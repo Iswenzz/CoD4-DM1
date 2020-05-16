@@ -80,7 +80,6 @@ namespace Iswenzz
 		int archiveIndex, unk1;
 		float origin[3], viewangles[3], nullvec[3];
 		int nullvelocity, commandTime;
-		unsigned char unk3[19];
 																			// 1 header
 		demo.read(reinterpret_cast<char*>(&archiveIndex), sizeof(int));     // 5
 		demo.read(reinterpret_cast<char*>(&origin[0]), sizeof(float));      // 9 player's position
@@ -101,7 +100,7 @@ namespace Iswenzz
 
 	void Demo::readSnapshot()
 	{
-		unsigned char header = 0, unk1[63];
+		unsigned char header = 0;
 		int swlen, len;
 																			   // 1 header
 		demo.read(reinterpret_cast<char*>(&swlen), sizeof(int));               // 5 packet sequence
