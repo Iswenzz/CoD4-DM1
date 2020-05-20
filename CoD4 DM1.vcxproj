@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Demo.cpp" />
+    <ClCompile Include="Huffman.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -159,6 +160,7 @@
     <ClInclude Include="DemoFrame.hpp" />
     <ClInclude Include="DemoSnapshot.hpp" />
     <ClInclude Include="EMSGType.hpp" />
+    <ClInclude Include="Huffman.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

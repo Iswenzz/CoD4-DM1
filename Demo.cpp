@@ -2,6 +2,7 @@
 #include "DemoSnapshot.hpp"
 #include "DemoFrame.hpp"
 #include "EMSGType.hpp"
+#include "Huffman.hpp"
 #include <iostream>
 #include <iterator>
 
@@ -115,5 +116,18 @@ namespace Iswenzz
 
 		std::vector<unsigned char> complen(len);
 		demo.read(reinterpret_cast<char*>(complen.data()), len);               // client message
+
+		std::vector<unsigned char> complenDecompressed(NETCHAN_FRAGMENTBUFFER_SIZE);
+		MSG_ReadBitsCompress(complen.data(), len, complenDecompressed.data(), NETCHAN_FRAGMENTBUFFER_SIZE);
+
+		std::cout << "Decompressed" << std::endl;
+		for (unsigned char c : complenDecompressed)
+			std::cout << c;
+		std::cout << std::endl;
+
+		/*std::cout << "\nSnapshot bytes \n" 
+			<< *reinterpret_cast<int*>(complen.data() + (1 * sizeof(int))) << std::endl;*/
+
+		std::cin.get();
 	}
 }

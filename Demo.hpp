@@ -3,7 +3,8 @@
 #include <fstream>
 #include <vector>
 
-#define FS_DEMOWRITEBUF_SIZE 0x20000
+#define NETCHAN_UNSENTBUFFER_SIZE 0x20000
+#define NETCHAN_FRAGMENTBUFFER_SIZE 0x800
 #define SYS_COMMONVERSION 17.5
 #define	PROTOCOL_VERSION (unsigned int)(SYS_COMMONVERSION + 0.00001)
 

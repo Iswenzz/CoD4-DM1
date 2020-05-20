@@ -9,11 +9,13 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Demo.cpp" />
+    <ClCompile Include="Huffman.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Demo.hpp" />
     <ClInclude Include="EMSGType.hpp" />
     <ClInclude Include="DemoFrame.hpp" />
     <ClInclude Include="DemoSnapshot.hpp" />
+    <ClInclude Include="Huffman.hpp" />
   </ItemGroup>
 </Project>
