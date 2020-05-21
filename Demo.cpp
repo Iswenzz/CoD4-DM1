@@ -3,6 +3,7 @@
 #include "DemoFrame.hpp"
 #include "EMSGType.hpp"
 #include "Huffman.hpp"
+#include "Msg.hpp"
 #include <iostream>
 #include <iterator>
 
@@ -36,10 +37,10 @@ namespace Iswenzz
 
 			switch (static_cast<int>(packet_header))
 			{
-				case MSG_SNAPSHOT:
+				case static_cast<int>(MSGType::MSG_SNAPSHOT):
 					readSnapshot();
 					break;
-				case MSG_FRAME:
+				case static_cast<int>(MSGType::MSG_FRAME):
 					readFrame();
 					break;
 			}
@@ -96,7 +97,7 @@ namespace Iswenzz
 		demo.read(reinterpret_cast<char*>(&viewangles[1]), sizeof(float));  // 49
 		demo.read(reinterpret_cast<char*>(&viewangles[2]), sizeof(float));  // 53
 
-		std::cout << "Frame " << origin[0] << " " << origin[1] << " " << origin[2] << std::endl;
+		std::cout << "Frame: " << origin[0] << " " << origin[1] << " " << origin[2] << std::endl;
 	}
 
 	void Demo::readSnapshot()
@@ -107,7 +108,7 @@ namespace Iswenzz
 		demo.read(reinterpret_cast<char*>(&swlen), sizeof(int));               // 5 packet sequence
 		demo.read(reinterpret_cast<char*>(&len), sizeof(int));                 // 9 client message length
 
-		std::cout << "Snapshot " << swlen << " " << len << std::endl;
+		std::cout << "Snapshot: " << swlen << " " << len << std::endl;
 		if (swlen == -1 && len == -1)                                          // demo ended
 		{
 			demo.close();
@@ -117,17 +118,16 @@ namespace Iswenzz
 		std::vector<unsigned char> complen(len);
 		demo.read(reinterpret_cast<char*>(complen.data()), len);               // client message
 
-		std::vector<unsigned char> complenDecompressed(NETCHAN_FRAGMENTBUFFER_SIZE);
-		MSG_ReadBitsCompress(complen.data(), len, complenDecompressed.data(), NETCHAN_FRAGMENTBUFFER_SIZE);
+		DemoSnapshot snap;
+		Msg snap_msg{ complen.data(), len, MSGCrypt::MSG_CRYPT_HUFFMAN };
+		snap.lastClientCommand = snap_msg.readBits(3);
 
-		std::cout << "Decompressed" << std::endl;
-		for (unsigned char c : complenDecompressed)
-			std::cout << c;
+		// Debug
+		std::cout << "Snapshot Packet: ";
+		std::cout << snap.lastClientCommand;
 		std::cout << std::endl;
 
-		/*std::cout << "\nSnapshot bytes \n" 
-			<< *reinterpret_cast<int*>(complen.data() + (1 * sizeof(int))) << std::endl;*/
-
 		std::cin.get();
+		demoSnaphots.push_back(snap);
 	}
 }

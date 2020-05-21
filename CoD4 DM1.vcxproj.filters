@@ -10,6 +10,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Demo.cpp" />
     <ClCompile Include="Huffman.cpp" />
+    <ClCompile Include="Msg.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Demo.hpp" />
@@ -17,5 +18,6 @@
     <ClInclude Include="DemoFrame.hpp" />
     <ClInclude Include="DemoSnapshot.hpp" />
     <ClInclude Include="Huffman.hpp" />
+    <ClInclude Include="Msg.hpp" />
   </ItemGroup>
 </Project>

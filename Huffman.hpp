@@ -18,9 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 ===========================================================================
 */
-
-#ifndef __HUFFMAN_H__
-#define __HUFFMAN_H__
+#pragma once
 
 #define NYT HMAX                    /* NYT = Not Yet Transmitted */
 #define INTERNAL_NODE (HMAX + 1)
@@ -51,5 +49,3 @@ typedef struct
 int MSG_ReadBitsCompress(const unsigned char* input, int readsize, unsigned char* outputBuf, int outputBufsize);
 int MSG_WriteBitsCompress(const unsigned char* datasrc, unsigned char* buffdest, int bytecount);
 void Huffman_InitMain();
-
-#endif
