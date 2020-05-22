@@ -14,9 +14,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Demo.hpp" />
-    <ClInclude Include="DemoSnapshot.hpp" />
     <ClInclude Include="Huffman.hpp" />
     <ClInclude Include="Msg.hpp" />
     <ClInclude Include="ClientArchiveData.hpp" />
+    <ClInclude Include="ClientSnapshotData.hpp" />
   </ItemGroup>
 </Project>
