@@ -158,9 +158,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Demo.hpp" />
-    <ClInclude Include="DemoFrame.hpp" />
+    <ClInclude Include="ClientArchiveData.hpp" />
     <ClInclude Include="DemoSnapshot.hpp" />
-    <ClInclude Include="EMSGType.hpp" />
     <ClInclude Include="Huffman.hpp" />
     <ClInclude Include="Msg.hpp" />
   </ItemGroup>

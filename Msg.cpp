@@ -4,13 +4,14 @@
 
 namespace Iswenzz
 {
-	Msg::Msg(unsigned char* buf, int len, MSGCrypt mode)
+	Msg::Msg(unsigned char* buf, std::size_t len, MSGCrypt mode)
 		: overflowed(false), readonly(false), splitData(nullptr), splitSize(0), readcount(0),
 		bit(0), lastRefEntity(0), data(nullptr), cursize(0), maxsize(0)
 	{
 		if (mode == MSGCrypt::MSG_CRYPT_NONE)
 		{
-			data = buf;
+			data = new unsigned char[NETCHAN_UNSENTBUFFER_SIZE];
+			std::memcpy(data, buf, len);
 			cursize = len;
 			maxsize = NETCHAN_UNSENTBUFFER_SIZE;
 		}
