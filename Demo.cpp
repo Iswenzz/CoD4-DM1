@@ -121,7 +121,17 @@ namespace Iswenzz
 		if (snap_msg.overflowed)
 			snap_msg.~Msg();
 		cmd = snap_msg.readByte();
+
 		std::cout << "Command: " << cmd << std::endl;
+		switch (cmd)
+		{
+			case static_cast<int>(svc_ops_e::svc_serverCommand):
+				readCommandString(&snap_msg);
+				break;
+			case static_cast<int>(svc_ops_e::svc_snapshot):
+				readSnapshot(&snap_msg);
+				break;
+		}
 
 		// Read the rest
 		std::vector<unsigned char> rest(NETCHAN_FRAGMENTBUFFER_SIZE);
@@ -133,7 +143,14 @@ namespace Iswenzz
 
 	void Demo::readCommandString(Msg* msg)
 	{
+		if (!msg) return;
 
+		int seq = msg->readInt();
+		int index;
+		std::string s = msg->readString(0x400u);
+
+		index = seq & 0x7F;
+		std::cout << "Server Command: " << index << " " << s << std::endl;
 	}
 
 	void Demo::readSnapshot(Msg* msg)
