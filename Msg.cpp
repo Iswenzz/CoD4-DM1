@@ -1,6 +1,7 @@
 #include "Msg.hpp"
 #include "Huffman.hpp"
 #include <stdint.h>
+#include <iostream>
 
 namespace Iswenzz
 {
@@ -79,7 +80,7 @@ namespace Iswenzz
 				}
 				if (((bit / 8)) >= cursize)
 				{
-					if (splitData == NULL)
+					if (splitData == nullptr)
 						return 0;
 
 					var = splitData[(bit / 8) - cursize];
@@ -116,7 +117,7 @@ namespace Iswenzz
 			overflowed = 1;
 			return -1;
 		}
-		c = (short*)&data[readcount];
+		c = reinterpret_cast<short*>(&data[readcount]);
 
 		readcount += sizeof(short);
 		return *c;
@@ -131,7 +132,7 @@ namespace Iswenzz
 			overflowed = 1;
 			return -1;
 		}
-		c = (int32_t*)&data[readcount];
+		c = reinterpret_cast<int32_t*>(&data[readcount]);
 
 		readcount += sizeof(int32_t);
 		return *c;
@@ -145,7 +146,7 @@ namespace Iswenzz
 			overflowed = 1;
 			return -1;
 		}
-		c = (int64_t*)&data[readcount];
+		c = reinterpret_cast<int64_t*>(&data[readcount]);
 
 		readcount += sizeof(int64_t);
 		return *c;
@@ -154,12 +155,12 @@ namespace Iswenzz
 	float Msg::readFloat()
 	{
 		float* c;
-
-		if (readcount + sizeof(int32_t) > cursize) {
-			//readcount += sizeof(int32_t); /* Hmm what a bad bug is this ? O_o*/
+		if (readcount + sizeof(float) > cursize) 
+		{
+			overflowed = 1;
 			return -1;
 		}
-		c = (float*)&data[readcount];
+		c = reinterpret_cast<float*>(&data[readcount]);
 
 		readcount += sizeof(float);
 		return *c;
@@ -169,7 +170,6 @@ namespace Iswenzz
 	{
 		int l = 0, c;
 		std::string bigstring;
-
 		do 
 		{
 			c = readByte();      // use ReadByte so -1 is out of bounds
@@ -178,11 +178,10 @@ namespace Iswenzz
 			// translate all fmt spec to avoid crash bugs
 			if (c == '%')
 				c = '.';
-			bigstring[l] = c;
+			bigstring += static_cast<unsigned char>(c);
 			l++;
 		} 
 		while (l < len - 1);
-
 		return bigstring;
 	}
 
@@ -190,7 +189,6 @@ namespace Iswenzz
 	{
 		int	l = 0, c;
 		std::string bigstring;
-
 		do 
 		{
 			c = readByte();	// use ReadByte so -1 is out of bounds
@@ -199,18 +197,17 @@ namespace Iswenzz
 			// translate all fmt spec to avoid crash bugs
 			if (c == '%')
 				c = '.';
-			bigstring[l] = c;
+			bigstring += static_cast<char>(c);
 			l++;
 		} 
 		while (l < len - 1);
-
 		return bigstring;
 	}
 
 	void Msg::readData(void* data, int len)
 	{
 		for (int i = 0; i < len; i++)
-			((unsigned char*)data)[i] = readByte();
+			reinterpret_cast<unsigned char*>(data)[i] = readByte();
 	}
 
 	void Msg::readDeltaUsercmdKey(int key, usercmd_s* from, usercmd_s* to)
@@ -254,9 +251,9 @@ namespace Iswenzz
 				}
 				b64data |= (databyte << shift);
 			}
-			outbuf[i + 0] = ((char*)&b64data)[2];
-			outbuf[i + 1] = ((char*)&b64data)[1];
-			outbuf[i + 2] = ((char*)&b64data)[0];
+			outbuf[i + 0] = (reinterpret_cast<char*>(&b64data))[2];
+			outbuf[i + 1] = (reinterpret_cast<char*>(&b64data))[1];
+			outbuf[i + 2] = (reinterpret_cast<char*>(&b64data))[0];
 			i += 3;
 		} 
 		while (databyte != -1 && (i + 4) < len);
