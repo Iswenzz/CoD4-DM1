@@ -5,7 +5,7 @@
 
 namespace Iswenzz
 {
-	struct DemoSnapshot;
+	struct ClientSnapshotData;
 	struct ClientArchiveData;
 	class Msg;
 
@@ -24,7 +24,7 @@ namespace Iswenzz
 			std::string demoFilePath;
 			bool isDemoOpen = false;
 
-			std::vector<DemoSnapshot> snapshots;
+			std::vector<ClientSnapshotData> snapshots;
 			std::vector<ClientArchiveData> archive;
 
 			void readHeader();

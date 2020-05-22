@@ -1,5 +1,5 @@
 #include "Demo.hpp"
-#include "DemoSnapshot.hpp"
+#include "ClientSnapshotData.hpp"
 #include "ClientArchiveData.hpp"
 #include "Huffman.hpp"
 #include "Msg.hpp"
@@ -96,14 +96,13 @@ namespace Iswenzz
 
 	void Demo::readSnapshot()
 	{
-		DemoSnapshot snap;
+		ClientSnapshotData snap;
 		unsigned char header = 0;
 		int swlen, len, lastClientCommand, cmd;
 																				// 1 header
 		demo.read(reinterpret_cast<char*>(&swlen), sizeof(int));				// 5 packet sequence
 		demo.read(reinterpret_cast<char*>(&len), sizeof(int));					// 9 client message length
 
-		std::cout << "Snapshot Header: " << swlen << " " << len << std::endl;
 		if (swlen == -1 && len == -1)											// demo ended
 		{
 			demo.close();
@@ -155,7 +154,13 @@ namespace Iswenzz
 
 	void Demo::readSnapshot(Msg* msg)
 	{
+		int time = msg->readInt();
+		int unk = msg->readInt();
+		unsigned char deltaNum = msg->readByte();
+		unsigned char unk2 = msg->readByte();
 
+
+		std::printf("Snapshot: %d %d %d", time, unk, deltaNum);
 	}
 
 	void Demo::readGamestate(Msg* msg)
