@@ -1,7 +1,6 @@
 #include "Demo.hpp"
 #include "DemoSnapshot.hpp"
-#include "DemoFrame.hpp"
-#include "EMSGType.hpp"
+#include "ClientArchiveData.hpp"
 #include "Huffman.hpp"
 #include "Msg.hpp"
 #include <iostream>
@@ -41,7 +40,7 @@ namespace Iswenzz
 					readSnapshot();
 					break;
 				case static_cast<int>(MSGType::MSG_FRAME):
-					readFrame();
+					readArchive();
 					break;
 			}
 		}
@@ -51,8 +50,8 @@ namespace Iswenzz
 	{
 		if (demo.is_open())
 			demo.close();
-		demoSnaphots.clear();
-		demoFrames.clear();
+		snapshots.clear();
+		archive.clear();
 		isDemoOpen = false;
 	}
 
@@ -76,58 +75,74 @@ namespace Iswenzz
 		demo.read(reinterpret_cast<char*>(complen.data()), len);            // client message
 	}
 
-	void Demo::readFrame()
+	void Demo::readArchive()
 	{
-		unsigned char header = 1;
-		int archiveIndex, unk1;
-		float origin[3], viewangles[3], nullvec[3];
-		int nullvelocity, commandTime;
-																			// 1 header
-		demo.read(reinterpret_cast<char*>(&archiveIndex), sizeof(int));     // 5
-		demo.read(reinterpret_cast<char*>(&origin[0]), sizeof(float));      // 9 player's position
-		demo.read(reinterpret_cast<char*>(&origin[1]), sizeof(float));      // 13
-		demo.read(reinterpret_cast<char*>(&origin[2]), sizeof(float));      // 17
-		demo.read(reinterpret_cast<char*>(&nullvec[0]), sizeof(float));     // 21
-		demo.read(reinterpret_cast<char*>(&nullvec[1]), sizeof(float));     // 25
-		demo.read(reinterpret_cast<char*>(&nullvec[2]), sizeof(float));     // 29
-		demo.read(reinterpret_cast<char*>(&nullvelocity), sizeof(int));     // 33
-		demo.read(reinterpret_cast<char*>(&unk1), sizeof(int));             // 37
-		demo.read(reinterpret_cast<char*>(&commandTime), sizeof(int));      // 41
-		demo.read(reinterpret_cast<char*>(&viewangles[0]), sizeof(float));  // 45 player's angles
-		demo.read(reinterpret_cast<char*>(&viewangles[1]), sizeof(float));  // 49
-		demo.read(reinterpret_cast<char*>(&viewangles[2]), sizeof(float));  // 53
-
-		std::cout << "Frame: " << origin[0] << " " << origin[1] << " " << origin[2] << std::endl;
+		ClientArchiveData data;													// 1 header
+		demo.read(reinterpret_cast<char*>(&data.index), sizeof(int));			// 5
+		demo.read(reinterpret_cast<char*>(&data.origin[0]), sizeof(float));		// 9 player's position
+		demo.read(reinterpret_cast<char*>(&data.origin[1]), sizeof(float));		// 13
+		demo.read(reinterpret_cast<char*>(&data.origin[2]), sizeof(float));		// 17
+		demo.read(reinterpret_cast<char*>(&data.velocity[0]), sizeof(float));	// 21
+		demo.read(reinterpret_cast<char*>(&data.velocity[1]), sizeof(float));	// 25
+		demo.read(reinterpret_cast<char*>(&data.velocity[2]), sizeof(float));	// 29
+		demo.read(reinterpret_cast<char*>(&data.movementDir), sizeof(int));		// 33
+		demo.read(reinterpret_cast<char*>(&data.bobCycle), sizeof(int));		// 37
+		demo.read(reinterpret_cast<char*>(&data.commandTime), sizeof(int));		// 41
+		demo.read(reinterpret_cast<char*>(&data.angles[0]), sizeof(float));		// 45 player's angles
+		demo.read(reinterpret_cast<char*>(&data.angles[1]), sizeof(float));		// 49
+		demo.read(reinterpret_cast<char*>(&data.angles[2]), sizeof(float));		// 53
+		archive.push_back(data);
 	}
 
 	void Demo::readSnapshot()
 	{
+		DemoSnapshot snap;
 		unsigned char header = 0;
-		int swlen, len;
-																			   // 1 header
-		demo.read(reinterpret_cast<char*>(&swlen), sizeof(int));               // 5 packet sequence
-		demo.read(reinterpret_cast<char*>(&len), sizeof(int));                 // 9 client message length
+		int swlen, len, lastClientCommand, cmd;
+																				// 1 header
+		demo.read(reinterpret_cast<char*>(&swlen), sizeof(int));				// 5 packet sequence
+		demo.read(reinterpret_cast<char*>(&len), sizeof(int));					// 9 client message length
 
-		std::cout << "Snapshot: " << swlen << " " << len << std::endl;
-		if (swlen == -1 && len == -1)                                          // demo ended
+		std::cout << "Snapshot Header: " << swlen << " " << len << std::endl;
+		if (swlen == -1 && len == -1)											// demo ended
 		{
 			demo.close();
 			return;
 		}
+		demo.read(reinterpret_cast<char*>(&lastClientCommand), sizeof(int));	// last client command
+		std::vector<unsigned char> complen(len - 4);
+		demo.read(reinterpret_cast<char*>(complen.data()), complen.size());				// client message
 
-		std::vector<unsigned char> complen(len);
-		demo.read(reinterpret_cast<char*>(complen.data()), len);               // client message
+		// Fill the snapshot struct
+		Msg snap_msg{ complen.data(), complen.size(), MSGCrypt::MSG_CRYPT_HUFFMAN };
+		snap.lastClientCommand = lastClientCommand;
 
-		DemoSnapshot snap;
-		Msg snap_msg{ complen.data(), len, MSGCrypt::MSG_CRYPT_HUFFMAN };
-		snap.lastClientCommand = snap_msg.readBits(3);
+		// Read command
+		if (snap_msg.overflowed)
+			snap_msg.~Msg();
+		cmd = snap_msg.readByte();
+		std::cout << "Command: " << cmd << std::endl;
 
-		// Debug
-		std::cout << "Snapshot Packet: ";
-		std::cout << snap.lastClientCommand;
-		std::cout << std::endl;
+		// Read the rest
+		std::vector<unsigned char> rest(NETCHAN_FRAGMENTBUFFER_SIZE);
+		snap_msg.readData(rest.data(), NETCHAN_FRAGMENTBUFFER_SIZE);
 
 		std::cin.get();
-		demoSnaphots.push_back(snap);
+		snapshots.push_back(snap);
+	}
+
+	void Demo::readCommandString(Msg* msg)
+	{
+
+	}
+
+	void Demo::readSnapshot(Msg* msg)
+	{
+
+	}
+
+	void Demo::readGamestate(Msg* msg)
+	{
+
 	}
 }

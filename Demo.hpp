@@ -6,7 +6,8 @@
 namespace Iswenzz
 {
 	struct DemoSnapshot;
-	struct DemoFrame;
+	struct ClientArchiveData;
+	class Msg;
 
 	class Demo
 	{
@@ -23,11 +24,15 @@ namespace Iswenzz
 			std::string demoFilePath;
 			bool isDemoOpen = false;
 
-			std::vector<DemoSnapshot> demoSnaphots;
-			std::vector<DemoFrame> demoFrames;
+			std::vector<DemoSnapshot> snapshots;
+			std::vector<ClientArchiveData> archive;
 
 			void readHeader();
-			void readFrame();
+			void readArchive();
 			void readSnapshot();
+
+			void readCommandString(Msg *msg);
+			void readSnapshot(Msg* msg);
+			void readGamestate(Msg* msg);
 	};
 }
