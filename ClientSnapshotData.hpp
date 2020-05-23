@@ -539,6 +539,49 @@ namespace Iswenzz
 		unsigned int partBits[4];		// 0xe4
 	} entityState_t;					// sizeof(entityState_t): 0xf4
 
+	#define MAX_NETNAME 16
+
+	typedef enum team_s 
+	{
+		TEAM_FREE,
+		TEAM_RED,
+		TEAM_BLUE,
+		TEAM_SPECTATOR,
+		TEAM_NUM_TEAMS
+	} team_t;
+
+	typedef struct clientState_s
+	{
+		int clientIndex;
+		team_t team;
+		int modelindex;
+		int attachModelIndex[6];
+		int attachTagIndex[6];
+		char netname[MAX_NETNAME];
+		float maxSprintTimeMultiplier;
+		int rank;
+		int prestige;
+		int perks;
+		int attachedVehEntNum;
+		int attachedVehSlotIndex;
+	} clientState_t;
+
+	/* 7472 */
+	typedef struct
+	{
+		int svFlags;
+		int clientMask[2];
+		float absmin[3];
+		float absmax[3];
+	} archivedEntityShared_t;
+
+	/* 7473 */
+	typedef struct archivedEntity_s
+	{
+		entityState_t s;
+		archivedEntityShared_t r;
+	} archivedEntity_t;
+
 	struct ClientSnapshotData
 	{
 		int lastClientCommand;		// 0x4
