@@ -6,6 +6,8 @@
 
 namespace Iswenzz
 {
+	typedef unsigned int clipHandle_t;
+
 	typedef struct 
 	{
 		int	sprintButtonUpRequired;
@@ -196,7 +198,8 @@ namespace Iswenzz
 		int	jumpTime;					// 128
 		float jumpOriginZ;				// 132
 
-		// Animations as in mp/playeranim.script and animtrees/multiplayer.atr, it also depends on mp/playeranimtypes.txt (the currently used weapon)
+		// Animations as in mp/playeranim.script and animtrees/multiplayer.atr
+		// it also depends on mp/playeranimtypes.txt (the currently used weapon)
 		int	legsTimer;					// 136
 		int	legsAnim;					// 140
 		int	torsoTimer;					// 144
@@ -308,29 +311,233 @@ namespace Iswenzz
 		float dofViewmodelStart;		// 1616
 		float dofViewmodelEnd;			// 1620
 
-		int	hudElemLastAssignedSoundID;  // 1624
+		int	hudElemLastAssignedSoundID; // 1624
 		objective_t objective[16];
 		char weaponmodels[128];
 		int	deltaTime;					// 2204
 		int	killCamEntity;				// 2208
 
 		hudElemState_t hud;				// 2212
-	} playerState_t;						//Size: 0x2f64
+	} playerState_t;					//Size: 0x2f64
 
 	typedef struct 
-	{										// (0x2146c)
-		playerState_t	ps;					// (0x2146c)
-		int		num_entities;
-		int		num_clients;				// (0x2f68)
-		int		first_entity;				// (0x2f6c)into the circular sv_packet_entities[]
-		int		first_client;
-											// the entities MUST be in increasing state number
-											// order, otherwise the delta compression will fail
-		unsigned int	messageSent;		// (0x243e0 | 0x2f74) time the message was transmitted
-		unsigned int	messageAcked;		// (0x243e4 | 0x2f78) time the message was acked
-		int		messageSize;				// (0x243e8 | 0x2f7c) used to rate drop packets
-		int		var_03;
-	} clientSnapshot_t;						// size: 0x2f84
+	{									// (0x2146c)
+		playerState_t ps;				// (0x2146c)
+		int	num_entities;
+		int	num_clients;				// (0x2f68)
+		int	first_entity;				// (0x2f6c)into the circular sv_packet_entities[]
+		int	first_client;
+		// the entities MUST be in increasing state number
+		// order, otherwise the delta compression will fail
+		unsigned int messageSent;		// (0x243e0 | 0x2f74) time the message was transmitted
+		unsigned int messageAcked;		// (0x243e4 | 0x2f78) time the message was acked
+		int	messageSize;				// (0x243e8 | 0x2f7c) used to rate drop packets
+		int	var_03;
+	} clientSnapshot_t;					// size: 0x2f84
+
+	enum entityType_t
+	{
+		ET_GENERAL = 0x0,
+		ET_PLAYER = 0x1,
+		ET_PLAYER_CORPSE = 0x2,
+		ET_ITEM = 0x3,
+		ET_MISSILE = 0x4,
+		ET_INVISIBLE = 0x5,
+		ET_SCRIPTMOVER = 0x6,
+		ET_SOUND_BLEND = 0x7,
+		ET_FX = 0x8,
+		ET_LOOP_FX = 0x9,
+		ET_PRIMARY_LIGHT = 0xA,
+		ET_MG42 = 0xB,
+		ET_HELICOPTER = 0xC,
+		ET_PLANE = 0xD,
+		ET_VEHICLE = 0xE,
+		ET_VEHICLE_COLLMAP = 0xF,
+		ET_VEHICLE_CORPSE = 0x10,
+		ET_EVENTS = 0x11,
+		ET_MOVER = 0x99					//Dummy for botlib
+	};
+
+	struct LerpEntityStatePhysicsJitter
+	{
+		float innerRadius;
+		float minDisplacement;
+		float maxDisplacement;
+	};
+
+	struct LerpEntityStatePlayer
+	{
+		float leanf;
+		int movementDir;
+	};
+
+	struct LerpEntityStateLoopFx
+	{
+		float cullDist;
+		int period;
+	};
+
+	struct LerpEntityStateCustomExplode
+	{
+		int startTime;
+	};
+
+	struct LerpEntityStateTurret
+	{
+		float gunAngles[3];
+	};
+
+	struct LerpEntityStateAnonymous
+	{
+		int data[7];
+	};
+
+	struct LerpEntityStateExplosion
+	{
+		float innerRadius;
+		float magnitude;
+	};
+
+	struct LerpEntityStateBulletHit
+	{
+		float start[3];
+	};
+
+	struct LerpEntityStatePrimaryLight
+	{
+		unsigned char colorAndExp[4];
+		float intensity;
+		float radius;
+		float cosHalfFovOuter;
+		float cosHalfFovInner;
+	};
+
+	struct LerpEntityStateMissile
+	{
+		int launchTime;
+	};
+
+	struct LerpEntityStateSoundBlend
+	{
+		float lerp;
+	};
+
+	struct LerpEntityStateExplosionJolt
+	{
+		float innerRadius;
+		float impulse[3];
+	};
+
+	struct LerpEntityStateVehicle
+	{
+		float bodyPitch;
+		float bodyRoll;
+		float steerYaw;
+		int materialTime;
+		float gunPitch;
+		float gunYaw;
+		int team;
+	};
+
+	struct LerpEntityStateEarthquake
+	{
+		float scale;
+		float radius;
+		int duration;
+	};
+
+	union LerpEntityStateTypeUnion
+	{
+		struct LerpEntityStateTurret turret;
+		struct LerpEntityStateLoopFx loopFx;
+		struct LerpEntityStatePrimaryLight primaryLight;
+		struct LerpEntityStatePlayer player;
+		struct LerpEntityStateVehicle vehicle;
+		struct LerpEntityStateMissile missile;
+		struct LerpEntityStateSoundBlend soundBlend;
+		struct LerpEntityStateBulletHit bulletHit;
+		struct LerpEntityStateEarthquake earthquake;
+		struct LerpEntityStateCustomExplode customExplode;
+		struct LerpEntityStateExplosion explosion;
+		struct LerpEntityStateExplosionJolt explosionJolt;
+		struct LerpEntityStatePhysicsJitter physicsJitter;
+		struct LerpEntityStateAnonymous anonymous;
+	};
+
+	typedef enum 
+	{
+		TR_STATIONARY,
+		TR_INTERPOLATE,				// non-parametric, but interpolate between snapshots
+		TR_LINEAR,
+		TR_LINEAR_STOP,
+		TR_SINE,					// value = base + sin( time / duration ) * delta
+		TR_GRAVITY
+	} trType_t;
+
+	typedef struct 
+	{
+		trType_t trType;
+		int trTime;
+		int trDuration;			// if non 0, trTime + trDuration = stop time
+		float trBase[3];
+		float trDelta[3];		// velocity, etc
+	} trajectory_t;
+
+	struct LerpEntityState
+	{
+		int eFlags;
+		trajectory_t pos;
+		trajectory_t apos;
+		union LerpEntityStateTypeUnion u;
+	};
+
+	// entityState_t is the information conveyed from the server
+	// in an update message about entities that the client will
+	// need to render in some way
+	// Different eTypes may use the information in different ways
+	// The messages are delta compressed, so it doesn't really matter if
+	// the structure size is fairly large
+	typedef struct entityState_s 
+	{									// Confirmed names and offsets but not types
+		int	number;						// entity index	//0x00
+		enum entityType_t eType;		// entityType_t	//0x04
+
+		struct LerpEntityState lerp;
+		int	time2;						// 0x70
+		int	otherEntityNum;				// 0x74 shotgun sources, etc
+		int	attackerEntityNum;			// 0x78
+		int	groundEntityNum;			// 0x7c -1 = in air
+		int	loopSound;					// 0x80 constantly loop this sound
+		int	surfType;					// 0x84
+
+		clipHandle_t index;				// 0x88
+		int	clientNum;					// 0x8c 0 to (MAX_CLIENTS - 1), for players and corpses
+		int	iHeadIcon;					// 0x90
+		int	iHeadIconTeam;				// 0x94
+		int	solid;						// 0x98 for client side prediction, trap_linkentity sets this properly	0x98
+
+		int	eventParm;					// 0x9c impulse events -- muzzle flashes, footsteps, etc
+		int	eventSequence;				// 0xa0
+
+		float events[4];				// 0xa4
+		float eventParms[4];			// 0xb4
+
+		// for players
+		int	weapon;						// 0xc4 determines weapon and flash model, etc
+		int	weaponModel;				// 0xc8
+		int	legsAnim;					// 0xcc mask off ANIM_TOGGLEBIT
+		int	torsoAnim;					// 0xd0 mask off ANIM_TOGGLEBIT
+
+		union 
+		{
+			int	helicopterStage;		// 0xd4
+		} un1;
+
+		int	un2;						// 0xd8
+		int	fTorsoPitch;				// 0xdc
+		int	fWaistPitch;				// 0xe0
+		unsigned int partBits[4];		// 0xe4
+	} entityState_t;					// sizeof(entityState_t): 0xf4
 
 	struct ClientSnapshotData
 	{
