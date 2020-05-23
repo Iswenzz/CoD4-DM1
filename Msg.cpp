@@ -258,6 +258,33 @@ namespace Iswenzz
 			reinterpret_cast<unsigned char*>(data)[i] = readByte();
 	}
 
+	void Msg::readDeltaField(int time, const netField_t* field, int fieldNum, unsigned char forceSend)
+	{
+		// @TODO
+		//fromdata = &from[field->offset];
+		//todata = &to[field->offset];
+		if (forceSend)
+		{
+			//nullfield = 0;
+			//fromdata = (const byte*)&nullfield;
+		}
+		if (field->changeHints != 2)
+		{
+			//if (!forceSend && MSG_ValuesAreEqual(field->bits, (const int*)fromdata, (const int*)todata))
+			{
+				readBit();
+				return;
+			}
+			readBit();
+		}
+
+		std::cout << "Field Bits: " << field->bits << std::endl;
+		switch (field->bits)
+		{
+
+		}
+	}
+
 	void Msg::readDeltaUsercmdKey(int key, usercmd_s* from, usercmd_s* to)
 	{
 		// @TODO

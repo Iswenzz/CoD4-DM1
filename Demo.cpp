@@ -1,6 +1,7 @@
 #include "Demo.hpp"
 #include "ClientSnapshotData.hpp"
 #include "ClientArchiveData.hpp"
+#include "NetFields.hpp"
 #include "Huffman.hpp"
 #include "Msg.hpp"
 #include <iostream>
@@ -125,10 +126,10 @@ namespace Iswenzz
 		switch (cmd)
 		{
 			case static_cast<int>(svc_ops_e::svc_serverCommand):
-				readCommandString(&snap_msg);
+				readCommandString(snap_msg);
 				break;
 			case static_cast<int>(svc_ops_e::svc_snapshot):
-				readSnapshot(&snap_msg);
+				readSnapshot(snap_msg);
 				break;
 		}
 
@@ -140,31 +141,51 @@ namespace Iswenzz
 		snapshots.push_back(snap);
 	}
 
-	void Demo::readCommandString(Msg* msg)
+	void Demo::readCommandString(Msg& msg)
 	{
-		if (!msg) return;
-
-		int seq = msg->readInt();
+		int seq = msg.readInt();
 		int index;
-		std::string s = msg->readString(0x400u);
+		std::string s = msg.readString(0x400u);
 
 		index = seq & 0x7F;
 		std::cout << "Server Command: " << index << " " << s << std::endl;
 	}
 
-	void Demo::readSnapshot(Msg* msg)
+	void Demo::readSnapshot(Msg& msg)
 	{
-		int time = msg->readInt();
-		int unk = msg->readInt();
-		unsigned char deltaNum = msg->readByte();
-		unsigned char unk2 = msg->readByte();
+		int serverTime = msg.readInt();
+		unsigned char lastFrame = msg.readByte();
+		unsigned char snapFlag = msg.readByte();
+		unsigned char sendOriginAndVel = msg.readBit();
 
+		int fieldChangeCount = msg.readBits(GetMinBitCount(PLAYER_STATE_FIELDS_COUNT));
 
-		std::printf("Snapshot: %d %d %d", time, unk, deltaNum);
+		std::cout << "Snapshot: " << serverTime << " " 
+			<< (int)lastFrame << " "
+			<< (int)snapFlag << " "
+			<< (int)sendOriginAndVel << " "
+			<< (int)fieldChangeCount << " "
+			<< std::endl;
+
+		netField_t* field;
+		int i;
+		if (fieldChangeCount > 0)
+		{
+			for (i = 0, field = playerStateFields; i < PLAYER_STATE_FIELDS_COUNT; i++, field++)
+			{
+				// @TODO MSG_ShouldSendPSField else bit0
+				msg.readDeltaField(serverTime, field, i, field->changeHints == 3);
+			}
+		}
 	}
 
-	void Demo::readGamestate(Msg* msg)
+	void Demo::readGameState(Msg& msg)
 	{
 
+	}
+
+	void Demo::readMatchState(Msg& msg, int time)
+	{
+		unsigned int entityIndex = msg.readEntityIndex(1);
 	}
 }

@@ -31,8 +31,9 @@ namespace Iswenzz
 			void readArchive();
 			void readSnapshot();
 
-			void readCommandString(Msg *msg);
-			void readSnapshot(Msg* msg);
-			void readGamestate(Msg* msg);
+			void readCommandString(Msg &msg);
+			void readSnapshot(Msg& msg);
+			void readGameState(Msg& msg);
+			void readMatchState(Msg& msg, int time);
 	};
 }
