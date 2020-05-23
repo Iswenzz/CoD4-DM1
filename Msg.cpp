@@ -5,6 +5,43 @@
 
 namespace Iswenzz
 {
+	int kbitmask[33] =
+	{
+		0,
+		1,
+		3,
+		7,
+		15,
+		31,
+		63,
+		127,
+		255,
+		511,
+		1023,
+		2047,
+		4095,
+		8191,
+		16383,
+		32767,
+		65535,
+		131071,
+		262143,
+		524287,
+		1048575,
+		2097151,
+		4194303,
+		8388607,
+		16777215,
+		33554431,
+		67108863,
+		134217727,
+		268435455,
+		536870911,
+		1073741823,
+		2147483647,
+		4294967295
+	};
+
 	Msg::Msg(unsigned char* buf, std::size_t len, MSGCrypt mode)
 		: overflowed(false), readonly(false), splitData(nullptr), splitSize(0), readcount(0),
 		bit(0), lastRefEntity(0), data(nullptr), cursize(0), maxsize(0)
@@ -166,6 +203,17 @@ namespace Iswenzz
 		return *c;
 	}
 
+	int Msg::readEntityIndex(int indexBits)
+	{
+		if (readBit())
+			++lastRefEntity;
+		else if (indexBits != 10 || readBit())
+			lastRefEntity = readBits(indexBits);
+		else
+			lastRefEntity += readBits(4);
+		return lastRefEntity;
+	}
+
 	std::string Msg::readString(int len)
 	{
 		int l = 0, c;
@@ -258,5 +306,10 @@ namespace Iswenzz
 		} 
 		while (databyte != -1 && (i + 4) < len);
 		outbuf[i] = '\0';
+	}
+
+	int Msg::getNumBitsRead()
+	{
+		return 8 * readcount - ((8 - bit) & 7);
 	}
 }

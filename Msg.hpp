@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "NetFields.hpp"
 
 #define NETCHAN_UNSENTBUFFER_SIZE 0x20000
 #define NETCHAN_FRAGMENTBUFFER_SIZE 0x800
@@ -81,11 +82,14 @@ namespace Iswenzz
 			int readInt();
 			int64_t readInt64();
 			float readFloat();
+			int readEntityIndex(int indexBits);
 			std::string readString(int len);
 			std::string readStringLine(int len);
 
 			void readData(void *data, int len);
 			void readDeltaUsercmdKey(int key, struct usercmd_s *from, struct usercmd_s* to);
 			void readBase64(unsigned char *outbuf, int len);
+
+			int getNumBitsRead();
 	};
 }
