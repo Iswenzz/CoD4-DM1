@@ -11,6 +11,7 @@
     <ClCompile Include="Demo.cpp" />
     <ClCompile Include="Huffman.cpp" />
     <ClCompile Include="Msg.cpp" />
+    <ClCompile Include="NetFields.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Demo.hpp" />
@@ -18,5 +19,6 @@
     <ClInclude Include="Msg.hpp" />
     <ClInclude Include="ClientArchiveData.hpp" />
     <ClInclude Include="ClientSnapshotData.hpp" />
+    <ClInclude Include="NetFields.hpp" />
   </ItemGroup>
 </Project>

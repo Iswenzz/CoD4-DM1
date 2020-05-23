@@ -155,6 +155,7 @@
     <ClCompile Include="Huffman.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Msg.cpp" />
+    <ClCompile Include="NetFields.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Demo.hpp" />
@@ -162,6 +163,7 @@
     <ClInclude Include="ClientSnapshotData.hpp" />
     <ClInclude Include="Huffman.hpp" />
     <ClInclude Include="Msg.hpp" />
+    <ClInclude Include="NetFields.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
