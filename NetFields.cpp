@@ -1030,7 +1030,7 @@ namespace Iswenzz
 
 	#define HEF(x) const_cast<char*>(# x), (int)&((hudelem_t*)0)->x
 
-	static netField_t hudElemFields[HUD_ELEM_FIELDS_COUNT] =
+	netField_t hudElemFields[HUD_ELEM_FIELDS_COUNT] =
 	{
 		{ HEF(color.rgba), -85, 0 },
 		{ HEF(fadeStartTime), -97, 0 },

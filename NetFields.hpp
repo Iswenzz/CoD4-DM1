@@ -10,8 +10,6 @@
 
 namespace Iswenzz
 {
-	int GetMinBitCount(int x);
-
 	typedef struct
 	{
 		const char* name;
@@ -39,4 +37,25 @@ namespace Iswenzz
 		netField_t* field;
 		int numFields;
 	} netFieldList_t;
+
+	int GetMinBitCount(int x);
+
+	extern netField_t entityStateFields[ENTITY_STATE_FIELDS_COUNT];
+	extern netField_t playerEntityStateFields[ENTITY_STATE_FIELDS_COUNT];
+	extern netField_t corpseEntityStateFields[ENTITY_STATE_FIELDS_COUNT];
+	extern netField_t itemEntityStateFields[ENTITY_STATE_FIELDS_COUNT];
+	extern netField_t missleEntityStateFields[ENTITY_STATE_FIELDS_COUNT];
+	extern netField_t scriptMoverStateFields[ENTITY_STATE_FIELDS_COUNT];
+	extern netField_t soundBlendEntityStateFields[ENTITY_STATE_FIELDS_COUNT];
+	extern netField_t fxStateFields[ENTITY_STATE_FIELDS_COUNT];
+	extern netField_t loopFxEntityStateFields[ENTITY_STATE_FIELDS_COUNT];
+	extern netField_t helicopterEntityStateFields[HELICOPTER_ENTITY_STATE_FIELDS_COUNT];
+	extern netField_t planeStateFields[PLANE_STATE_FIELDS_COUNT];
+	extern netField_t vehicleEntityStateFields[ENTITY_STATE_FIELDS_COUNT];
+	extern netField_t eventEntityStateFields[ENTITY_STATE_FIELDS_COUNT];
+	extern netFieldList_t netFieldList[NET_FIELDS_COUNT];
+	extern netField_t playerStateFields[PLAYER_STATE_FIELDS_COUNT];
+	extern netField_t hudElemFields[HUD_ELEM_FIELDS_COUNT];
+	extern netField_t clientStateFields[CLIENT_STATE_FIELDS_COUNT];
+	extern netField_t archivedEntityFields[ARCHIVED_ENTITY_FIELDS_COUNT];
 }
