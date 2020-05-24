@@ -365,9 +365,8 @@ namespace Iswenzz
 			l = readInt();
 			*(uint32_t*)toF = l;
 			*(uint32_t*)toF = l ^ *(uint32_t*)fromF;
+			return;
 		}
-
-		std::cout << "Field Bits: " << field->bits << std::endl;
 
 		// Command
 		switch (field->bits)
