@@ -33,7 +33,7 @@ namespace Iswenzz
 			void readSnapshot();
 
 			void readCommandString(Msg &msg);
-			void readSnapshot(Msg& msg);
+			void readSnapshot(Msg& msg, ClientSnapshotData& snap);
 			void readGameState(Msg& msg);
 			void readMatchState(Msg& msg, int time);
 			void readDeltaPlayerState(Msg& msg, int time, playerState_t* from, playerState_t* to,

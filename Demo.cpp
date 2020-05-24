@@ -116,7 +116,6 @@ namespace Iswenzz
 		// Fill the snapshot struct
 		Msg snap_msg{ complen.data(), complen.size(), MSGCrypt::MSG_CRYPT_HUFFMAN };
 		snap.lastClientCommand = lastClientCommand;
-		snap.cl_snap = {};
 
 		// Read command
 		if (snap_msg.overflowed)
@@ -130,7 +129,7 @@ namespace Iswenzz
 				readCommandString(snap_msg);
 				break;
 			case static_cast<int>(svc_ops_e::svc_snapshot):
-				readSnapshot(snap_msg);
+				readSnapshot(snap_msg, snap);
 				break;
 		}
 
@@ -152,11 +151,11 @@ namespace Iswenzz
 		std::cout << "Server Command: " << index << " " << s << std::endl;
 	}
 
-	void Demo::readSnapshot(Msg& msg)
+	void Demo::readSnapshot(Msg& msg, ClientSnapshotData& snap)
 	{
 		clientSnapshot_t* frame = new clientSnapshot_t{};
 		clientSnapshot_t* oldFrame = new clientSnapshot_t{};
-		if (snapshots.size() > 0)
+		if (snapshots.size() > 0) // if oldFrame exists
 			std::memcpy(oldFrame, &snapshots.back().cl_snap, sizeof(clientSnapshot_t));
 		std::memcpy(frame, oldFrame, sizeof(clientSnapshot_t));
 
@@ -164,9 +163,11 @@ namespace Iswenzz
 		unsigned char lastFrame = msg.readByte();
 		unsigned char snapFlag = msg.readByte();
 
-		readDeltaPlayerState(msg, serverTime, &frame->ps, &oldFrame->ps, false);
-		delete frame;
+		readDeltaPlayerState(msg, serverTime, &oldFrame->ps, &frame->ps, false);
+
+		std::memcpy(&snap.cl_snap, frame, sizeof(clientSnapshot_t));
 		delete oldFrame;
+		delete frame;
 	}
 
 	void Demo::readDeltaPlayerState(Msg& msg, int time, playerState_t* from, playerState_t* to, 
@@ -185,6 +186,14 @@ namespace Iswenzz
 			bool noXor = predictedFieldsIgnoreXor && readOriginAndVel && stateFields[i].changeHints == 3;
 			msg.readDeltaField(time, from, to, &stateFields[i], noXor);
 		}
+
+		// @TODO
+		std::cout << "Origin: " 
+			<< to->origin[0] << " " << to->origin[1] << " " << to->origin[2]
+			<< std::endl;
+		std::cout << "Velocity: "
+			<< to->velocity[0] << " " << to->velocity[1] << " " << to->velocity[2]
+			<< std::endl;
 	}
 
 	void Demo::readGameState(Msg& msg)
