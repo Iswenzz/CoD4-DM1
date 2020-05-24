@@ -586,6 +586,6 @@ namespace Iswenzz
 	{
 		int lastClientCommand;		// 0x4
 		int lastServerCommand;		// 0x8
-		clientSnapshot_t s;			// 0x2F8C
+		clientSnapshot_t cl_snap;	// 0x2F8C
 	};
 }
