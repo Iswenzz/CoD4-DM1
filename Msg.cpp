@@ -258,30 +258,181 @@ namespace Iswenzz
 			reinterpret_cast<unsigned char*>(data)[i] = readByte();
 	}
 
-	void Msg::readDeltaField(int time, const netField_t* field, int fieldNum, unsigned char forceSend)
+	void Msg::readDeltaField(int time, const void* from, const void* to, const netField_t* field, bool noXor)
 	{
 		// @TODO
-		//fromdata = &from[field->offset];
-		//todata = &to[field->offset];
-		if (forceSend)
-		{
-			//nullfield = 0;
-			//fromdata = (const byte*)&nullfield;
-		}
+		unsigned char* fromF;
+		unsigned char* toF;
+		int bits, b, bit_vect, v, zeroV = 0;
+		uint32_t l;
+		double f = 0;
+		signed int t;
+
+		if (noXor)
+			fromF = (unsigned char*)&zeroV;
+		else
+			fromF = (unsigned char*)from + field->offset;
+		toF = (unsigned char*)to + field->offset;
+
 		if (field->changeHints != 2)
 		{
-			//if (!forceSend && MSG_ValuesAreEqual(field->bits, (const int*)fromdata, (const int*)todata))
+			if (!readBit()) // No change ?
 			{
-				readBit();
+				*(uint32_t*)toF = *(uint32_t*)fromF;
 				return;
 			}
-			readBit();
+		} 
+
+		//Changed field
+		bits = field->bits;
+		if (!bits)
+		{
+			if (!readBit())
+			{
+				*(uint32_t*)toF = readBit() << 31;
+				return;
+			}
+			if (!readBit())
+			{
+				b = readBits(5);
+				v = ((32 * readByte() + b) ^ ((signed int)*(float*)fromF + 4096)) - 4096;
+				*(float*)toF = (double)v;
+				return;
+			}
+			l = readInt();
+			*(uint32_t*)toF = l;
+			*(uint32_t*)toF = l ^ *(uint32_t*)fromF;
 		}
 
 		std::cout << "Field Bits: " << field->bits << std::endl;
+
+		// Command
 		switch (field->bits)
 		{
+			case -89:
+				if (!readBit())
+				{
+					b = readBits(5);
+					l = ((32 * readByte() + b) ^ ((signed int)*(float*)fromF + 4096)) - 4096;
+					*(float*)toF = (double)l;
+					return;
+				}
+				l = readInt();
+				*(uint32_t*)toF = l ^ *(uint32_t*)fromF;
+				return;
 
+			case -88:
+				l = readInt();
+				*(uint32_t*)toF = l ^ *(uint32_t*)fromF;
+				return;
+
+			case -100:
+				if (!readBit())
+				{
+					*(float*)toF = 0.0;
+					return;
+				}
+				//*(float*)toF = MSG_ReadAngle16(msg);
+				return;
+
+			case -99:
+				if (readBit())
+				{
+					if (!readBit())
+					{
+						b = readBits(4);
+						v = ((16 * readByte() + b) ^ ((signed int)*(float*)fromF + 2048)) - 2048;
+						*(float*)toF = (double)v;
+						return;
+					}
+					l = readInt();
+					*(uint32_t*)toF = l ^ *(uint32_t*)fromF;
+					return;
+				}
+				*(uint32_t*)toF = 0;
+				return;
+
+			case -98:
+				//*(uint32_t*)toF = MSG_ReadEFlags(msg, *(uint32_t*)fromF);
+				return;
+
+			case -97:
+				if (readBit())
+					*(uint32_t*)toF = readInt();
+				else
+					*(uint32_t*)toF = time - readBits(8);
+				return;
+
+			case -96:
+				//*(uint32_t*)toF = MSG_ReadDeltaGroundEntity(msg);
+				return;
+
+			case -95:
+				*(uint32_t*)toF = 100 * readBits(7);
+				return;
+
+			case -94:
+			case -93:
+				*(uint32_t*)toF = readByte();
+				return;
+
+			case -92:
+			case -91:
+				//f = MSG_ReadOriginFloat(msg, bits, *(float*)fromF);
+				*(float*)toF = f;
+				return;
+
+			case -90:
+				//f = MSG_ReadOriginZFloat(msg, *(float*)fromF);
+				*(float*)toF = f;
+				return;
+
+			case -87:
+				//*(float*)toF = MSG_ReadAngle16(msg);
+				return;
+
+			case -86:
+				*(float*)toF = (double)readBits(5) / 10.0 + 1.399999976158142;
+				return;
+
+			case -85:
+				if (readBit())
+				{
+					*(uint32_t*)toF = *(uint32_t*)fromF;
+					toF[3] = (fromF[3] != 0) - 1;
+					return;
+				}
+				if (!readBit())
+				{
+					toF[0] = readByte();
+					toF[1] = readByte();
+					toF[2] = readByte();
+				}
+				toF[3] = 8 * readBits(5);
+				return;
+
+			default:
+				if (!readBit())
+				{
+					*(uint32_t*)toF = 0;
+					return;
+				}
+				bits = abs(field->bits);
+				bit_vect = bits & 7;
+
+				if (bit_vect) t = readBits(bit_vect);
+				else t = 0;
+
+				for (; bit_vect < bits; bit_vect += 8)
+					t |= (readByte() << bit_vect);
+
+				if (bits == 32) bit_vect = -1;
+				else bit_vect = (1 << bits) - 1;
+
+				t = t ^ (*(uint32_t*)fromF & bit_vect);
+				if (field->bits < 0 && (t >> (bits - 1)) & 1)
+					t |= ~bit_vect;
+				*(uint32_t*)toF = t;
 		}
 	}
 

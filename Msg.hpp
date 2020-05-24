@@ -87,7 +87,7 @@ namespace Iswenzz
 			std::string readStringLine(int len);
 
 			void readData(void *data, int len);
-			void readDeltaField(int time, const netField_t* field, int fieldNum, unsigned char forceSend);
+			void readDeltaField(int time, const void* from, const void* to, const netField_t* field, bool noXor);
 			void readDeltaUsercmdKey(int key, struct usercmd_s *from, struct usercmd_s* to);
 			void readBase64(unsigned char *outbuf, int len);
 
