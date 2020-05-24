@@ -8,6 +8,8 @@ namespace Iswenzz
 	struct ClientSnapshotData;
 	struct ClientArchiveData;
 	typedef struct playerState_s playerState_t;
+	typedef struct objective_s objective_t;
+	typedef struct hudelem_s hudelem_t;
 	class Msg;
 
 	class Demo
@@ -34,8 +36,8 @@ namespace Iswenzz
 
 			void readCommandString(Msg &msg);
 			void readSnapshot(Msg& msg, ClientSnapshotData& snap);
-			void readGameState(Msg& msg);
-			void readMatchState(Msg& msg, int time);
+			void readDeltaObjectiveFields(Msg& msg, int time, objective_t* from, objective_t* to);
+			void readDeltaHudElems(Msg &msg, const int time, hudelem_t* from, hudelem_t* to, int count);
 			void readDeltaPlayerState(Msg& msg, int time, playerState_t* from, playerState_t* to,
 				bool predictedFieldsIgnoreXor);
 	};
