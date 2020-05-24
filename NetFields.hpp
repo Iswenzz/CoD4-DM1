@@ -7,6 +7,9 @@
 #define PLANE_STATE_FIELDS_COUNT				60
 #define HELICOPTER_ENTITY_STATE_FIELDS_COUNT	58
 #define ENTITY_STATE_FIELDS_COUNT				59
+#define OBJECTIVE_FIELDS_COUNT					6
+
+#define VectorCopy(a, b) ((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2])
 
 namespace Iswenzz
 {
@@ -58,4 +61,5 @@ namespace Iswenzz
 	extern netField_t hudElemFields[HUD_ELEM_FIELDS_COUNT];
 	extern netField_t clientStateFields[CLIENT_STATE_FIELDS_COUNT];
 	extern netField_t archivedEntityFields[ARCHIVED_ENTITY_FIELDS_COUNT];
+	extern netField_t objectiveFields[OBJECTIVE_FIELDS_COUNT];
 }

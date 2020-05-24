@@ -1179,6 +1179,18 @@ namespace Iswenzz
 		{ AEF(s.partBits[3]), 32, 0 }
 	};
 
+	#define OBJF(x) const_cast<char*>(# x), (int)&((objective_t*)0)->x
+
+	netField_t objectiveFields[OBJECTIVE_FIELDS_COUNT] =
+	{
+		{ OBJF(origin[0]), 0, 0 },
+		{ OBJF(origin[1]), 0, 0 },
+		{ OBJF(origin[2]), 0, 0 },
+		{ OBJF(icon), 12, 0 },
+		{ OBJF(entNum), 10, 0 },
+		{ OBJF(teamNum), 4, 0 }
+	};
+
 	int GetMinBitCount(int x)
 	{
 		return 32 - __builtin_clz(x);
