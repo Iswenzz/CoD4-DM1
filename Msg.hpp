@@ -7,6 +7,9 @@
 #define SYS_COMMONVERSION 17.5
 #define	PROTOCOL_VERSION (unsigned int)(SYS_COMMONVERSION + 0.00001)
 
+#define	ANGLE2SHORT(x) ((int)((x)*65536.0f/360.0f) & 65535)
+#define	SHORT2ANGLE(x) ((x)*(360.0/65536))
+
 namespace Iswenzz
 {
 	enum class MSGType
@@ -82,9 +85,16 @@ namespace Iswenzz
 			int readInt();
 			int64_t readInt64();
 			float readFloat();
-			int readEntityIndex(int indexBits);
+
 			std::string readString(int len);
 			std::string readStringLine(int len);
+
+			double readAngle16();
+			int readEFlags(int oldFlags);
+			int readEntityIndex(int indexBits);
+			int readDeltaGroundEntity();
+			float readOriginFloat(int bits, float oldValue);
+			float readOriginZFloat(float oldValue);
 
 			void readData(void *data, int len);
 			void readDeltaField(int time, const void* from, const void* to, const netField_t* field, bool noXor);

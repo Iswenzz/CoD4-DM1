@@ -164,11 +164,6 @@ namespace Iswenzz
 		unsigned char lastFrame = msg.readByte();
 		unsigned char snapFlag = msg.readByte();
 
-		std::cout << "Snapshot: " << serverTime << " " 
-			<< (int)lastFrame << " "
-			<< (int)snapFlag << " "
-			<< std::endl;
-
 		readDeltaPlayerState(msg, serverTime, &frame->ps, &oldFrame->ps, false);
 		delete frame;
 		delete oldFrame;

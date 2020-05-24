@@ -203,6 +203,31 @@ namespace Iswenzz
 		return *c;
 	}
 
+	double Msg::readAngle16()
+	{
+		return SHORT2ANGLE((double)readShort());
+	}
+
+	int Msg::readEFlags(int oldFlags)
+	{
+		int bitChanged, value, i, b;
+		if (readBit() == 1)
+		{
+			value = 0;
+			for (i = 0; i < 24; i += 8)
+			{
+				b = readByte();
+				value |= (b << i);
+			}
+		}
+		else
+		{
+			bitChanged = readBits(5);
+			value = oldFlags ^ (1 << bitChanged);
+		}
+		return value;
+	}
+
 	int Msg::readEntityIndex(int indexBits)
 	{
 		if (readBit())
@@ -212,6 +237,44 @@ namespace Iswenzz
 		else
 			lastRefEntity += readBits(4);
 		return lastRefEntity;
+	}
+
+	int Msg::readDeltaGroundEntity()
+	{
+		int j, value;
+		if (readBit() == 1) return 1022;
+		if (readBit() == 1) return 0;
+
+		value = readBits(2);
+		for (j = 2; j < 10; j += 8)
+			value |= readByte() << j;
+		return value;
+	}
+
+	float Msg::readOriginFloat(int bits, float oldValue)
+	{
+		signed int coord;
+		if (readBit())
+		{
+			float center[3];
+			//MSG_GetMapCenter(center); // @TODO
+			coord = (signed int)(center[bits != -92] + 0.5);
+			return (double)((((signed int)oldValue - coord + 0x8000) ^ readBits(16)) + coord - 0x8000);
+		}
+		return (double)(readBits(7) - 64) + oldValue;
+	}
+
+	float Msg::readOriginZFloat(float oldValue)
+	{
+		signed int coord;
+		if (readBit())
+		{
+			float center[3];
+			//MSG_GetMapCenter(center); // @TODO
+			coord = (signed int)(center[2] + 0.5);
+			return (double)((((signed int)oldValue - coord + 0x8000) ^ readBits(16)) + coord - 0x8000);
+		}
+		return (double)(readBits(7) - 64) + oldValue;
 	}
 
 	std::string Msg::readString(int len)
@@ -258,9 +321,9 @@ namespace Iswenzz
 			reinterpret_cast<unsigned char*>(data)[i] = readByte();
 	}
 
+	// @TODO
 	void Msg::readDeltaField(int time, const void* from, const void* to, const netField_t* field, bool noXor)
 	{
-		// @TODO
 		unsigned char* fromF;
 		unsigned char* toF;
 		int bits, b, bit_vect, v, zeroV = 0;
@@ -276,7 +339,7 @@ namespace Iswenzz
 
 		if (field->changeHints != 2)
 		{
-			if (!readBit()) // No change ?
+			if (!readBit()) // No change
 			{
 				*(uint32_t*)toF = *(uint32_t*)fromF;
 				return;
@@ -332,7 +395,7 @@ namespace Iswenzz
 					*(float*)toF = 0.0;
 					return;
 				}
-				//*(float*)toF = MSG_ReadAngle16(msg);
+				*(float*)toF = readAngle16();
 				return;
 
 			case -99:
@@ -353,7 +416,7 @@ namespace Iswenzz
 				return;
 
 			case -98:
-				//*(uint32_t*)toF = MSG_ReadEFlags(msg, *(uint32_t*)fromF);
+				*(uint32_t*)toF = readEFlags(*(uint32_t*)fromF);
 				return;
 
 			case -97:
@@ -364,7 +427,7 @@ namespace Iswenzz
 				return;
 
 			case -96:
-				//*(uint32_t*)toF = MSG_ReadDeltaGroundEntity(msg);
+				*(uint32_t*)toF = readDeltaGroundEntity();
 				return;
 
 			case -95:
@@ -378,17 +441,17 @@ namespace Iswenzz
 
 			case -92:
 			case -91:
-				//f = MSG_ReadOriginFloat(msg, bits, *(float*)fromF);
+				f = readOriginFloat(bits, *(float*)fromF);
 				*(float*)toF = f;
 				return;
 
 			case -90:
-				//f = MSG_ReadOriginZFloat(msg, *(float*)fromF);
+				f = readOriginZFloat(*(float*)fromF);
 				*(float*)toF = f;
 				return;
 
 			case -87:
-				//*(float*)toF = MSG_ReadAngle16(msg);
+				*(float*)toF = readAngle16();
 				return;
 
 			case -86:
@@ -436,9 +499,10 @@ namespace Iswenzz
 		}
 	}
 
+	// @TODO
 	void Msg::readDeltaUsercmdKey(int key, usercmd_s* from, usercmd_s* to)
 	{
-		// @TODO
+		
 	}
 
 	void Msg::readBase64(unsigned char* outbuf, int len)
