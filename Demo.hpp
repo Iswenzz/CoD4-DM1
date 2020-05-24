@@ -7,6 +7,7 @@ namespace Iswenzz
 {
 	struct ClientSnapshotData;
 	struct ClientArchiveData;
+	typedef struct playerState_s playerState_t;
 	class Msg;
 
 	class Demo
@@ -35,5 +36,7 @@ namespace Iswenzz
 			void readSnapshot(Msg& msg);
 			void readGameState(Msg& msg);
 			void readMatchState(Msg& msg, int time);
+			void readDeltaPlayerState(Msg& msg, int time, playerState_t* from, playerState_t* to,
+				bool predictedFieldsIgnoreXor);
 	};
 }

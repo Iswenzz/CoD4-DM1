@@ -116,6 +116,7 @@ namespace Iswenzz
 		// Fill the snapshot struct
 		Msg snap_msg{ complen.data(), complen.size(), MSGCrypt::MSG_CRYPT_HUFFMAN };
 		snap.lastClientCommand = lastClientCommand;
+		snap.cl_snap = {};
 
 		// Read command
 		if (snap_msg.overflowed)
@@ -153,29 +154,41 @@ namespace Iswenzz
 
 	void Demo::readSnapshot(Msg& msg)
 	{
+		clientSnapshot_t* frame = new clientSnapshot_t{};
+		clientSnapshot_t* oldFrame = new clientSnapshot_t{};
+		if (snapshots.size() > 0)
+			std::memcpy(oldFrame, &snapshots.back().cl_snap, sizeof(clientSnapshot_t));
+		std::memcpy(frame, oldFrame, sizeof(clientSnapshot_t));
+
 		int serverTime = msg.readInt();
 		unsigned char lastFrame = msg.readByte();
 		unsigned char snapFlag = msg.readByte();
-		unsigned char sendOriginAndVel = msg.readBit();
-
-		int fieldChangeCount = msg.readBits(GetMinBitCount(PLAYER_STATE_FIELDS_COUNT));
 
 		std::cout << "Snapshot: " << serverTime << " " 
 			<< (int)lastFrame << " "
 			<< (int)snapFlag << " "
-			<< (int)sendOriginAndVel << " "
-			<< (int)fieldChangeCount << " "
 			<< std::endl;
 
-		netField_t* field;
-		int i;
-		if (fieldChangeCount > 0)
+		readDeltaPlayerState(msg, serverTime, &frame->ps, &oldFrame->ps, false);
+		delete frame;
+		delete oldFrame;
+	}
+
+	void Demo::readDeltaPlayerState(Msg& msg, int time, playerState_t* from, playerState_t* to, 
+		bool predictedFieldsIgnoreXor)
+	{
+		std::memcpy(to, from, sizeof(playerState_t));
+
+		bool readOriginAndVel = msg.readBit() > 0;
+		int lastChangedField = msg.readBits(GetMinBitCount(PLAYER_STATE_FIELDS_COUNT));
+		
+		std::cout << "LC: " << lastChangedField << std::endl;
+
+		netField_t *stateFields = playerStateFields;
+		for (int i = 0; i < lastChangedField; ++i)
 		{
-			for (i = 0, field = playerStateFields; i < PLAYER_STATE_FIELDS_COUNT; i++, field++)
-			{
-				// @TODO MSG_ShouldSendPSField else bit0
-				msg.readDeltaField(serverTime, field, i, field->changeHints == 3);
-			}
+			bool noXor = predictedFieldsIgnoreXor && readOriginAndVel && stateFields[i].changeHints == 3;
+			msg.readDeltaField(time, from, to, &stateFields[i], noXor);
 		}
 	}
 
