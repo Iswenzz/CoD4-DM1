@@ -97,7 +97,7 @@ namespace Iswenzz
 
 	void Demo::readSnapshot()
 	{
-		ClientSnapshotData snap;
+		ClientSnapshotData snap{};
 		unsigned char header = 0;
 		int swlen, len, lastClientCommand, cmd;
 																				// 1 header
