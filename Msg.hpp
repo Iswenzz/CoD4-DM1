@@ -102,5 +102,6 @@ namespace Iswenzz
 			void readBase64(unsigned char *outbuf, int len);
 
 			int getNumBitsRead();
+			void clearLastReferencedEntity();
 	};
 }
