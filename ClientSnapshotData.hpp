@@ -552,18 +552,18 @@ namespace Iswenzz
 
 	typedef struct clientState_s
 	{
-		int clientIndex;
-		team_t team;
-		int modelindex;
-		int attachModelIndex[6];
-		int attachTagIndex[6];
-		char netname[MAX_NETNAME];
-		float maxSprintTimeMultiplier;
-		int rank;
-		int prestige;
-		int perks;
-		int attachedVehEntNum;
-		int attachedVehSlotIndex;
+		int clientIndex;				// 4
+		team_t team;					// 8
+		int modelindex;					// 12
+		int attachModelIndex[6];		// 36
+		int attachTagIndex[6];			// 60
+		char netname[MAX_NETNAME];		// 76
+		float maxSprintTimeMultiplier;	// 80
+		int rank;						// 84
+		int prestige;					// 88
+		int perks;						// 92
+		int attachedVehEntNum;			// 96
+		int attachedVehSlotIndex;		// 100
 	} clientState_t;
 
 	/* 7472 */
@@ -586,6 +586,8 @@ namespace Iswenzz
 	{
 		int lastClientCommand;		// 0x4
 		int lastServerCommand;		// 0x8
-		clientSnapshot_t cl_snap;	// 0x2F8C
+		clientSnapshot_t sn;		// 0x2F8C // 0x2F84
+		entityState_t es;			// 0x3080 // 0xF4
+		clientState_t cs;			// 0x30E4 // 0x64
 	};
 }
