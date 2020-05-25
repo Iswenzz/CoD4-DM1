@@ -111,7 +111,7 @@ namespace Iswenzz
 		}
 		demo.read(reinterpret_cast<char*>(&lastClientCommand), sizeof(int));	// last client command
 		std::vector<unsigned char> complen(len - 4);
-		demo.read(reinterpret_cast<char*>(complen.data()), complen.size());				// client message
+		demo.read(reinterpret_cast<char*>(complen.data()), complen.size());		// client message
 
 		// Fill the snapshot struct
 		Msg snap_msg{ complen.data(), complen.size(), MSGCrypt::MSG_CRYPT_HUFFMAN };
@@ -122,7 +122,6 @@ namespace Iswenzz
 			snap_msg.~Msg();
 		cmd = snap_msg.readByte();
 
-		std::cout << "Command: " << cmd << std::endl;
 		switch (cmd)
 		{
 			case static_cast<int>(svc_ops_e::svc_serverCommand):
@@ -132,6 +131,7 @@ namespace Iswenzz
 				readSnapshot(snap_msg, snap);
 				break;
 		}
+		std::cout << "Byte Left: " << snap_msg.readcount << "/" << snap_msg.cursize << std::endl;
 
 		// Read the rest
 		std::vector<unsigned char> rest(NETCHAN_FRAGMENTBUFFER_SIZE);
@@ -205,27 +205,18 @@ namespace Iswenzz
 				to->stats[4] = msg.readByte();
 		}
 
-		// @TODO
 		std::cout << "Command Time: " << to->commandTime << std::endl;
-		std::cout << "Origin: " 
-			<< to->origin[0] << " " << to->origin[1] << " " << to->origin[2]
-			<< std::endl;
-		std::cout << "Speed: "
-			<< to->speed << " "
-			<< to->moveSpeedScaleMultiplier << " "
-			<< std::endl;
 		for (i = 0; i < 31; i++)
 		{
 			hudelem_t hud = to->hud.current[i];
 			if (hud.value > 0)
 				std::cout << "HUD Velocity: " << hud.value << std::endl;
-			if (hud.materialIndex > 0)
-				std::cout << "HUD FPS ID: " << hud.materialIndex << std::endl;
 		}
 
 		// ammo stored
 		if (msg.readBit())
-		{ // check for any ammo change (0-63)
+		{ 
+			// check for any ammo change (0-63)
 			for (j = 0; j < 4; j++) 
 			{
 				if (msg.readBit())
@@ -274,7 +265,6 @@ namespace Iswenzz
 			for (i = 0; i < 128; ++i)
 				to->weaponmodels[i] = msg.readByte();
 		}
-		std::cout << "Weapon: " << to->weaponmodels << std::endl; // @TODO
 	}
 
 	void Demo::readDeltaObjectiveFields(Msg& msg, int time, objective_t* from, objective_t* to)
