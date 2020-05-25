@@ -9,8 +9,6 @@
 #define ENTITY_STATE_FIELDS_COUNT				59
 #define OBJECTIVE_FIELDS_COUNT					6
 
-#define VectorCopy(a, b) ((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2])
-
 namespace Iswenzz
 {
 	typedef struct

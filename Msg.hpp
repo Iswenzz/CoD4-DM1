@@ -1,17 +1,27 @@
 #pragma once
 #include <string>
-#include "NetFields.hpp"
+#include <vector>
 
-#define NETCHAN_UNSENTBUFFER_SIZE 0x20000
-#define NETCHAN_FRAGMENTBUFFER_SIZE 0x800
-#define SYS_COMMONVERSION 17.5
-#define	PROTOCOL_VERSION (unsigned int)(SYS_COMMONVERSION + 0.00001)
+#define NETCHAN_UNSENTBUFFER_SIZE		0x20000
+#define NETCHAN_FRAGMENTBUFFER_SIZE		0x800
+#define SYS_COMMONVERSION				17.5
+#define	PROTOCOL_VERSION				(unsigned int)(SYS_COMMONVERSION + 0.00001)
+#define MAX_CLIENTS						64
 
-#define	ANGLE2SHORT(x) ((int)((x)*65536.0f/360.0f) & 65535)
-#define	SHORT2ANGLE(x) ((x)*(360.0/65536))
+#define VectorCopy(a, b)	((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2])
+#define	ANGLE2SHORT(x)		((int)((x)*65536.0f/360.0f) & 65535)
+#define	SHORT2ANGLE(x)		((x)*(360.0/65536))
 
 namespace Iswenzz
 {
+	struct ClientSnapshotData;
+	typedef struct netField_s netField_t;
+	typedef struct playerState_s playerState_t;
+	typedef struct objective_s objective_t;
+	typedef struct entityState_s entityState_t;
+	typedef struct clientState_s clientState_t;
+	typedef struct hudelem_s hudelem_t;
+
 	enum class MSGType
 	{
 		MSG_SNAPSHOT,
@@ -92,14 +102,28 @@ namespace Iswenzz
 			double readAngle16();
 			int readEFlags(int oldFlags);
 			int readEntityIndex(int indexBits);
-			int readDeltaGroundEntity();
 			float readOriginFloat(int bits, float oldValue);
 			float readOriginZFloat(float oldValue);
-
+			void readBase64(unsigned char* outbuf, int len);
 			void readData(void *data, int len);
+
+			int readDeltaGroundEntity();
+			int readDeltaStruct(const int time, const void* from, void* to, 
+				unsigned int number, int numFields, int indexBits, netField_t* stateFields);
+			void readDeltaFields(const int time, const unsigned char* from, unsigned char* to,
+				int numFields, netField_t* stateFields);
 			void readDeltaField(int time, const void* from, const void* to, const netField_t* field, bool noXor);
 			void readDeltaUsercmdKey(int key, struct usercmd_s *from, struct usercmd_s* to);
-			void readBase64(unsigned char *outbuf, int len);
+			int readDeltaEntity(const int time, entityState_t* from, entityState_t* to, int number);
+			int readDeltaClient(const int time, clientState_t* from, clientState_t* to, int number);
+			void readDeltaObjectiveFields(const int time, objective_t* from, objective_t* to);
+			void readDeltaHudElems(const int time, hudelem_t* from, hudelem_t* to, int count);
+			void readDeltaPlayerState(int time, playerState_t* from, playerState_t* to,
+				bool predictedFieldsIgnoreXor);
+
+			void readCommandString();
+			int readLastChangedField(int totalFields);
+			void readSnapshot(const std::vector<ClientSnapshotData>& snapshots, ClientSnapshotData& snap);
 
 			int getNumBitsRead();
 			void clearLastReferencedEntity();
