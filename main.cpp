@@ -1,6 +1,6 @@
 #include <iostream>
-#include "Demo.hpp"
-#include "Huffman.hpp"
+#include "src/Demo.hpp"
+#include "src/Huffman.hpp"
 using namespace Iswenzz;
 
 int main()

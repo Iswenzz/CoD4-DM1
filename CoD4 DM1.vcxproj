@@ -151,19 +151,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Demo.cpp" />
-    <ClCompile Include="Huffman.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Msg.cpp" />
-    <ClCompile Include="NetFields.cpp" />
+    <ClCompile Include="src\Demo.cpp" />
+    <ClCompile Include="src\Huffman.cpp" />
+    <ClCompile Include="src\Msg.cpp" />
+    <ClCompile Include="src\NetFields.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Demo.hpp" />
-    <ClInclude Include="ClientArchiveData.hpp" />
-    <ClInclude Include="ClientSnapshotData.hpp" />
-    <ClInclude Include="Huffman.hpp" />
-    <ClInclude Include="Msg.hpp" />
-    <ClInclude Include="NetFields.hpp" />
+    <ClInclude Include="src\ClientArchiveData.hpp" />
+    <ClInclude Include="src\ClientSnapshotData.hpp" />
+    <ClInclude Include="src\Demo.hpp" />
+    <ClInclude Include="src\Huffman.hpp" />
+    <ClInclude Include="src\Msg.hpp" />
+    <ClInclude Include="src\NetFields.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
