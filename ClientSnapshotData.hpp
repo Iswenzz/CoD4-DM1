@@ -1,4 +1,6 @@
 #pragma once
+#include <vector>
+#include <array>
 
 #define MAX_HUDELEMENTS 31
 #define MAX_HUDELEMS_ARCHIVAL MAX_HUDELEMENTS
@@ -584,10 +586,10 @@ namespace Iswenzz
 
 	struct ClientSnapshotData
 	{
-		int lastClientCommand;		// 0x4
-		int lastServerCommand;		// 0x8
-		clientSnapshot_t sn;		// 0x2F8C // 0x2F84
-		entityState_t es;			// 0x3080 // 0xF4
-		clientState_t cs;			// 0x30E4 // 0x64
+		int lastClientCommand;
+		int lastServerCommand;
+		clientSnapshot_t sn;
+		std::array<entityState_t, 1024> es;
+		std::array<clientState_t, 64> cs;
 	};
 }
