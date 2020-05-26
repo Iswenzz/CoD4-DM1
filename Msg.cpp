@@ -271,7 +271,7 @@ namespace Iswenzz
 
 		if (!readBit())
 		{
-			memcpy(to, from, 4 * numFields + 4);
+			std::memcpy(to, from, 4 * numFields + 4);
 			return;
 		}
 		lc = readLastChangedField(numFields);
@@ -283,7 +283,7 @@ namespace Iswenzz
 		}
 
 		for (i = 0; i < lc; ++i)
-			readDeltaField(time, from, to, &stateFields[i], false);
+			readDeltaField(time, from, to, &stateFields[i], false, true);
 		for (i = lc; i < numFields; ++i)
 		{
 			int offset = stateFields[i].offset;
@@ -362,7 +362,8 @@ namespace Iswenzz
 	}
 
 	// @TODO
-	void Msg::readDeltaField(int time, const void* from, const void* to, const netField_t* field, bool noXor)
+	void Msg::readDeltaField(int time, const void* from, const void* to, const netField_t* field, 
+		bool noXor, bool print)
 	{
 		unsigned char* fromF;
 		unsigned char* toF;
@@ -400,11 +401,17 @@ namespace Iswenzz
 				b = readBits(5);
 				v = ((32 * readByte() + b) ^ ((signed int)*(float*)fromF + 4096)) - 4096;
 				*(float*)toF = (double)v;
+				if (print)
+					std::cout << field->name << "=" << v << " ";
 				return;
 			}
 			l = readInt();
 			*(uint32_t*)toF = l;
 			*(uint32_t*)toF = l ^ *(uint32_t*)fromF;
+			
+			if (!print) return;
+			f = *(float*)toF;
+			std::cout << field->name << "=" << f << " ";
 			return;
 		}
 
@@ -417,15 +424,25 @@ namespace Iswenzz
 					b = readBits(5);
 					l = ((32 * readByte() + b) ^ ((signed int)*(float*)fromF + 4096)) - 4096;
 					*(float*)toF = (double)l;
+					if (print)
+						std::cout << field->name << "=" << l << " ";
 					return;
 				}
 				l = readInt();
 				*(uint32_t*)toF = l ^ *(uint32_t*)fromF;
+
+				if (!print) return;
+				f = *(float*)toF;
+				std::cout << field->name << "=" << f << " ";
 				return;
 
 			case -88:
 				l = readInt();
 				*(uint32_t*)toF = l ^ *(uint32_t*)fromF;
+
+				if (!print) return;
+				f = *(float*)toF;
+				std::cout << field->name << "=" << f << " ";
 				return;
 
 			case -100:
@@ -445,10 +462,16 @@ namespace Iswenzz
 						b = readBits(4);
 						v = ((16 * readByte() + b) ^ ((signed int)*(float*)fromF + 2048)) - 2048;
 						*(float*)toF = (double)v;
+						if (print)
+							std::cout << field->name << "=" << (int)v << " ";
 						return;
 					}
 					l = readInt();
 					*(uint32_t*)toF = l ^ *(uint32_t*)fromF;
+					
+					if (!print) return;
+					f = *(float*)toF;
+					std::cout << field->name << "=" << f << " ";
 					return;
 				}
 				*(uint32_t*)toF = 0;
@@ -482,11 +505,16 @@ namespace Iswenzz
 			case -91:
 				f = readOriginFloat(bits, *(float*)fromF);
 				*(float*)toF = f;
+				if (print)
+					std::cout << field->name << "=" << f << " ";
 				return;
 
 			case -90:
 				f = readOriginZFloat(*(float*)fromF);
 				*(float*)toF = f;
+
+				if (!print) return;
+					std::cout << field->name << "=" << f << " ";
 				return;
 
 			case -87:
@@ -534,14 +562,11 @@ namespace Iswenzz
 				t = t ^ (*(uint32_t*)fromF & bit_vect);
 				if (field->bits < 0 && (t >> (bits - 1)) & 1)
 					t |= ~bit_vect;
+
+				if (print)
+					std::cout << field->name << "=" << *(uint32_t*)toF << " ";
 				*(uint32_t*)toF = t;
 		}
-	}
-
-	// @TODO
-	void Msg::readDeltaUsercmdKey(int key, usercmd_s* from, usercmd_s* to)
-	{
-		
 	}
 
 	void Msg::readBase64(unsigned char* outbuf, int len)
@@ -599,6 +624,7 @@ namespace Iswenzz
 		lastRefEntity = -1;
 	}
 
+	// @TODO
 	void Msg::readCommandString()
 	{
 		int seq = readInt();
@@ -649,39 +675,38 @@ namespace Iswenzz
 	void Msg::readSnapshot(const std::vector<ClientSnapshotData>& snapshots, ClientSnapshotData& snap)
 	{
 		ClientSnapshotData* frame = new ClientSnapshotData{};
-		ClientSnapshotData* oldFrame = new ClientSnapshotData{};
+		ClientSnapshotData* from = new ClientSnapshotData{};
 
-		if (snapshots.size() > 0) // if oldFrame exists
-			std::memcpy(oldFrame, &snapshots.back(), sizeof(ClientSnapshotData));
-		std::memcpy(frame, oldFrame, sizeof(ClientSnapshotData));
+		if (snapshots.size() > 0) // if from exists
+			std::memcpy(from, &snapshots.back(), sizeof(ClientSnapshotData));
+		std::memcpy(frame, from, sizeof(ClientSnapshotData));
 
 		int serverTime = readInt();
 		unsigned char lastFrame = readByte();
 		unsigned char snapFlags = readByte();
 
 		// Read Player State
-		readDeltaPlayerState(serverTime, &oldFrame->sn.ps, &frame->sn.ps, true);
+		readDeltaPlayerState(serverTime, &from->sn.ps, &frame->sn.ps, true);
 		clearLastReferencedEntity();
-		bit = 0;
 
 		// Read Entities State
-		/*while (readBit())
-		{
-			int newnum = readEntityIndex(6);
-			std::cout << "Newnum: " << newnum << std::endl;
-			readDeltaEntity(serverTime, &oldFrame->es, &frame->es, newnum);
-		}*/
+		/*readEntities(serverTime, from, frame);
+		readEntityIndex(10);
+		clearLastReferencedEntity();*/
 
 		// Read Clients State
-		/*while (readBit())
-		{
-			int newnum = readEntityIndex(6);
-			std::cout << "Newnum: " << newnum << std::endl;
-			readDeltaClient(serverTime, &oldFrame->cs, &frame->cs, newnum);
-		}*/
+		//readClients(serverTime, from, frame);
+
+		int isZero = readBit();
+		std::cout << "IsZero: " << isZero << std::endl;
+		//if (sv_padPackets->integer) // if server has packet padding
+		//{
+		//	for (int i = 0; i < sv_padPackets->integer; i++)
+		//		readByte(); // svc_nop
+		//}
 
 		std::memcpy(&snap, frame, sizeof(ClientSnapshotData));
-		delete oldFrame;
+		delete from;
 		delete frame;
 	}
 
@@ -710,7 +735,7 @@ namespace Iswenzz
 		for (int i = 0; i < lastChangedField; ++i)
 		{
 			bool noXor = predictedFieldsIgnoreXor && readOriginAndVel && stateFields[i].changeHints == 3;
-			readDeltaField(time, from, to, &stateFields[i], noXor);
+			readDeltaField(time, from, to, &stateFields[i], noXor, false);
 		}
 
 		for (i = lastChangedField; i < PLAYER_STATE_FIELDS_COUNT; ++i)
@@ -737,8 +762,8 @@ namespace Iswenzz
 		for (i = 0; i < 31; i++)
 		{
 			hudelem_t hud = to->hud.current[i];
-			if (hud.value > 0)
-				std::cout << "HUD Velocity: " << hud.value << std::endl;
+			/*if (hud.value > 0)
+				std::cout << "HUD Velocity: " << hud.value << std::endl;*/
 		}
 
 		// ammo stored
@@ -800,7 +825,7 @@ namespace Iswenzz
 		if (readBit())
 		{
 			for (int i = 0; i < OBJECTIVE_FIELDS_COUNT; ++i)
-				readDeltaField(time, from, to, &objectiveFields[i], false);
+				readDeltaField(time, from, to, &objectiveFields[i], false, false);
 		}
 		else
 		{
@@ -822,7 +847,7 @@ namespace Iswenzz
 		{
 			lc = readBits(6);
 			for (y = 0; y <= lc; ++y)
-				readDeltaField(time, &from[i], &to[i], &hudElemFields[y], false);
+				readDeltaField(time, &from[i], &to[i], &hudElemFields[y], false, true);
 
 			for (; y < HUD_ELEM_FIELDS_COUNT; ++y)
 			{

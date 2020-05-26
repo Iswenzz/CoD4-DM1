@@ -112,8 +112,8 @@ namespace Iswenzz
 				unsigned int number, int numFields, int indexBits, netField_t* stateFields);
 			void readDeltaFields(const int time, const unsigned char* from, unsigned char* to,
 				int numFields, netField_t* stateFields);
-			void readDeltaField(int time, const void* from, const void* to, const netField_t* field, bool noXor);
-			void readDeltaUsercmdKey(int key, struct usercmd_s *from, struct usercmd_s* to);
+			void readDeltaField(int time, const void* from, const void* to, const netField_t* field, 
+				bool noXor, bool print);
 			int readDeltaEntity(const int time, entityState_t* from, entityState_t* to, int number);
 			int readDeltaClient(const int time, clientState_t* from, clientState_t* to, int number);
 			void readDeltaObjectiveFields(const int time, objective_t* from, objective_t* to);
