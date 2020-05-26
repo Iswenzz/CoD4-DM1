@@ -609,6 +609,34 @@ namespace Iswenzz
 		//std::cout << "Server Command: " << index << " " << s << std::endl;
 	}
 
+	// @TODO
+	int Msg::readClients(const int time, ClientSnapshotData* from, ClientSnapshotData* to)
+	{
+		while (!overflowed)
+		{
+			int newnum = readEntityIndex(GetMinBitCount(MAX_CLIENTS - 1));
+			std::cout << "CS NN: " << newnum << std::endl;
+			readDeltaClient(time, &from->cs[from->sn.num_clients], &to->cs[to->sn.num_clients], newnum);
+			++to->sn.num_clients;
+		}
+		return to->sn.num_clients;
+	}
+
+	// @TODO
+	int Msg::readEntities(const int time, ClientSnapshotData* from, ClientSnapshotData* to)
+	{
+		while (!overflowed)
+		{
+			int newnum = readEntityIndex(10);
+			if (newnum == 1023 || newnum < 0 || newnum >= 1024)
+				break;
+			std::cout << "ES NN: " << newnum << std::endl;
+			readDeltaEntity(time, &from->es[from->sn.num_entities], &to->es[to->sn.num_entities], newnum);
+			++to->sn.num_entities;
+		}
+		return to->sn.num_entities;
+	}
+
 	int Msg::readLastChangedField(int totalFields)
 	{
 		int idealBits, lastChanged;

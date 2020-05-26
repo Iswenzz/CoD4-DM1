@@ -122,6 +122,8 @@ namespace Iswenzz
 				bool predictedFieldsIgnoreXor);
 
 			void readCommandString();
+			int readClients(const int time, ClientSnapshotData* from, ClientSnapshotData* to);
+			int readEntities(const int time, ClientSnapshotData* from, ClientSnapshotData* to);
 			int readLastChangedField(int totalFields);
 			void readSnapshot(const std::vector<ClientSnapshotData>& snapshots, ClientSnapshotData& snap);
 
