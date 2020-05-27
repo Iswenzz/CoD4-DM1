@@ -9,6 +9,12 @@
 #define ENTITY_STATE_FIELDS_COUNT				59
 #define OBJECTIVE_FIELDS_COUNT					6
 
+/*
+This file contains all net fields used in delta compressed packets.
+A net field is composed by a field name, its offset in a specific struct, 
+and bits for specific variable reading.
+*/
+
 namespace Iswenzz
 {
 	typedef struct
