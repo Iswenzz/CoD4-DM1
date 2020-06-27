@@ -371,7 +371,7 @@ namespace Iswenzz
 				v = ((32 * readByte() + b) ^ ((signed int)*(float*)fromF + 4096)) - 4096;
 				*(float*)toF = (double)v;
 				if (print)
-					std::cout << field->name << "{" << field->bits << "} " << "=" << v << " ";
+					std::cout << field->name << "{" << field->bits << "} = " << v << " ";
 				return;
 			}
 			l = readInt();
@@ -380,7 +380,7 @@ namespace Iswenzz
 			
 			if (!print) return;
 			f = *(float*)toF;
-			std::cout << field->name << "{" << field->bits << "} " << "=" << f << " ";
+			std::cout << field->name << "{" << field->bits << "} = " << f << " ";
 			return;
 		}
 
@@ -394,7 +394,7 @@ namespace Iswenzz
 					l = ((32 * readByte() + b) ^ ((signed int)*(float*)fromF + 4096)) - 4096;
 					*(float*)toF = (double)l;
 					if (print)
-						std::cout << field->name << "{" << field->bits << "} " << "=" << l << " ";
+						std::cout << field->name << "{" << field->bits << "} = " << l << " ";
 					return;
 				}
 				l = readInt();
@@ -402,7 +402,7 @@ namespace Iswenzz
 
 				if (!print) return;
 				f = *(float*)toF;
-				std::cout << field->name << "{" << field->bits << "} " << "=" << f << " ";
+				std::cout << field->name << "{" << field->bits << "} = " << f << " ";
 				return;
 
 			case -88:
@@ -411,7 +411,7 @@ namespace Iswenzz
 
 				if (!print) return;
 				f = *(float*)toF;
-				std::cout << field->name << "{" << field->bits << "} " << "=" << f << " ";
+				std::cout << field->name << "{" << field->bits << "} = " << f << " ";
 				return;
 
 			case -100:
@@ -432,7 +432,7 @@ namespace Iswenzz
 						v = ((16 * readByte() + b) ^ ((signed int)*(float*)fromF + 2048)) - 2048;
 						*(float*)toF = (double)v;
 						if (print)
-							std::cout << field->name << "{" << field->bits << "} " << "=" << (int)v << " ";
+							std::cout << field->name << "{" << field->bits << "} = " << (int)v << " ";
 						return;
 					}
 					l = readInt();
@@ -440,7 +440,7 @@ namespace Iswenzz
 					
 					if (!print) return;
 					f = *(float*)toF;
-					std::cout << field->name << "{" << field->bits << "} " << "=" << f << " ";
+					std::cout << field->name << "{" << field->bits << "} = " << f << " ";
 					return;
 				}
 				*(uint32_t*)toF = 0;
@@ -475,7 +475,7 @@ namespace Iswenzz
 				f = readOriginFloat(bits, *(float*)fromF);
 				*(float*)toF = f;
 				if (print)
-					std::cout << field->name << "{" << field->bits << "} " << "=" << f << " ";
+					std::cout << field->name << "{" << field->bits << "} = " << f << " ";
 				return;
 
 			case -90:
@@ -483,7 +483,7 @@ namespace Iswenzz
 				*(float*)toF = f;
 
 				if (!print) return;
-					std::cout << field->name << "{" << field->bits << "} " << "=" << f << " ";
+					std::cout << field->name << "{" << field->bits << "} = " << f << " ";
 				return;
 
 			case -87:
@@ -533,7 +533,7 @@ namespace Iswenzz
 					t |= ~bit_vect;
 
 				if (print)
-					std::cout << field->name << "{" << field->bits << "} " << "=" << *(uint32_t*)toF << " ";
+					std::cout << field->name << "{" << field->bits << "} = " << *(uint32_t*)toF << " ";
 				*(uint32_t*)toF = t;
 		}
 	}
@@ -704,7 +704,7 @@ namespace Iswenzz
 		for (int i = 0; i < lastChangedField; ++i)
 		{
 			bool noXor = predictedFieldsIgnoreXor && readOriginAndVel && stateFields[i].changeHints == 3;
-			readDeltaField(time, from, to, &stateFields[i], noXor, true);
+			readDeltaField(time, from, to, &stateFields[i], noXor, false);
 		}
 
 		for (i = lastChangedField; i < PLAYER_STATE_FIELDS_COUNT; ++i)
@@ -727,7 +727,7 @@ namespace Iswenzz
 				to->stats[4] = readByte();
 		}
 
-		std::cout << "Command Time: " << to->commandTime << std::endl;
+		std::cout << std::endl;
 		for (i = 0; i < 31; i++)
 		{
 			hudelem_t hud = to->hud.current[i];
@@ -816,7 +816,7 @@ namespace Iswenzz
 		{
 			lc = readBits(6);
 			for (y = 0; y <= lc; ++y)
-				readDeltaField(time, &from[i], &to[i], &hudElemFields[y], false, true);
+				readDeltaField(time, &from[i], &to[i], &hudElemFields[y], false, false);
 
 			for (; y < HUD_ELEM_FIELDS_COUNT; ++y)
 			{
