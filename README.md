@@ -1,4 +1,5 @@
 # CoD4 DM1
+Reverse CoD4x ``.DM_1`` server demo format.
 
 ## TODO
 * Player Snapshot
