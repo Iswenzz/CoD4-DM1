@@ -2,6 +2,7 @@
 #include "Huffman.hpp"
 #include "NetFields.hpp"
 #include "ClientSnapshotData.hpp"
+#include <cstring>
 #include <stdint.h>
 #include <iostream>
 
