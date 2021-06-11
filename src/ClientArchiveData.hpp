@@ -6,7 +6,7 @@ namespace Iswenzz
 	{
 		int index;
 		float origin[3];
-		float velocity[3];		// null for some reason?
+		float velocity[3];
 		int movementDir;
 		int bobCycle;
 		int commandTime;

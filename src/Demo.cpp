@@ -12,18 +12,18 @@ namespace Iswenzz
 	Demo::Demo() { }
 	Demo::Demo(std::string filepath)
 	{
-		open(filepath);
+		Open(filepath);
 	}
 
 	Demo::~Demo()
 	{
-		close();
+		Close();
 	}
 
-	void Demo::open(std::string filepath)
+	void Demo::Open(std::string filepath)
 	{
 		if (isDemoOpen)
-			close();
+			Close();
 		isDemoOpen = true;
 		demoFilePath = filepath;
 
@@ -39,14 +39,14 @@ namespace Iswenzz
 				//case 2: // @TODO
 				case static_cast<int>(MSGType::MSG_SNAPSHOT):
 				{
-					Msg snapshotMsg = readSnapshot();
-					parseSnapshot(snapshotMsg);
+					Msg snapshotMsg = ReadSnapshot();
+					ParseSnapshot(snapshotMsg);
 					break;
 				}
 				case static_cast<int>(MSGType::MSG_FRAME):
 				{
-					Msg archiveMsg = readArchive();	
-					parseArchive(archiveMsg);
+					Msg archiveMsg = ReadArchive();	
+					ParseArchive(archiveMsg);
 					break;
 				}
 			}
@@ -57,25 +57,25 @@ namespace Iswenzz
 			switch (static_cast<int>(msgType))
 			{
 				case static_cast<int>(MSGType::MSG_SNAPSHOT):
-					parseSnapshot();
+					ParseSnapshot();
 					break;
 				case static_cast<int>(MSGType::MSG_FRAME):
-					parseArchive();
+					ParseArchive();
 					break;
 			}*/
 		}
 	}
 
-	void Demo::close()
+	void Demo::Close()
 	{
 		if (demo.is_open())
 			demo.close();
-		snapshots.clear();
-		archive.clear();
+		Snapshots.clear();
+		Archives.clear();
 		isDemoOpen = false;
 	}
 
-	Msg Demo::readSnapshot()
+	Msg Demo::ReadSnapshot()
 	{
 		Msg msg{ };
 
@@ -103,13 +103,13 @@ namespace Iswenzz
 		if (msg.maxsize > sizeof(int))
 		{
 			int size = msg.maxsize - sizeof(int);
-			msg.initialize(size);
+			msg.Initialize(size);
 			demo.read(reinterpret_cast<char*>(msg.buffer.data()), size);
 		}
 		return msg;
 	}
 
-	Msg Demo::readArchive()
+	Msg Demo::ReadArchive()
 	{
 		int len = 48, swlen = 0;
 		demo.read(reinterpret_cast<char*>(&swlen), sizeof(int));            // 21 packet sequence
@@ -119,7 +119,7 @@ namespace Iswenzz
 		return Msg{ nullptr, 0, MSGCrypt::MSG_CRYPT_NONE };
 	}
 
-	void Demo::parseArchive(Msg& msg)
+	void Demo::ParseArchive(Msg& msg)
 	{
 		ClientArchiveData buffer{ };
 		demo.read(reinterpret_cast<char*>(&buffer.index), sizeof(int));
@@ -135,10 +135,10 @@ namespace Iswenzz
 		demo.read(reinterpret_cast<char*>(&buffer.angles[0]), sizeof(float));
 		demo.read(reinterpret_cast<char*>(&buffer.angles[1]), sizeof(float));
 		demo.read(reinterpret_cast<char*>(&buffer.angles[2]), sizeof(float));
-		archive.push_back(buffer);
+		Archives.push_back(buffer);
 	}
 
-	void Demo::parseSnapshot(Msg& msg)
+	void Demo::ParseSnapshot(Msg& msg)
 	{
 		ClientSnapshotData snap{ };
 		unsigned char header = 0;
@@ -147,12 +147,12 @@ namespace Iswenzz
 		/*demo.read(reinterpret_cast<char*>(&swlen), sizeof(int));
 		demo.read(reinterpret_cast<char*>(&len), sizeof(int));*/
 
-		msg.initialize(msg.buffer.data(), msg.cursize, MSGCrypt::MSG_CRYPT_HUFFMAN);
+		msg.Initialize(msg.buffer.data(), msg.cursize, MSGCrypt::MSG_CRYPT_HUFFMAN);
 
 		//// demo ended
 		//if (swlen == -1 && len == -1)
 		//{
-		//	demo.close();
+		//	demo.Close();
 		//	return;
 		//}
 		//demo.read(reinterpret_cast<char*>(&lastClientCommand), sizeof(int)); // last client command
@@ -169,23 +169,23 @@ namespace Iswenzz
 				break;
 
 			// Read command
-			cmd = msg.readByte();
+			cmd = msg.ReadByte();
 			std::cout << "CMD: " << cmd << std::endl;
 			for (int i = 0; i < 10; i++)
-				std::cout << "readBits: " << msg.readByte() << std::endl;
+				std::cout << "readBits: " << msg.ReadByte() << std::endl;
 			break;
 			switch (cmd)
 			{
 				case static_cast<int>(svc_ops_e::svc_gamestate):
-					msg.readGamestate();
+					msg.ReadGamestate();
 					break;
 				case static_cast<int>(svc_ops_e::svc_serverCommand):
-					msg.readCommandString();
+					msg.ReadCommandString();
 					break;
 				case static_cast<int>(svc_ops_e::svc_download):
 					break;
 				case static_cast<int>(svc_ops_e::svc_snapshot):
-					msg.readSnapshot(snapshots, snap);
+					msg.ReadSnapshot(Snapshots, snap);
 					break;
 			}
 			if (cmd == static_cast<int>(svc_ops_e::svc_EOF))
@@ -197,9 +197,9 @@ namespace Iswenzz
 
 		// Read the rest
 		//std::vector<unsigned char> rest(NETCHAN_FRAGMENTBUFFER_SIZE);
-		//msg.readData(rest.data(), NETCHAN_FRAGMENTBUFFER_SIZE);
+		//msg.ReadData(rest.data(), NETCHAN_FRAGMENTBUFFER_SIZE);
 
 		////std::cin.get();
-		//snapshots.push_back(snap);
+		//Snapshots.push_back(snap);
 	}
 }

@@ -469,7 +469,7 @@ namespace Iswenzz
 	typedef enum 
 	{
 		TR_STATIONARY,
-		TR_INTERPOLATE,				// non-parametric, but interpolate between snapshots
+		TR_INTERPOLATE,				// non-parametric, but interpolate between Snapshots
 		TR_LINEAR,
 		TR_LINEAR_STOP,
 		TR_SINE,					// value = base + sin( time / duration ) * delta

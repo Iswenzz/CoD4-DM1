@@ -108,94 +108,94 @@ namespace Iswenzz
 		/// <returns></returns>
 		Msg(unsigned char *buffer, std::size_t len, MSGCrypt mode);
 
-		void initialize(std::size_t len);
-		void initialize(unsigned char* buf, std::size_t len, MSGCrypt mode);
+		void Initialize(std::size_t len);
+		void Initialize(unsigned char* buf, std::size_t len, MSGCrypt mode);
 
 		/// <summary>
 		/// Read one bit.
 		/// </summary>
 		/// <returns></returns>
-		int readBit();
+		int ReadBit();
 
 		/// <summary>
 		/// Read specified bits.
 		/// </summary>
 		/// <param name="numBits">Bit count</param>
 		/// <returns></returns>
-		int readBits(int numBits);
+		int ReadBits(int numBits);
 
 		/// <summary>
 		/// Read a byte.
 		/// </summary>
 		/// <returns></returns>
-		int readByte();
+		int ReadByte();
 
 		/// <summary>
 		/// Read a short.
 		/// </summary>
 		/// <returns></returns>
-		int readShort();
+		int ReadShort();
 
 		/// <summary>
 		/// Read a 32 bit integer.
 		/// </summary>
 		/// <returns></returns>
-		int readInt();
+		int ReadInt();
 
 		/// <summary>
 		/// Read a 64 bit integer.
 		/// </summary>
 		/// <returns></returns>
-		int64_t readInt64();
+		int64_t ReadInt64();
 
 		/// <summary>
 		/// Read a float.
 		/// </summary>
 		/// <returns></returns>
-		float readFloat();
+		float ReadFloat();
 
 		/// <summary>
 		/// Read a string.
 		/// </summary>
 		/// <returns></returns>
-		std::string readString();
+		std::string ReadString();
 
 		/// <summary>
 		/// Read a string until line break.
 		/// </summary>
 		/// <returns></returns>
-		std::string readStringLine();
+		std::string ReadStringLine();
 
 		/// <summary>
 		/// Read a 16 bit short and return its angle using the SHORT2ANGLE macro.
 		/// </summary>
 		/// <returns></returns>
-		double readAngle16();
+		double ReadAngle16();
 
-		int readEFlags(int oldFlags);
-		int readEntityIndex(int indexBits);
-		float readOriginFloat(int bits, float oldValue);
-		float readOriginZFloat(float oldValue);
+		int ReadEFlags(int oldFlags);
+		int ReadEntityIndex(int indexBits);
+		float ReadOriginFloat(int bits, float oldValue);
+		float ReadOriginZFloat(float oldValue);
 
 		/// <summary>
 		/// Read a Base64 buffer.
 		/// </summary>
 		/// <param name="outbuf">The output buffer.</param>
 		/// <param name="len">Length of the buffer.</param>
-		void readBase64(unsigned char* outbuf, int len);
+		void ReadBase64(unsigned char* outbuf, int len);
 
 		/// <summary>
 		/// Read buffer to an output buffer.
 		/// </summary>
 		/// <param name="buffer">The output buffer.</param>
 		/// <param name="len">The size to read.</param>
-		void readData(void *buffer, int len);
+		void ReadData(void *buffer, int len);
 
 		/// <summary>
 		/// Read a delta compressed ground entity.
 		/// </summary>
 		/// <returns></returns>
-		int readDeltaGroundEntity();
+		int ReadDeltaGroundEntity();
 
 		/// <summary>
 		/// Read a delta compressed struct.
@@ -208,7 +208,7 @@ namespace Iswenzz
 		/// <param name="indexBits">Min bit count.</param>
 		/// <param name="stateFields">Netfield fields.</param>
 		/// <returns></returns>
-		int readDeltaStruct(const int time, const void* from, void* to, 
+		int ReadDeltaStruct(const int time, const void* from, void* to, 
 			unsigned int number, int numFields, int indexBits, netField_t* stateFields);
 
 		/// <summary>
@@ -219,7 +219,7 @@ namespace Iswenzz
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="numFields">Struct field count.</param>
 		/// <param name="stateFields">Netfield fields.</param>
-		void readDeltaFields(const int time, const unsigned char* from, unsigned char* to,
+		void ReadDeltaFields(const int time, const unsigned char* from, unsigned char* to,
 			int numFields, netField_t* stateFields);
 
 		/// <summary>
@@ -231,7 +231,7 @@ namespace Iswenzz
 		/// <param name="field">Current netfield to read.</param>
 		/// <param name="noXor">Should start with a value of 0.</param>
 		/// <param name="print">Should print debug information.</param>
-		void readDeltaField(int time, const void* from, const void* to, const netField_t* field, 
+		void ReadDeltaField(int time, const void* from, const void* to, const netField_t* field, 
 			bool noXor, bool print);
 
 		/// <summary>
@@ -242,7 +242,7 @@ namespace Iswenzz
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="number">Entity number.</param>
 		/// <returns></returns>
-		int readDeltaEntity(const int time, entityState_t* from, entityState_t* to, int number);
+		int ReadDeltaEntity(const int time, entityState_t* from, entityState_t* to, int number);
 
 		/// <summary>
 		/// Read a delta compressed client state.
@@ -252,7 +252,7 @@ namespace Iswenzz
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="number">Entity number.</param>
 		/// <returns></returns>
-		int readDeltaClient(const int time, clientState_t* from, clientState_t* to, int number);
+		int ReadDeltaClient(const int time, clientState_t* from, clientState_t* to, int number);
 
 		/// <summary>
 		/// Read a delta compressed objective struct.
@@ -260,7 +260,7 @@ namespace Iswenzz
 		/// <param name="time">Server time.</param>
 		/// <param name="from">Pointer to the old struct state.</param>
 		/// <param name="to">Pointer to the new struct state.</param>
-		void readDeltaObjectiveFields(const int time, objective_t* from, objective_t* to);
+		void ReadDeltaObjectiveFields(const int time, objective_t* from, objective_t* to);
 
 		/// <summary>
 		/// Read all delta compressed hud element struct.
@@ -269,7 +269,7 @@ namespace Iswenzz
 		/// <param name="from">Pointer to the old struct state.</param>
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="count">HUD Count.</param>
-		void readDeltaHudElems(const int time, hudelem_t* from, hudelem_t* to, int count);
+		void ReadDeltaHudElems(const int time, hudelem_t* from, hudelem_t* to, int count);
 
 		/// <summary>
 		/// Read a delta compressed player state.
@@ -278,18 +278,18 @@ namespace Iswenzz
 		/// <param name="from">Pointer to the old struct state.</param>
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="predictedFieldsIgnoreXor">Should start with a value of 0.</param>
-		void readDeltaPlayerState(int time, playerState_t* from, playerState_t* to,
+		void ReadDeltaPlayerState(int time, playerState_t* from, playerState_t* to,
 			bool predictedFieldsIgnoreXor);
 
 		/// <summary>
 		/// Read a gamestate.
 		/// </summary>
-		void readGamestate();
+		void ReadGamestate();
 
 		/// <summary>
 		/// Read a command string.
 		/// </summary>
-		void readCommandString();
+		void ReadCommandString();
 
 		/// <summary>
 		/// Read all clients.
@@ -298,7 +298,7 @@ namespace Iswenzz
 		/// <param name="from">Pointer to the old struct state.</param>
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <returns></returns>
-		int readClients(const int time, ClientSnapshotData* from, ClientSnapshotData* to);
+		int ReadClients(const int time, ClientSnapshotData* from, ClientSnapshotData* to);
 
 		/// <summary>
 		/// Read all entities.
@@ -307,31 +307,31 @@ namespace Iswenzz
 		/// <param name="from">Pointer to the old struct state.</param>
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <returns></returns>
-		int readEntities(const int time, ClientSnapshotData* from, ClientSnapshotData* to);
+		int ReadEntities(const int time, ClientSnapshotData* from, ClientSnapshotData* to);
 
 		/// <summary>
 		/// Read last changed net field.
 		/// </summary>
 		/// <param name="totalFields">Net field count.</param>
 		/// <returns>The last changed field index.</returns>
-		int readLastChangedField(int totalFields);
+		int ReadLastChangedField(int totalFields);
 
 		/// <summary>
 		/// Read a server snapshot.
 		/// </summary>
-		/// <param name="snapshots">Snapshot vector containing all previous snapshots.</param>
+		/// <param name="Snapshots">Snapshot vector containing all previous Snapshots.</param>
 		/// <param name="snap">The current snapshot that will be added to the vector later.</param>
-		void readSnapshot(const std::vector<ClientSnapshotData>& snapshots, ClientSnapshotData& snap);
+		void ReadSnapshot(const std::vector<ClientSnapshotData>& Snapshots, ClientSnapshotData& snap);
 
 		/// <summary>
 		/// Get the number of bits currently read.
 		/// </summary>
 		/// <returns></returns>
-		int getNumBitsRead();
+		int GetNumBitsRead();
 
 		/// <summary>
 		/// Set lastRefEntity to -1
 		/// </summary>
-		void clearLastReferencedEntity();
+		void ClearLastReferencedEntity();
 	};
 }

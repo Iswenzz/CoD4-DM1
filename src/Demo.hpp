@@ -16,7 +16,7 @@ namespace Iswenzz
 	{
 	public:
 		/// <summary>
-		/// Initialize a new Demo object, demo file can be opened with the open() function.
+		/// Initialize a new Demo object, demo file can be opened with the Open() function.
 		/// </summary>
 		/// <returns></returns>
 		Demo();
@@ -33,42 +33,42 @@ namespace Iswenzz
 		/// Open a demo file from specified path.
 		/// </summary>
 		/// <param name="filepath">File path to a demo file (.dm_1).</param>
-		void open(std::string filepath);
+		void Open(std::string filepath);
 
 		/// <summary>
 		/// Close the demo file and free resources.
 		/// </summary>
-		void close();
+		void Close();
 
 	private:
 		std::ifstream demo;
 		std::string demoFilePath;
 		bool isDemoOpen = false;
 
-		std::vector<ClientSnapshotData> snapshots;
-		std::vector<ClientArchiveData> archive;
+		std::vector<ClientSnapshotData> Snapshots;
+		std::vector<ClientArchiveData> Archives;
 
 		/// <summary>
 		/// Read a server snapshot.
 		/// </summary>
-		Msg readSnapshot();
+		Msg ReadSnapshot();
 
 		/// <summary>
-		/// Read an archive client state.
+		/// Read an Archives client state.
 		/// </summary>
-		Msg readArchive();
+		Msg ReadArchive();
 
 		/// <summary>
 		/// Parse a server snapshot.
 		/// </summary>
 		/// <param name="msg">The snapshot message.</param>
-		void parseSnapshot(Msg &msg);
+		void ParseSnapshot(Msg &msg);
 
 
 		/// <summary>
-		/// Parse an archive client state.
+		/// Parse an Archives client state.
 		/// </summary>
-		/// <param name="msg">The archive message.</param>
-		void parseArchive(Msg& msg);
+		/// <param name="msg">The Archives message.</param>
+		void ParseArchive(Msg& msg);
 	};
 }
