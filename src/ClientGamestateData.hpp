@@ -1,0 +1,5 @@
+#pragma once
+
+#define MAX_CONFIGSTRINGS 3000
+#define GENTITYNUM_BITS 10
+#define MAX_GENTITIES 1 >> GENTITYNUM_BITS

@@ -2,6 +2,7 @@
 #include "Huffman.hpp"
 #include "NetFields.hpp"
 #include "ClientSnapshotData.hpp"
+#include "ClientGamestateData.hpp"
 #include <cstring>
 #include <stdint.h>
 #include <iostream>
@@ -16,29 +17,35 @@ namespace Iswenzz
 		268435455, 536870911, 1073741823, 2147483647, 4294967295
 	};
 
+	Msg::Msg() : overflowed(false), readonly(false), splitBuffer({ }), splitSize(0), readcount(0),
+		bit(0), lastRefEntity(0), buffer({ }), cursize(0), maxsize(0) { }
+	Msg::~Msg() { }
+
 	Msg::Msg(unsigned char* buf, std::size_t len, MSGCrypt mode)
-		: overflowed(false), readonly(false), splitData(nullptr), splitSize(0), readcount(0),
-		bit(0), lastRefEntity(0), data(nullptr), cursize(0), maxsize(0)
+	{
+		initialize(buf, len, mode);
+	}
+
+	void Msg::initialize(std::size_t len)
+	{
+		cursize = len;
+		maxsize = NETCHAN_UNSENTBUFFER_SIZE;
+		buffer = std::vector<unsigned char>(len);
+	}
+
+	void Msg::initialize(unsigned char* buf, std::size_t len, MSGCrypt mode)
 	{
 		if (mode == MSGCrypt::MSG_CRYPT_NONE)
 		{
-			data = new unsigned char[NETCHAN_UNSENTBUFFER_SIZE];
-			std::memcpy(data, buf, len);
+			std::memcpy(buffer.data(), buf, len);
 			cursize = len;
 			maxsize = NETCHAN_UNSENTBUFFER_SIZE;
 		}
 		else if (mode == MSGCrypt::MSG_CRYPT_HUFFMAN)
 		{
-			data = new unsigned char[NETCHAN_UNSENTBUFFER_SIZE];
-			cursize = MSG_ReadBitsCompress(buf, len, data, NETCHAN_FRAGMENTBUFFER_SIZE);
+			cursize = Huffman::Decompress(buf, len, buffer.data(), NETCHAN_FRAGMENTBUFFER_SIZE);
 			maxsize = NETCHAN_UNSENTBUFFER_SIZE;
 		}
-	}
-
-	Msg::~Msg() 
-	{ 
-		if (data)
-			delete data;
 	}
 
 	int Msg::readBit()
@@ -60,11 +67,11 @@ namespace Iswenzz
 		numBytes = bit / 8;
 		if (numBytes < cursize)
 		{
-			bits = data[numBytes] >> oldbit7;
+			bits = buffer[numBytes] >> oldbit7;
 			bit++;
 			return bits & 1;
 		}
-		bits = splitData[numBytes - cursize] >> oldbit7;
+		bits = splitBuffer[numBytes - cursize] >> oldbit7;
 		bit++;
 		return bits & 1;
 	}
@@ -91,33 +98,32 @@ namespace Iswenzz
 				}
 				if (((bit / 8)) >= cursize)
 				{
-					if (splitData == nullptr)
+					if (splitBuffer.empty())
 						return 0;
 
-					var = splitData[(bit / 8) - cursize];
+					var = splitBuffer[(bit / 8) - cursize];
 				}
 				else
-					var = data[bit / 8];
+					var = buffer[bit / 8];
 
 				retval |= ((var >> (bit & 7)) & 1) << i;
+				std::cout << retval << " ";
 				bit++;
 			}
 		}
+		std::cout << std::endl;
 		return retval;
 	}
 
 	int Msg::readByte()
 	{
-		unsigned char* c;
-		if (readcount + sizeof(unsigned char) > cursize)
+		int c = readBits(8);
+		if (readcount > cursize)
 		{
 			overflowed = 1;
 			return -1;
 		}
-		c = &data[readcount];
-
-		readcount += sizeof(unsigned char);
-		return *c;
+		return c;
 	}
 
 	int Msg::readShort()
@@ -128,7 +134,7 @@ namespace Iswenzz
 			overflowed = 1;
 			return -1;
 		}
-		c = reinterpret_cast<short*>(&data[readcount]);
+		c = reinterpret_cast<short*>(&buffer[readcount]);
 
 		readcount += sizeof(short);
 		return *c;
@@ -143,7 +149,7 @@ namespace Iswenzz
 			overflowed = 1;
 			return -1;
 		}
-		c = reinterpret_cast<int32_t*>(&data[readcount]);
+		c = reinterpret_cast<int32_t*>(&buffer[readcount]);
 
 		readcount += sizeof(int32_t);
 		return *c;
@@ -157,7 +163,7 @@ namespace Iswenzz
 			overflowed = 1;
 			return -1;
 		}
-		c = reinterpret_cast<int64_t*>(&data[readcount]);
+		c = reinterpret_cast<int64_t*>(&buffer[readcount]);
 
 		readcount += sizeof(int64_t);
 		return *c;
@@ -171,7 +177,7 @@ namespace Iswenzz
 			overflowed = 1;
 			return -1;
 		}
-		c = reinterpret_cast<float*>(&data[readcount]);
+		c = reinterpret_cast<float*>(&buffer[readcount]);
 
 		readcount += sizeof(float);
 		return *c;
@@ -287,7 +293,7 @@ namespace Iswenzz
 		return (double)(readBits(7) - 64) + oldValue;
 	}
 
-	std::string Msg::readString(int len)
+	std::string Msg::readString()
 	{
 		int l = 0, c;
 		std::string bigstring;
@@ -302,11 +308,11 @@ namespace Iswenzz
 			bigstring += static_cast<unsigned char>(c);
 			l++;
 		} 
-		while (l < len - 1);
+		while (l < bigstring.size());
 		return bigstring;
 	}
 
-	std::string Msg::readStringLine(int len)
+	std::string Msg::readStringLine()
 	{
 		int	l = 0, c;
 		std::string bigstring;
@@ -321,14 +327,14 @@ namespace Iswenzz
 			bigstring += static_cast<char>(c);
 			l++;
 		} 
-		while (l < len - 1);
+		while (l < bigstring.size());
 		return bigstring;
 	}
 
-	void Msg::readData(void* data, int len)
+	void Msg::readData(void* buffer, int len)
 	{
 		for (int i = 0; i < len; i++)
-			reinterpret_cast<unsigned char*>(data)[i] = readByte();
+			reinterpret_cast<unsigned char*>(buffer)[i] = readByte();
 	}
 
 	// @TODO
@@ -371,8 +377,8 @@ namespace Iswenzz
 				b = readBits(5);
 				v = ((32 * readByte() + b) ^ ((signed int)*(float*)fromF + 4096)) - 4096;
 				*(float*)toF = (double)v;
-				if (print)
-					std::cout << field->name << "{" << field->bits << "} = " << v << " ";
+				//if (print)
+					//std::cout << field->name << "{" << field->bits << "} = " << v << std::endl;
 				return;
 			}
 			l = readInt();
@@ -381,7 +387,7 @@ namespace Iswenzz
 			
 			if (!print) return;
 			f = *(float*)toF;
-			std::cout << field->name << "{" << field->bits << "} = " << f << " ";
+			//std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
 			return;
 		}
 
@@ -394,8 +400,8 @@ namespace Iswenzz
 					b = readBits(5);
 					l = ((32 * readByte() + b) ^ ((signed int)*(float*)fromF + 4096)) - 4096;
 					*(float*)toF = (double)l;
-					if (print)
-						std::cout << field->name << "{" << field->bits << "} = " << l << " ";
+					//if (print)
+						//std::cout << field->name << "{" << field->bits << "} = " << l << std::endl;
 					return;
 				}
 				l = readInt();
@@ -403,7 +409,7 @@ namespace Iswenzz
 
 				if (!print) return;
 				f = *(float*)toF;
-				std::cout << field->name << "{" << field->bits << "} = " << f << " ";
+				//std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
 				return;
 
 			case -88:
@@ -412,7 +418,7 @@ namespace Iswenzz
 
 				if (!print) return;
 				f = *(float*)toF;
-				std::cout << field->name << "{" << field->bits << "} = " << f << " ";
+				std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
 				return;
 
 			case -100:
@@ -432,8 +438,8 @@ namespace Iswenzz
 						b = readBits(4);
 						v = ((16 * readByte() + b) ^ ((signed int)*(float*)fromF + 2048)) - 2048;
 						*(float*)toF = (double)v;
-						if (print)
-							std::cout << field->name << "{" << field->bits << "} = " << (int)v << " ";
+						//if (print)
+							//std::cout << field->name << "{" << field->bits << "} = " << (int)v << std::endl;
 						return;
 					}
 					l = readInt();
@@ -441,7 +447,7 @@ namespace Iswenzz
 					
 					if (!print) return;
 					f = *(float*)toF;
-					std::cout << field->name << "{" << field->bits << "} = " << f << " ";
+					//std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
 					return;
 				}
 				*(uint32_t*)toF = 0;
@@ -475,16 +481,16 @@ namespace Iswenzz
 			case -91:
 				f = readOriginFloat(bits, *(float*)fromF);
 				*(float*)toF = f;
-				if (print)
-					std::cout << field->name << "{" << field->bits << "} = " << f << " ";
+				//if (print)
+					//std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
 				return;
 
 			case -90:
 				f = readOriginZFloat(*(float*)fromF);
 				*(float*)toF = f;
 
-				if (!print) return;
-					std::cout << field->name << "{" << field->bits << "} = " << f << " ";
+				//if (!print) return;
+					//std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
 				return;
 
 			case -87:
@@ -533,8 +539,8 @@ namespace Iswenzz
 				if (field->bits < 0 && (t >> (bits - 1)) & 1)
 					t |= ~bit_vect;
 
-				if (print)
-					std::cout << field->name << "{" << field->bits << "} = " << *(uint32_t*)toF << " ";
+				//if (print)
+					//std::cout << field->name << "{" << field->bits << "} = " << *(uint32_t*)toF << std::endl;
 				*(uint32_t*)toF = t;
 		}
 	}
@@ -599,7 +605,7 @@ namespace Iswenzz
 	{
 		int seq = readInt();
 		int index;
-		std::string s = readString(0x400u);
+		std::string s = readString();
 
 		index = seq & 0x7F;
 		//std::cout << "Server Command: " << index << " " << s << std::endl;
@@ -705,7 +711,7 @@ namespace Iswenzz
 		for (int i = 0; i < lastChangedField; ++i)
 		{
 			bool noXor = predictedFieldsIgnoreXor && readOriginAndVel && stateFields[i].changeHints == 3;
-			readDeltaField(time, from, to, &stateFields[i], noXor, false);
+			readDeltaField(time, from, to, &stateFields[i], noXor, true);
 		}
 
 		for (i = lastChangedField; i < PLAYER_STATE_FIELDS_COUNT; ++i)
@@ -728,7 +734,6 @@ namespace Iswenzz
 				to->stats[4] = readByte();
 		}
 
-		std::cout << std::endl;
 		for (i = 0; i < 31; i++)
 		{
 			hudelem_t hud = to->hud.current[i];
@@ -787,6 +792,60 @@ namespace Iswenzz
 		{
 			for (i = 0; i < 128; ++i)
 				to->weaponmodels[i] = readByte();
+		}
+	}
+
+	void Msg::readGamestate()
+	{
+		int cmd = 0, newnum = -1, idx = -1; 
+		int seq = readInt();
+		std::cout << seq << std::endl;
+
+		while (true)
+		{
+			cmd = readByte();
+			std::cout << "gamestate cmd: " << cmd << std::endl;
+			if (cmd == static_cast<int>(svc_ops_e::svc_EOF))
+				break;
+
+			if (cmd == static_cast<int>(svc_ops_e::svc_configstring))
+			{
+				short i = readShort();
+				if (i < 0 || i >= MAX_CONFIGSTRINGS)
+					break;
+
+				while (i > 0)
+				{
+					if (readBit()) idx++;
+					else idx = readBits(12);
+
+					std::string s = readString();
+					i--;
+
+					std::cout << "configString: " << s << std::endl;
+				}
+			}
+			else if (cmd == static_cast<int>(svc_ops_e::svc_configstring))
+			{
+				if (readBit())
+					newnum++;
+				else
+				{
+					if (!readBit())
+					{
+						int c = readBits(4);
+						newnum += c;
+					}
+					else
+						newnum = readBits(GENTITYNUM_BITS);
+				}
+				if (newnum < 0 || newnum >= MAX_GENTITIES)
+					break;
+
+				//readDeltaEntity() // @TODO
+			}
+			else 
+				break;
 		}
 	}
 

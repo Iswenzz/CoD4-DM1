@@ -391,7 +391,7 @@ namespace Iswenzz
 
 	struct LerpEntityStateAnonymous
 	{
-		int data[7];
+		int buffer[7];
 	};
 
 	struct LerpEntityStateExplosion

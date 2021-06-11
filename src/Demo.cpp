@@ -28,22 +28,41 @@ namespace Iswenzz
 		demoFilePath = filepath;
 
 		demo.open(filepath, std::ios::binary);
-		readHeader();
-
 		while (demo.is_open())
 		{
-			unsigned char packet_header;
-			demo.read(reinterpret_cast<char*>(&packet_header), sizeof(unsigned char));
+			char msgType = 0;
+			demo.read(reinterpret_cast<char*>(&msgType), sizeof(char));
+			std::cout << static_cast<int>(msgType) << std::endl;
 
-			switch (static_cast<int>(packet_header))
+			switch (msgType)
+			{
+				//case 2: // @TODO
+				case static_cast<int>(MSGType::MSG_SNAPSHOT):
+				{
+					Msg snapshotMsg = readSnapshot();
+					parseSnapshot(snapshotMsg);
+					break;
+				}
+				case static_cast<int>(MSGType::MSG_FRAME):
+				{
+					Msg archiveMsg = readArchive();	
+					parseArchive(archiveMsg);
+					break;
+				}
+			}
+			break; // @TODO
+
+			/*unsigned char packet_header = 0;
+			demo.read(reinterpret_cast<char*>(&packet_header), sizeof(unsigned char));
+			switch (static_cast<int>(msgType))
 			{
 				case static_cast<int>(MSGType::MSG_SNAPSHOT):
-					readSnapshot();
+					parseSnapshot();
 					break;
 				case static_cast<int>(MSGType::MSG_FRAME):
-					readArchive();
+					parseArchive();
 					break;
-			}
+			}*/
 		}
 	}
 
@@ -56,88 +75,131 @@ namespace Iswenzz
 		isDemoOpen = false;
 	}
 
-	void Demo::readHeader()
+	Msg Demo::readSnapshot()
 	{
-		unsigned char header, slen;
-		int protocol;
-		int dummyend[3];
-		int len, swlen;
+		Msg msg{ };
 
-		demo.read(reinterpret_cast<char*>(&header), sizeof(unsigned char)); // 1 head
-		demo.read(reinterpret_cast<char*>(&protocol), sizeof(int));         // 5 protocol
-		demo.read(reinterpret_cast<char*>(&dummyend[0]), sizeof(int));      // 9 datalen (-1 = demo ended)
-		demo.read(reinterpret_cast<char*>(&dummyend[1]), sizeof(int));      // 13
-		demo.read(reinterpret_cast<char*>(&dummyend[2]), sizeof(int));      // 17
-		demo.read(reinterpret_cast<char*>(&slen), sizeof(unsigned char));   // 18
-		demo.read(reinterpret_cast<char*>(&swlen), sizeof(int));            // 22 packet sequence
-		demo.read(reinterpret_cast<char*>(&len), sizeof(int));              // 26 client message length
+		unsigned char slen = 0;
+		int protocol = 0, messageLength = 0, packetSequence = 0;
+		int dummyend[3] = { };
+
+		// CoD4X
+		//demo.read(reinterpret_cast<char*>(&protocol), sizeof(int));
+		//demo.read(reinterpret_cast<char*>(&dummyend[0]), sizeof(int)); // datalen (-1 = demo ended)
+		//demo.read(reinterpret_cast<char*>(&dummyend[1]), sizeof(int));
+		//demo.read(reinterpret_cast<char*>(&dummyend[2]), sizeof(int));
+		//demo.read(reinterpret_cast<char*>(&slen), sizeof(unsigned char));
+		//demo.read(reinterpret_cast<char*>(&packetSequence), sizeof(int));
+		//demo.read(reinterpret_cast<char*>(&msg.maxsize), sizeof(int));
+
+		// 1.7
+		demo.read(reinterpret_cast<char*>(&packetSequence), sizeof(int));
+		demo.read(reinterpret_cast<char*>(&msg.maxsize), sizeof(int));
+		demo.read(reinterpret_cast<char*>(&dummyend[0]), sizeof(int));
+
+		std::cout << msg.maxsize << std::endl;
+
+		// Read the client message
+		if (msg.maxsize > sizeof(int))
+		{
+			int size = msg.maxsize - sizeof(int);
+			msg.initialize(size);
+			demo.read(reinterpret_cast<char*>(msg.buffer.data()), size);
+		}
+		return msg;
+	}
+
+	Msg Demo::readArchive()
+	{
+		int len = 48, swlen = 0;
+		demo.read(reinterpret_cast<char*>(&swlen), sizeof(int));            // 21 packet sequence
 
 		std::vector<unsigned char> complen(len);
 		demo.read(reinterpret_cast<char*>(complen.data()), len);            // client message
+		return Msg{ nullptr, 0, MSGCrypt::MSG_CRYPT_NONE };
 	}
 
-	void Demo::readArchive()
+	void Demo::parseArchive(Msg& msg)
 	{
-		ClientArchiveData data;													// 1 header
-		demo.read(reinterpret_cast<char*>(&data.index), sizeof(int));			// 5
-		demo.read(reinterpret_cast<char*>(&data.origin[0]), sizeof(float));		// 9 player's position
-		demo.read(reinterpret_cast<char*>(&data.origin[1]), sizeof(float));		// 13
-		demo.read(reinterpret_cast<char*>(&data.origin[2]), sizeof(float));		// 17
-		demo.read(reinterpret_cast<char*>(&data.velocity[0]), sizeof(float));	// 21
-		demo.read(reinterpret_cast<char*>(&data.velocity[1]), sizeof(float));	// 25
-		demo.read(reinterpret_cast<char*>(&data.velocity[2]), sizeof(float));	// 29
-		demo.read(reinterpret_cast<char*>(&data.movementDir), sizeof(int));		// 33
-		demo.read(reinterpret_cast<char*>(&data.bobCycle), sizeof(int));		// 37
-		demo.read(reinterpret_cast<char*>(&data.commandTime), sizeof(int));		// 41
-		demo.read(reinterpret_cast<char*>(&data.angles[0]), sizeof(float));		// 45 player's angles
-		demo.read(reinterpret_cast<char*>(&data.angles[1]), sizeof(float));		// 49
-		demo.read(reinterpret_cast<char*>(&data.angles[2]), sizeof(float));		// 53
-		archive.push_back(data);
+		ClientArchiveData buffer{ };
+		demo.read(reinterpret_cast<char*>(&buffer.index), sizeof(int));
+		demo.read(reinterpret_cast<char*>(&buffer.origin[0]), sizeof(float));
+		demo.read(reinterpret_cast<char*>(&buffer.origin[1]), sizeof(float));
+		demo.read(reinterpret_cast<char*>(&buffer.origin[2]), sizeof(float));
+		demo.read(reinterpret_cast<char*>(&buffer.velocity[0]), sizeof(float));
+		demo.read(reinterpret_cast<char*>(&buffer.velocity[1]), sizeof(float));
+		demo.read(reinterpret_cast<char*>(&buffer.velocity[2]), sizeof(float));
+		demo.read(reinterpret_cast<char*>(&buffer.movementDir), sizeof(int));
+		demo.read(reinterpret_cast<char*>(&buffer.bobCycle), sizeof(int));
+		demo.read(reinterpret_cast<char*>(&buffer.commandTime), sizeof(int));
+		demo.read(reinterpret_cast<char*>(&buffer.angles[0]), sizeof(float));
+		demo.read(reinterpret_cast<char*>(&buffer.angles[1]), sizeof(float));
+		demo.read(reinterpret_cast<char*>(&buffer.angles[2]), sizeof(float));
+		archive.push_back(buffer);
 	}
 
-	void Demo::readSnapshot()
+	void Demo::parseSnapshot(Msg& msg)
 	{
-		ClientSnapshotData snap{};
+		ClientSnapshotData snap{ };
 		unsigned char header = 0;
-		int swlen, len, lastClientCommand, cmd;
-																				// 1 header
-		demo.read(reinterpret_cast<char*>(&swlen), sizeof(int));				// 5 packet sequence
-		demo.read(reinterpret_cast<char*>(&len), sizeof(int));					// 9 client message length
+		int swlen = 0, len = 0, lastClientCommand = 0, cmd = 0;
+		
+		/*demo.read(reinterpret_cast<char*>(&swlen), sizeof(int));
+		demo.read(reinterpret_cast<char*>(&len), sizeof(int));*/
 
-		if (swlen == -1 && len == -1)											// demo ended
-		{
-			demo.close();
-			return;
-		}
-		demo.read(reinterpret_cast<char*>(&lastClientCommand), sizeof(int));	// last client command
-		std::vector<unsigned char> complen(len - 4);
-		demo.read(reinterpret_cast<char*>(complen.data()), complen.size());		// client message
+		msg.initialize(msg.buffer.data(), msg.cursize, MSGCrypt::MSG_CRYPT_HUFFMAN);
+
+		//// demo ended
+		//if (swlen == -1 && len == -1)
+		//{
+		//	demo.close();
+		//	return;
+		//}
+		//demo.read(reinterpret_cast<char*>(&lastClientCommand), sizeof(int)); // last client command
+		//std::vector<unsigned char> complen(len - 4);
+		//demo.read(reinterpret_cast<char*>(complen.data()), complen.size());	// client message
 
 		// Fill the snapshot struct
-		Msg snap_msg{ complen.data(), complen.size(), MSGCrypt::MSG_CRYPT_HUFFMAN };
-		snap.lastClientCommand = lastClientCommand;
+		/*Msg snap_msg{ complen.data(), complen.size(), MSGCrypt::MSG_CRYPT_HUFFMAN };
+		snap.lastClientCommand = lastClientCommand;*/
 
-		// Read command
-		if (snap_msg.overflowed)
-			snap_msg.~Msg();
-		cmd = snap_msg.readByte();
-
-		switch (cmd)
+		while (true)
 		{
-			case static_cast<int>(svc_ops_e::svc_serverCommand):
-				snap_msg.readCommandString();
+			if (msg.readcount > msg.cursize)
 				break;
-			case static_cast<int>(svc_ops_e::svc_snapshot):
-				snap_msg.readSnapshot(snapshots, snap);
+
+			// Read command
+			cmd = msg.readByte();
+			std::cout << "CMD: " << cmd << std::endl;
+			for (int i = 0; i < 10; i++)
+				std::cout << "readBits: " << msg.readByte() << std::endl;
+			break;
+			switch (cmd)
+			{
+				case static_cast<int>(svc_ops_e::svc_gamestate):
+					msg.readGamestate();
+					break;
+				case static_cast<int>(svc_ops_e::svc_serverCommand):
+					msg.readCommandString();
+					break;
+				case static_cast<int>(svc_ops_e::svc_download):
+					break;
+				case static_cast<int>(svc_ops_e::svc_snapshot):
+					msg.readSnapshot(snapshots, snap);
+					break;
+			}
+			if (cmd == static_cast<int>(svc_ops_e::svc_EOF))
 				break;
+			break; // @TODO
 		}
-		std::cout << "Byte Left: " << snap_msg.readcount << "/" << snap_msg.cursize << std::endl;
+
+		//std::cout << "Byte Left: " << snap_msg.readcount << "/" << snap_msg.cursize << std::endl;
 
 		// Read the rest
-		std::vector<unsigned char> rest(NETCHAN_FRAGMENTBUFFER_SIZE);
-		snap_msg.readData(rest.data(), NETCHAN_FRAGMENTBUFFER_SIZE);
+		//std::vector<unsigned char> rest(NETCHAN_FRAGMENTBUFFER_SIZE);
+		//msg.readData(rest.data(), NETCHAN_FRAGMENTBUFFER_SIZE);
 
-		//std::cin.get();
-		snapshots.push_back(snap);
+		////std::cin.get();
+		//snapshots.push_back(snap);
 	}
 }

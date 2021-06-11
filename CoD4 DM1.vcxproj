@@ -159,6 +159,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ClientArchiveData.hpp" />
+    <ClInclude Include="src\ClientGamestateData.hpp" />
     <ClInclude Include="src\ClientSnapshotData.hpp" />
     <ClInclude Include="src\Demo.hpp" />
     <ClInclude Include="src\Huffman.hpp" />
