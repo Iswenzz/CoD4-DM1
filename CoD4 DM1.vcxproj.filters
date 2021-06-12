@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="src\Demo.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -12,6 +11,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\NetFields.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -39,6 +41,8 @@
     <ClInclude Include="src\NetFields.hpp">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\ClientGamestateData.hpp" />
+    <ClInclude Include="src\ClientGamestateData.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

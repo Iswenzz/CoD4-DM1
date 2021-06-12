@@ -106,10 +106,10 @@ namespace Iswenzz
 		/// <param name="len">Length of the buffer</param>
 		/// <param name="mode">Crypt mode</param>
 		/// <returns></returns>
-		Msg(unsigned char *buffer, std::size_t len, MSGCrypt mode);
+		Msg(unsigned char *buffer, int len, MSGCrypt mode);
 
-		void Initialize(std::size_t len);
-		void Initialize(unsigned char* buf, std::size_t len, MSGCrypt mode);
+		void Initialize(int len);
+		void Initialize(unsigned char* buf, int len, MSGCrypt mode);
 
 		/// <summary>
 		/// Read one bit.

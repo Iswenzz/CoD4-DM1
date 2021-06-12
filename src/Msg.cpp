@@ -21,29 +21,31 @@ namespace Iswenzz
 		bit(0), lastRefEntity(0), buffer(0), cursize(0), maxsize(0) { }
 	Msg::~Msg() { }
 
-	Msg::Msg(unsigned char* buf, std::size_t len, MSGCrypt mode)
+	Msg::Msg(unsigned char* buf, int len, MSGCrypt mode)
 	{
 		Initialize(buf, len, mode);
 	}
 
-	void Msg::Initialize(std::size_t len)
+	void Msg::Initialize(int len)
 	{
 		cursize = len;
 		maxsize = NETCHAN_UNSENTBUFFER_SIZE;
 		buffer = std::vector<unsigned char>(len);
 	}
 
-	void Msg::Initialize(unsigned char* buf, std::size_t len, MSGCrypt mode)
+	void Msg::Initialize(unsigned char* buf, int len, MSGCrypt mode)
 	{
 		if (mode == MSGCrypt::MSG_CRYPT_NONE)
 		{
-			std::memcpy(buffer.data(), buf, len);
-			cursize = len;
+			buffer = std::vector<unsigned char>(len);
+			cursize = buffer.size();
 			maxsize = NETCHAN_MAXBUFFER_SIZE;
+			std::memcpy(buffer.data(), buf, buffer.size());
 		}
 		else if (mode == MSGCrypt::MSG_CRYPT_HUFFMAN)
 		{
-			cursize = Huffman::Decompress(buf, len, buffer.data(), NETCHAN_MAXBUFFER_SIZE);
+			buffer = std::vector<unsigned char>(NETCHAN_MAXBUFFER_SIZE);
+			cursize = Huffman::Decompress(buf, len, buffer.data(), buffer.size());
 			maxsize = NETCHAN_MAXBUFFER_SIZE;
 		}
 		readcount = 0;
@@ -108,23 +110,24 @@ namespace Iswenzz
 					var = buffer[bit / 8];
 
 				retval |= ((var >> (bit & 7)) & 1) << i;
-				std::cout << retval << " ";
 				bit++;
 			}
 		}
-		std::cout << std::endl;
 		return retval;
 	}
 
 	int Msg::ReadByte()
 	{
-		int c = ReadBits(8);
-		if (readcount > cursize)
+		unsigned char* c;
+		if (readcount + sizeof(unsigned char) > cursize)
 		{
 			overflowed = 1;
 			return -1;
 		}
-		return c;
+		c = &buffer[readcount];
+
+		readcount += sizeof(unsigned char);
+		return *c;
 	}
 
 	int Msg::ReadShort()
@@ -609,7 +612,7 @@ namespace Iswenzz
 		std::string s = ReadString();
 
 		index = seq & 0x7F;
-		//std::cout << "Server Command: " << index << " " << s << std::endl;
+		std::cout << "Server Command: " << index << " " << s << std::endl;
 	}
 
 	// @TODO
@@ -618,7 +621,7 @@ namespace Iswenzz
 		while (!overflowed)
 		{
 			int newnum = ReadEntityIndex(GetMinBitCount(MAX_CLIENTS - 1));
-			std::cout << "CS NN: " << newnum << std::endl;
+			//std::cout << "CS NN: " << newnum << std::endl;
 			ReadDeltaClient(time, &from->cs[from->sn.num_clients], &to->cs[to->sn.num_clients], newnum);
 			++to->sn.num_clients;
 		}
@@ -633,7 +636,7 @@ namespace Iswenzz
 			int newnum = ReadEntityIndex(10);
 			if (newnum == 1023 || newnum < 0 || newnum >= 1024)
 				break;
-			std::cout << "ES NN: " << newnum << std::endl;
+			//std::cout << "ES NN: " << newnum << std::endl;
 			ReadDeltaEntity(time, &from->es[from->sn.num_entities], &to->es[to->sn.num_entities], newnum);
 			++to->sn.num_entities;
 		}

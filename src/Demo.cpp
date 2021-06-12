@@ -35,7 +35,6 @@ namespace Iswenzz
 
 			switch (msgType)
 			{
-				//case 2: // @TODO
 				case static_cast<int>(MSGType::MSG_SNAPSHOT):
 				{
 					Msg snapshotMsg = ReadSnapshot();
@@ -50,18 +49,6 @@ namespace Iswenzz
 				}
 			}
 			break; // @TODO
-
-			/*unsigned char packet_header = 0;
-			demo.read(reinterpret_cast<char*>(&packet_header), sizeof(unsigned char));
-			switch (static_cast<int>(msgType))
-			{
-				case static_cast<int>(MSGType::MSG_SNAPSHOT):
-					ParseSnapshot();
-					break;
-				case static_cast<int>(MSGType::MSG_FRAME):
-					ParseArchive();
-					break;
-			}*/
 		}
 	}
 
@@ -96,8 +83,6 @@ namespace Iswenzz
 		demo.read(reinterpret_cast<char*>(&msg.cursize), sizeof(int));
 		demo.read(reinterpret_cast<char*>(&dummyend[0]), sizeof(int));
 
-		//std::cout << msg.cursize << std::endl;
-
 		// Read the client message
 		msg.cursize -= sizeof(int);
 		msg.Initialize(msg.cursize);
@@ -108,10 +93,10 @@ namespace Iswenzz
 	Msg Demo::ReadArchive()
 	{
 		int len = 48, swlen = 0;
-		demo.read(reinterpret_cast<char*>(&swlen), sizeof(int));            // 21 packet sequence
+		demo.read(reinterpret_cast<char*>(&swlen), sizeof(int));
 
 		std::vector<unsigned char> complen(len);
-		demo.read(reinterpret_cast<char*>(complen.data()), len);            // client message
+		demo.read(reinterpret_cast<char*>(complen.data()), len);
 		return Msg{ nullptr, 0, MSGCrypt::MSG_CRYPT_NONE };
 	}
 
@@ -137,51 +122,30 @@ namespace Iswenzz
 	void Demo::ParseSnapshot(Msg& msg)
 	{
 		ClientSnapshotData snap{ };
+		Msg decMsg{ msg.buffer.data(), msg.cursize, MSGCrypt::MSG_CRYPT_HUFFMAN };
+
 		unsigned char header = 0;
-		int swlen = 0, len = 0, lastClientCommand = 0, cmd = 0;
-		
-		/*demo.read(reinterpret_cast<char*>(&swlen), sizeof(int));
-		demo.read(reinterpret_cast<char*>(&len), sizeof(int));*/
-
-		msg.Initialize(msg.buffer.data(), msg.cursize, MSGCrypt::MSG_CRYPT_HUFFMAN);
-
-		//// demo ended
-		//if (swlen == -1 && len == -1)
-		//{
-		//	demo.Close();
-		//	return;
-		//}
-		//demo.read(reinterpret_cast<char*>(&lastClientCommand), sizeof(int)); // last client command
-		//std::vector<unsigned char> complen(len - 4);
-		//demo.read(reinterpret_cast<char*>(complen.data()), complen.size());	// client message
-
-		// Fill the snapshot struct
-		/*Msg snap_msg{ complen.data(), complen.size(), MSGCrypt::MSG_CRYPT_HUFFMAN };
-		snap.lastClientCommand = lastClientCommand;*/
+		int cmd = 0;
 
 		while (true)
 		{
-			if (msg.readcount > msg.cursize)
+			if (decMsg.readcount > decMsg.cursize)
 				break;
 
 			// Read command
-			cmd = msg.ReadByte();
-			std::cout << "CMD: " << cmd << std::endl;
-			for (int i = 0; i < 10; i++)
-				std::cout << "readBits: " << msg.ReadByte() << std::endl;
-			break;
+			cmd = decMsg.ReadByte();
 			switch (cmd)
 			{
 				case static_cast<int>(svc_ops_e::svc_gamestate):
-					msg.ReadGamestate();
+					decMsg.ReadGamestate();
 					break;
 				case static_cast<int>(svc_ops_e::svc_serverCommand):
-					msg.ReadCommandString();
+					decMsg.ReadCommandString();
 					break;
 				case static_cast<int>(svc_ops_e::svc_download):
 					break;
 				case static_cast<int>(svc_ops_e::svc_snapshot):
-					msg.ReadSnapshot(Snapshots, snap);
+					decMsg.ReadSnapshot(Snapshots, snap);
 					break;
 			}
 			if (cmd == static_cast<int>(svc_ops_e::svc_EOF))
@@ -190,12 +154,6 @@ namespace Iswenzz
 		}
 
 		//std::cout << "Byte Left: " << snap_msg.readcount << "/" << snap_msg.cursize << std::endl;
-
-		// Read the rest
-		//std::vector<unsigned char> rest(NETCHAN_FRAGMENTBUFFER_SIZE);
-		//msg.ReadData(rest.data(), NETCHAN_FRAGMENTBUFFER_SIZE);
-
-		////std::cin.get();
-		//Snapshots.push_back(snap);
+		Snapshots.push_back(snap);
 	}
 }
