@@ -1,4 +1,5 @@
 #include "Huffman.hpp"
+#include <iostream>
 
 namespace Iswenzz
 {
@@ -55,33 +56,45 @@ namespace Iswenzz
 		if (lenIn <= 0 || lenOut <= 0)
 			return -1;
 
-		*reinterpret_cast<unsigned char*>(reinterpret_cast<int>(bufIn) + lenIn) = 0;
+		std::cout << "lenIn/lenOut: " << lenIn << " " << lenOut << std::endl;
+
+		*(unsigned char*)(((int)bufIn) + lenIn) = 0;
 		int cch = lenOut, c = 0, ch = 0;
 
 		for (int j = 0; j <= cch; j++)
 		{
-			pOut = reinterpret_cast<unsigned char*>(reinterpret_cast<int>(bufOut) + j);
+			std::cout << j << " ";
+
+			pOut = (unsigned char*)(((int)bufOut) + j);
 			ch = 0;
 
 			if ((bloc << 3) > lenIn)
 			{
 				*pOut = 0;
+				//std::cout << "break << 3 ";
 				break;
 			}
 			Huff_Receive(msgHuff.decompressor.tree, &ch, bufIn);
+			std::cout << ch << " ";
+
 			if (ch == NYT)
 			{
 				ch = 0;
 				for (int i = 0; i < 7; i++)
-					ch = ch >> 1 + GetBit(bufIn);
+					ch = (ch >> 1) + GetBit(bufIn);
 			}
 			*pOut = static_cast<unsigned char>(ch);
 
 			c++;
-			if (c >= lenOut)
+			if (c >= lenOut) 
+			{
+				//std::cout << "break c >= ";
 				break;
+			}
+			std::cout << std::endl;
 		}
 
+		std::cout << std::endl << c << " " << ch << " " << cch << std::endl;
 		lenOut = c;
 		return lenOut;
 	}
@@ -126,6 +139,7 @@ namespace Iswenzz
 	{
 		int t = (fin[(bloc >> 3)] >> (bloc & 7)) & 0x1;
 		bloc++;
+		//std::cout << t;
 		return t;
 	}
 
@@ -140,6 +154,7 @@ namespace Iswenzz
 			huff->freelist = (node_t**)*tppnode;
 			return tppnode;
 		}
+		std::cout << huff->blocPtrs << " ";
 	}
 
 	void Huffman::FreePPNode(huff_t* huff, node_t** ppnode) 
@@ -249,7 +264,7 @@ namespace Iswenzz
 
 	void Huffman::Huff_AddRef(huff_t* huff, unsigned char ch) 
 	{
-		node_t* tnode, * tnode2;
+		node_t* tnode, *tnode2;
 
 		// if this is the first transmission of this node
 		if (huff->loc[ch] == nullptr) 
@@ -336,12 +351,16 @@ namespace Iswenzz
 		while (node && node->symbol == INTERNAL_NODE) 
 		{
 			if (GetBit(fin))
+			{
+				//std::cout << "right ";
 				node = node->right;
+			}
 			else
 				node = node->left;
 		}
 		if (!node)
 			return 0;
+		//std::cout << node->symbol << " ";
 		return (*ch = node->symbol);
 	}
 

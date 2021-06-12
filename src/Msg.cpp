@@ -17,8 +17,8 @@ namespace Iswenzz
 		268435455, 536870911, 1073741823, 2147483647, 4294967295
 	};
 
-	Msg::Msg() : overflowed(false), readonly(false), splitBuffer({ }), splitSize(0), readcount(0),
-		bit(0), lastRefEntity(0), buffer({ }), cursize(0), maxsize(0) { }
+	Msg::Msg() : overflowed(false), readonly(false), splitBuffer(0), splitSize(0), readcount(0),
+		bit(0), lastRefEntity(0), buffer(0), cursize(0), maxsize(0) { }
 	Msg::~Msg() { }
 
 	Msg::Msg(unsigned char* buf, std::size_t len, MSGCrypt mode)
@@ -39,13 +39,14 @@ namespace Iswenzz
 		{
 			std::memcpy(buffer.data(), buf, len);
 			cursize = len;
-			maxsize = NETCHAN_UNSENTBUFFER_SIZE;
+			maxsize = NETCHAN_MAXBUFFER_SIZE;
 		}
 		else if (mode == MSGCrypt::MSG_CRYPT_HUFFMAN)
 		{
-			cursize = Huffman::Decompress(buf, len, buffer.data(), NETCHAN_FRAGMENTBUFFER_SIZE);
-			maxsize = NETCHAN_UNSENTBUFFER_SIZE;
+			cursize = Huffman::Decompress(buf, len, buffer.data(), NETCHAN_MAXBUFFER_SIZE);
+			maxsize = NETCHAN_MAXBUFFER_SIZE;
 		}
+		readcount = 0;
 	}
 
 	int Msg::ReadBit()

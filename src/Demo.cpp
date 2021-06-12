@@ -32,7 +32,6 @@ namespace Iswenzz
 		{
 			char msgType = 0;
 			demo.read(reinterpret_cast<char*>(&msgType), sizeof(char));
-			std::cout << static_cast<int>(msgType) << std::endl;
 
 			switch (msgType)
 			{
@@ -94,18 +93,15 @@ namespace Iswenzz
 
 		// 1.7
 		demo.read(reinterpret_cast<char*>(&packetSequence), sizeof(int));
-		demo.read(reinterpret_cast<char*>(&msg.maxsize), sizeof(int));
+		demo.read(reinterpret_cast<char*>(&msg.cursize), sizeof(int));
 		demo.read(reinterpret_cast<char*>(&dummyend[0]), sizeof(int));
 
-		std::cout << msg.maxsize << std::endl;
+		//std::cout << msg.cursize << std::endl;
 
 		// Read the client message
-		if (msg.maxsize > sizeof(int))
-		{
-			int size = msg.maxsize - sizeof(int);
-			msg.Initialize(size);
-			demo.read(reinterpret_cast<char*>(msg.buffer.data()), size);
-		}
+		msg.cursize -= sizeof(int);
+		msg.Initialize(msg.cursize);
+		demo.read(reinterpret_cast<char*>(msg.buffer.data()), msg.cursize);
 		return msg;
 	}
 
