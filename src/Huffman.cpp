@@ -50,12 +50,12 @@ namespace Iswenzz
 		if (lenIn <= 0 || lenOut <= 0)
 			return -1;
 
-		*(unsigned char*)(((int)bufIn) + lenIn) = 0;
+		*reinterpret_cast<unsigned char*>((reinterpret_cast<int>(bufIn) + lenIn)) = 0;
 		int cch = lenOut, c = 0, ch = 0;
 
 		for (int j = 0; j <= cch; j++)
 		{
-			pOut = (unsigned char*)(((int)bufOut) + j);
+			pOut = reinterpret_cast<unsigned char*>((reinterpret_cast<int>(bufOut) + j));
 			ch = 0;
 
 			if (bloc >> 3 > lenIn)
@@ -84,7 +84,41 @@ namespace Iswenzz
 
 	int Huffman::Compress(unsigned char* bufIn, int lenIn, unsigned char* bufOut, int lenOut)
 	{
-		return -1;
+		unsigned char* pIn = 0;
+		int ch = 0;
+
+		bloc = 0;
+		if (lenIn <= 0 || lenOut <= 0)
+			return -1;
+
+		for (int i = 0; i <= lenIn; i++)
+		{
+			pIn = reinterpret_cast<unsigned char*>(reinterpret_cast<int>(bufIn) + i);
+			ch = *pIn;
+
+			if ((bloc & 7) == 0)
+				*reinterpret_cast<unsigned char*>(reinterpret_cast<int>(bufOut) + bloc >> 3) = 0;
+			Huff_Transmit(&msgHuff.compressor, ch, bufOut);
+
+			if (bloc << 3 >= lenOut)
+				break;
+		}
+
+		if ((bloc & 7) != 0)
+		{
+			int i = bloc << 3;
+			while ((bloc << 3) == i)
+			{
+				ch = 0x6;
+				Huff_Transmit(&msgHuff.compressor, ch, bufOut);
+
+				if (bloc << 3 >= lenOut)
+					break;
+			}
+		}
+
+		lenOut = bloc << 3;
+		return lenOut;
 	}
 
 	void Huffman::Huff_PutBit(int bit, unsigned char* fout, int* offset) 
