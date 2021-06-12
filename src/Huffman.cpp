@@ -1,4 +1,5 @@
-#include "Huffman.hpp"
+﻿#include "Huffman.hpp"
+#include <iostream>
 
 namespace Iswenzz
 {
@@ -57,7 +58,7 @@ namespace Iswenzz
 			pOut = (unsigned char*)(((int)bufOut) + j);
 			ch = 0;
 
-			if ((bloc << 3) > lenIn)
+			if (bloc >> 3 > lenIn)
 			{
 				*pOut = 0;
 				break;
@@ -68,14 +69,15 @@ namespace Iswenzz
 			{
 				ch = 0;
 				for (int i = 0; i < 7; i++)
-					ch = (ch >> 1) + GetBit(bufIn);
+					ch <<= 1 + GetBit(bufIn);
 			}
 			*pOut = static_cast<unsigned char>(ch);
 
 			c++;
-			if (c >= lenOut) 
+			if (c >= lenOut)
 				break;
 		}
+		
 		lenOut = c;
 		return lenOut;
 	}
