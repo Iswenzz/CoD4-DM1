@@ -1,5 +1,4 @@
 ﻿#include "Huffman.hpp"
-#include <iostream>
 
 namespace Iswenzz
 {

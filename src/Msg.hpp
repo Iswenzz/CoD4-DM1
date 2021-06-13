@@ -1,6 +1,6 @@
 #pragma once
+#include "DemoData.hpp"
 #include <string>
-#include <vector>
 
 #define NETCHAN_UNSENTBUFFER_SIZE		0x20000
 #define NETCHAN_FRAGMENTBUFFER_SIZE		0x800
@@ -15,14 +15,6 @@
 
 namespace Iswenzz
 {
-	struct ClientSnapshotData;
-	typedef struct netField_s netField_t;
-	typedef struct playerState_s playerState_t;
-	typedef struct objective_s objective_t;
-	typedef struct entityState_s entityState_t;
-	typedef struct clientState_s clientState_t;
-	typedef struct hudelem_s hudelem_t;
-
 	enum class MSGType
 	{
 		MSG_SNAPSHOT,
@@ -77,38 +69,50 @@ namespace Iswenzz
 	class Msg
 	{
 	public:
-		bool overflowed;
-		bool readonly;
-		std::vector<unsigned char> buffer;
-		std::vector<unsigned char> splitBuffer;
-		int	maxsize;
-		int	cursize;
-		int	splitSize;
-		int	readcount;
-		int	bit;
+		MSGType type = { };
+		int srvMsgSeq = 0;
+		int dummy = 0;
 
-		union
-		{
-			int	lastRefEntity;
-			int	lengthoffset;
-		};
+		bool overflowed = 0;
+		bool readonly = 0;
+
+		std::vector<unsigned char> buffer{ };
+		std::vector<unsigned char> splitBuffer{ };
+
+		int	maxsize = 0;
+		int	cursize = 0;
+		int	splitSize = 0;
+		int	readcount = 0;
+		int	bit = 0;
 
 		/// <summary>
 		/// Initialize a new Msg object.
 		/// </summary>
-		Msg();
-		~Msg();
+		Msg() = default;
+		~Msg() = default;
 
 		/// <summary>
-		/// Initialize a new Msg object with specified buffer buffer and crypt mode.
+		/// Initialize a new Msg object with specified buffer and crypt mode.
 		/// </summary>
 		/// <param name="buffer">The buffer to read.</param>
-		/// <param name="len">Length of the buffer</param>
-		/// <param name="mode">Crypt mode</param>
+		/// <param name="len">Length of the buffer.</param>
+		/// <param name="mode">Crypt mode.</param>
 		/// <returns></returns>
 		Msg(unsigned char *buffer, int len, MSGCrypt mode);
 
+		/// <summary>
+		/// Initialize the msg buffer with the specified buffer length.
+		/// </summary>
+		/// <param name="len">The buffer length.</param>
 		void Initialize(int len);
+
+		/// <summary>
+		/// Initialze the msg buffer with specified buffer and crypt mode.
+		/// </summary>
+		/// <param name="buffer">The buffer to read.</param>
+		/// <param name="len">Length of the buffer.</param>
+		/// <param name="mode">Crypt mode.</param>
+		/// <returns></returns>
 		void Initialize(unsigned char* buf, int len, MSGCrypt mode);
 
 		/// <summary>
@@ -120,7 +124,7 @@ namespace Iswenzz
 		/// <summary>
 		/// Read specified bits.
 		/// </summary>
-		/// <param name="numBits">Bit count</param>
+		/// <param name="numBits">Bit count.</param>
 		/// <returns></returns>
 		int ReadBits(int numBits);
 
@@ -172,9 +176,24 @@ namespace Iswenzz
 		/// <returns></returns>
 		double ReadAngle16();
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="indexBits"></param>
+		/// <returns></returns>
 		int ReadEFlags(int oldFlags);
-		int ReadEntityIndex(int indexBits);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="oldValue"></param>
+		/// <returns></returns>
 		float ReadOriginFloat(int bits, float oldValue);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="oldValue"></param>
 		float ReadOriginZFloat(float oldValue);
 
 		/// <summary>
@@ -185,153 +204,16 @@ namespace Iswenzz
 		void ReadBase64(unsigned char* outbuf, int len);
 
 		/// <summary>
-		/// Read buffer to an output buffer.
+		/// Read the specified length to an output buffer.
 		/// </summary>
 		/// <param name="buffer">The output buffer.</param>
 		/// <param name="len">The size to read.</param>
 		void ReadData(void *buffer, int len);
 
 		/// <summary>
-		/// Read a delta compressed ground entity.
-		/// </summary>
-		/// <returns></returns>
-		int ReadDeltaGroundEntity();
-
-		/// <summary>
-		/// Read a delta compressed struct.
-		/// </summary>
-		/// <param name="time">The server time.</param>
-		/// <param name="from">Pointer to the old struct state.</param>
-		/// <param name="to">Pointer to the new struct state.</param>
-		/// <param name="number">Entity number.</param>
-		/// <param name="numFields">Struct field count.</param>
-		/// <param name="indexBits">Min bit count.</param>
-		/// <param name="stateFields">Netfield fields.</param>
-		/// <returns></returns>
-		int ReadDeltaStruct(const int time, const void* from, void* to, 
-			unsigned int number, int numFields, int indexBits, netField_t* stateFields);
-
-		/// <summary>
-		/// Read all delta compressed net fields.
-		/// </summary>
-		/// <param name="time">Server time.</param>
-		/// <param name="from">Pointer to the old struct state.</param>
-		/// <param name="to">Pointer to the new struct state.</param>
-		/// <param name="numFields">Struct field count.</param>
-		/// <param name="stateFields">Netfield fields.</param>
-		void ReadDeltaFields(const int time, const unsigned char* from, unsigned char* to,
-			int numFields, netField_t* stateFields);
-
-		/// <summary>
-		/// Read a delta compressed net field.
-		/// </summary>
-		/// <param name="time">Server time.</param>
-		/// <param name="from">Pointer to the old struct state.</param>
-		/// <param name="to">Pointer to the new struct state.</param>
-		/// <param name="field">Current netfield to read.</param>
-		/// <param name="noXor">Should start with a value of 0.</param>
-		/// <param name="print">Should print debug information.</param>
-		void ReadDeltaField(int time, const void* from, const void* to, const netField_t* field, 
-			bool noXor, bool print);
-
-		/// <summary>
-		/// Read a delta compressed entity state.
-		/// </summary>
-		/// <param name="time">Server time.</param>
-		/// <param name="from">Pointer to the old struct state.</param>
-		/// <param name="to">Pointer to the new struct state.</param>
-		/// <param name="number">Entity number.</param>
-		/// <returns></returns>
-		int ReadDeltaEntity(const int time, entityState_t* from, entityState_t* to, int number);
-
-		/// <summary>
-		/// Read a delta compressed client state.
-		/// </summary>
-		/// <param name="time">Server time.</param>
-		/// <param name="from">Pointer to the old struct state.</param>
-		/// <param name="to">Pointer to the new struct state.</param>
-		/// <param name="number">Entity number.</param>
-		/// <returns></returns>
-		int ReadDeltaClient(const int time, clientState_t* from, clientState_t* to, int number);
-
-		/// <summary>
-		/// Read a delta compressed objective struct.
-		/// </summary>
-		/// <param name="time">Server time.</param>
-		/// <param name="from">Pointer to the old struct state.</param>
-		/// <param name="to">Pointer to the new struct state.</param>
-		void ReadDeltaObjectiveFields(const int time, objective_t* from, objective_t* to);
-
-		/// <summary>
-		/// Read all delta compressed hud element struct.
-		/// </summary>
-		/// <param name="time">Server time.</param>
-		/// <param name="from">Pointer to the old struct state.</param>
-		/// <param name="to">Pointer to the new struct state.</param>
-		/// <param name="count">HUD Count.</param>
-		void ReadDeltaHudElems(const int time, hudelem_t* from, hudelem_t* to, int count);
-
-		/// <summary>
-		/// Read a delta compressed player state.
-		/// </summary>
-		/// <param name="time">Server time.</param>
-		/// <param name="from">Pointer to the old struct state.</param>
-		/// <param name="to">Pointer to the new struct state.</param>
-		/// <param name="predictedFieldsIgnoreXor">Should start with a value of 0.</param>
-		void ReadDeltaPlayerState(int time, playerState_t* from, playerState_t* to,
-			bool predictedFieldsIgnoreXor);
-
-		/// <summary>
-		/// Read a gamestate.
-		/// </summary>
-		void ReadGamestate();
-
-		/// <summary>
-		/// Read a command string.
-		/// </summary>
-		void ReadCommandString();
-
-		/// <summary>
-		/// Read all clients.
-		/// </summary>
-		/// <param name="time">Server time.</param>
-		/// <param name="from">Pointer to the old struct state.</param>
-		/// <param name="to">Pointer to the new struct state.</param>
-		/// <returns></returns>
-		int ReadClients(const int time, ClientSnapshotData* from, ClientSnapshotData* to);
-
-		/// <summary>
-		/// Read all entities.
-		/// </summary>
-		/// <param name="time">Server time.</param>
-		/// <param name="from">Pointer to the old struct state.</param>
-		/// <param name="to">Pointer to the new struct state.</param>
-		/// <returns></returns>
-		int ReadEntities(const int time, ClientSnapshotData* from, ClientSnapshotData* to);
-
-		/// <summary>
-		/// Read last changed net field.
-		/// </summary>
-		/// <param name="totalFields">Net field count.</param>
-		/// <returns>The last changed field index.</returns>
-		int ReadLastChangedField(int totalFields);
-
-		/// <summary>
-		/// Read a server snapshot.
-		/// </summary>
-		/// <param name="Snapshots">Snapshot vector containing all previous Snapshots.</param>
-		/// <param name="snap">The current snapshot that will be added to the vector later.</param>
-		void ReadSnapshot(const std::vector<ClientSnapshotData>& Snapshots, ClientSnapshotData& snap);
-
-		/// <summary>
 		/// Get the number of bits currently read.
 		/// </summary>
 		/// <returns></returns>
 		int GetNumBitsRead();
-
-		/// <summary>
-		/// Set lastRefEntity to -1
-		/// </summary>
-		void ClearLastReferencedEntity();
 	};
 }

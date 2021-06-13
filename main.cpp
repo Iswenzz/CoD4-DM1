@@ -21,9 +21,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#include <iostream>
 #include "src/Demo.hpp"
 #include "src/Huffman.hpp"
+
+#include <iostream>
+#include <memory>
+
 using namespace Iswenzz;
 
 int main()
@@ -34,7 +37,7 @@ int main()
     std::string demoPath = R"(C:\Users\Iswenzz\Desktop\ez2.dm_1)";
     std::cout << "Openning " << demoPath << " demo." << std::endl;
 
-    Demo demo{ demoPath };
+    std::unique_ptr<Demo> demo = std::make_unique<Demo>(demoPath);
 
     return 0;
 }

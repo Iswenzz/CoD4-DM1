@@ -2,9 +2,40 @@
 #include <vector>
 #include <array>
 
+#define GENTITYNUM_BITS 10
+#define BIG_INFO_STRING 8192
+#define PACKET_BACKUP 32
+#define PACKET_MASK PACKET_BACKUP - 1
+
+#define FREETEXT_STARTINDEX 309
+#define MATERIAL_STARTINDEX 2002
+
+#define GROUND_CLIENT_NUM 1022
+#define KILLCAM_ENTITY_ON 1023
+#define KILLCAM_ENTITY_OFF 0
+
 #define MAX_HUDELEMENTS 31
 #define MAX_HUDELEMS_ARCHIVAL MAX_HUDELEMENTS
 #define MAX_HUDELEMS_CURRENT MAX_HUDELEMENTS
+#define MAX_CONFIGSTRINGS 3000
+#define MAX_GENTITIES 1 << GENTITYNUM_BITS
+#define MAX_STRING_CHARS 1024 
+#define MAX_FRAMES 256
+#define MAX_CLIENTS 64
+#define MAX_CMDSTRINGS 2048
+#define MAX_STATS 5
+#define MAX_WEAPONS 16
+#define MAX_PS_EVENTS 4
+#define MAX_RELIABLE_COMMANDS 128
+#define MAX_MAP_AREA_BYTES 32
+#define MAX_PARSE_ENTITIES 2048
+#define MAX_PARSE_CLIENTS 2048
+#define MAX_CLIENTEVENTS 128
+#define MAX_KILLFEED 128
+	         
+#define ENTITYNUM_NONE MAX_GENTITIES - 1
+#define ENTITYNUM_WORLD MAX_GENTITIES - 2
+#define ENTITYNUM_MAX_NORMAL MAX_GENTITIES - 2
 
 namespace Iswenzz
 {
@@ -584,12 +615,14 @@ namespace Iswenzz
 		archivedEntityShared_t r;
 	} archivedEntity_t;
 
-	struct ClientSnapshotData
+	typedef struct archivedFrame_s
 	{
-		int lastClientCommand;
-		int lastServerCommand;
-		clientSnapshot_t sn;
-		std::array<entityState_t, 1024> es;
-		std::array<clientState_t, 64> cs;
-	};
+		int index;
+		float origin[3];
+		float velocity[3];
+		int movementDir;
+		int bobCycle;
+		int commandTime;
+		float angles[3];
+	} archivedFrame_t;
 }

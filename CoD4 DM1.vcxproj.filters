@@ -23,12 +23,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\ClientArchiveData.hpp">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ClientSnapshotData.hpp">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="src\Demo.hpp">
       <Filter>src</Filter>
     </ClInclude>
@@ -41,7 +35,7 @@
     <ClInclude Include="src\NetFields.hpp">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\ClientGamestateData.hpp">
+    <ClInclude Include="src\DemoData.hpp">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

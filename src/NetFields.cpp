@@ -1,5 +1,5 @@
 #include "NetFields.hpp"
-#include "ClientSnapshotData.hpp"
+#include "DemoData.hpp"
 
 #ifdef _MSC_VER
 #define __clz __lzcnt
