@@ -84,6 +84,10 @@ namespace Iswenzz
 		int WriteClientsNum = 0;
 		int SnapMessageNum = 0;
 
+		playerState_t NullPlayerState = { 0 };
+		entityState_t NullEntityState = { 0 };
+		clientState_t NullClientState = { 0 };
+
 		std::array<std::string, MAX_CMDSTRINGS> CommandStrings{ };
 		std::array<std::string, MAX_CONFIGSTRINGS> ValidConfigStrings{ };
 		std::array<std::string, MAX_CONFIGSTRINGS> ConfigStrings{ };

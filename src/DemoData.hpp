@@ -354,19 +354,22 @@ namespace Iswenzz
 	} playerState_t;					//Size: 0x2f64
 
 	typedef struct 
-	{									// (0x2146c)
-		playerState_t ps;				// (0x2146c)
-		int	num_entities;
-		int	num_clients;				// (0x2f68)
-		int	first_entity;				// (0x2f6c)into the circular sv_packet_entities[]
-		int	first_client;
-		// the entities MUST be in increasing state number
-		// order, otherwise the delta compression will fail
-		unsigned int messageSent;		// (0x243e0 | 0x2f74) time the message was transmitted
-		unsigned int messageAcked;		// (0x243e4 | 0x2f78) time the message was acked
-		int	messageSize;				// (0x243e8 | 0x2f7c) used to rate drop packets
-		int	var_03;
-	} clientSnapshot_t;					// size: 0x2f84
+	{
+		bool valid;
+		int snapFlags;
+		int serverTime;
+		int messageNum;
+		int deltaNum;
+		int ping;
+		std::array<unsigned char, MAX_MAP_AREA_BYTES> areamask;
+		int cmdNum;
+		playerState_t ps;
+		int numEntities;
+		int parseEntitiesNum;
+		int numClients;
+		int parseClientsNum;
+		int serverCommandNum;
+	} clientSnapshot_t;
 
 	enum entityType_t
 	{

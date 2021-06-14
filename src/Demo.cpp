@@ -27,6 +27,7 @@ namespace Iswenzz
 		{
 			MSGType msgType = { };
 			DemoFile.read(reinterpret_cast<char*>(&msgType), sizeof(char));
+			std::cout << "msg: " << static_cast<int>(msgType) << std::endl;
 
 			switch (msgType)
 			{
@@ -43,7 +44,6 @@ namespace Iswenzz
 					break;
 				}
 			}
-			break; // @TODO
 		}
 	}
 
@@ -115,7 +115,6 @@ namespace Iswenzz
 			}
 			if (command == svc_ops_e::svc_EOF)
 				break;
-			break; // @TODO
 		}
 	}
 
@@ -126,13 +125,12 @@ namespace Iswenzz
 		CurrentCompressedMsg.Initialize(len);
 
 		DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.srvMsgSeq), sizeof(int));
-		DemoFile.read(reinterpret_cast<char*>(CurrentCompressedMsg.buffer.data()), len);
 	}
 
 	void Demo::ParseArchiveHeader()
 	{
 		archivedFrame_t frame = { 0 };
-		DemoFile.read(reinterpret_cast<char*>(&frame.index), sizeof(int));
+	
 		DemoFile.read(reinterpret_cast<char*>(&frame.origin[0]), sizeof(float));
 		DemoFile.read(reinterpret_cast<char*>(&frame.origin[1]), sizeof(float));
 		DemoFile.read(reinterpret_cast<char*>(&frame.origin[2]), sizeof(float));
@@ -216,9 +214,7 @@ namespace Iswenzz
 					break;
 
 				entityState_t es = EntityBaselines[newnum];
-				entityState_t nullState = { 0 };
-
-				ReadDeltaEntity(msg, 0, &nullState, &es, newnum);
+				ReadDeltaEntity(msg, 0, &NullEntityState, &es, newnum);
 				ActiveBaselines[newnum] = 1;
 			}
 			else
@@ -239,9 +235,28 @@ namespace Iswenzz
 	// @TODO
 	void Demo::ParseSnapshot(Msg& msg)
 	{
-		int serverTime = msg.ReadInt();
-		unsigned char lastFrame = msg.ReadByte();
-		unsigned char snapFlags = msg.ReadByte();
+		clientSnapshot_t old = { 0 };
+		CurrentSnapshot = { 0 };
+		CurrentSnapshot.serverCommandNum = ServCmdSequence;
+		CurrentSnapshot.serverTime = msg.ReadInt();
+		CurrentSnapshot.messageNum = msg.srvMsgSeq;
+
+		unsigned char deltaNum = msg.ReadByte();
+		CurrentSnapshot.deltaNum = !deltaNum ? -1 : CurrentSnapshot.messageNum - deltaNum;
+		CurrentSnapshot.snapFlags = msg.ReadByte();
+
+		if (CurrentSnapshot.deltaNum <= 0)
+			CurrentSnapshot.valid = true;
+		else
+		{
+			old = Snapshots[CurrentSnapshot.deltaNum & PACKET_MASK];
+			CurrentSnapshot.valid = old.valid;
+		}
+
+		if (old.valid)
+			ReadDeltaPlayerState(msg, CurrentSnapshot.serverTime, &old.ps, &CurrentSnapshot.ps, true);
+		else
+			ReadDeltaPlayerState(msg, CurrentSnapshot.serverTime, &NullPlayerState, &CurrentSnapshot.ps, true);
 
 		// Read Player State
 		//ReadDeltaPlayerState(msg, serverTime, &from->sn.ps, &frame->sn.ps, true);
