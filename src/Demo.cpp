@@ -214,7 +214,7 @@ namespace Iswenzz
 					break;
 
 				entityState_t es = EntityBaselines[newnum];
-				ReadDeltaEntity(msg, 0, &NullEntityState, &es, newnum);
+				ReadDeltaEntity(msg, 0, &NullEntityState, &es, newnum, true);
 				ActiveBaselines[newnum] = 1;
 			}
 			else
@@ -289,14 +289,14 @@ namespace Iswenzz
 		return value;
 	}
 
-	int Demo::ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to, unsigned int number,
+	void Demo::ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to, unsigned int number,
 		int numFields, int indexBits, netField_t* stateFields)
 	{
-		if (msg.ReadBit() == 1) return 1;
+		if (msg.ReadBit() == 1) 
+			return;
 		*(uint32_t*)to = number;
 		ReadDeltaFields(msg, time, reinterpret_cast<const unsigned char*>(from),
 			reinterpret_cast<unsigned char*>(to), numFields, stateFields);
-		return 0;
 	}
 
 	void Demo::ReadDeltaFields(Msg& msg, const int time, const unsigned char* from, unsigned char* to,
@@ -337,7 +337,7 @@ namespace Iswenzz
 		double f = 0;
 		signed int t;
 
-		if (noXor)
+		if (noXor && field->changeHints == 3)
 			fromF = (unsigned char*)&zeroV;
 		else
 			fromF = (unsigned char*)from + field->offset;
@@ -366,8 +366,8 @@ namespace Iswenzz
 				b = msg.ReadBits(5);
 				v = ((32 * msg.ReadByte() + b) ^ ((signed int)*(float*)fromF + 4096)) - 4096;
 				*(float*)toF = (double)v;
-				//if (print)
-					//std::cout << field->name << "{" << field->bits << "} = " << v << std::endl;
+				if (print)
+					std::cout << field->name << "{" << field->bits << "} = " << v << std::endl;
 				return;
 			}
 			l = msg.ReadInt();
@@ -376,7 +376,7 @@ namespace Iswenzz
 
 			if (!print) return;
 			f = *(float*)toF;
-			//std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
+			std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
 			return;
 		}
 
@@ -389,8 +389,8 @@ namespace Iswenzz
 				b = msg.ReadBits(5);
 				l = ((32 * msg.ReadByte() + b) ^ ((signed int)*(float*)fromF + 4096)) - 4096;
 				*(float*)toF = (double)l;
-				//if (print)
-					//std::cout << field->name << "{" << field->bits << "} = " << l << std::endl;
+				if (print)
+					std::cout << field->name << "{" << field->bits << "} = " << l << std::endl;
 				return;
 			}
 			l = msg.ReadInt();
@@ -398,7 +398,7 @@ namespace Iswenzz
 
 			if (!print) return;
 			f = *(float*)toF;
-			//std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
+			std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
 			return;
 
 		case -88:
@@ -427,8 +427,8 @@ namespace Iswenzz
 					b = msg.ReadBits(4);
 					v = ((16 * msg.ReadByte() + b) ^ ((signed int)*(float*)fromF + 2048)) - 2048;
 					*(float*)toF = (double)v;
-					//if (print)
-						//std::cout << field->name << "{" << field->bits << "} = " << (int)v << std::endl;
+					if (print)
+						std::cout << field->name << "{" << field->bits << "} = " << (int)v << std::endl;
 					return;
 				}
 				l = msg.ReadInt();
@@ -436,7 +436,7 @@ namespace Iswenzz
 
 				if (!print) return;
 				f = *(float*)toF;
-				//std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
+				std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
 				return;
 			}
 			*(uint32_t*)toF = 0;
@@ -470,16 +470,16 @@ namespace Iswenzz
 		case -91:
 			f = msg.ReadOriginFloat(bits, *(float*)fromF);
 			*(float*)toF = f;
-			//if (print)
-				//std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
+			if (print)
+				std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
 			return;
 
 		case -90:
 			f = msg.ReadOriginZFloat(*(float*)fromF);
 			*(float*)toF = f;
 
-			//if (!print) return;
-				//std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
+			if (!print) return;
+				std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
 			return;
 
 		case -87:
@@ -528,8 +528,8 @@ namespace Iswenzz
 			if (field->bits < 0 && (t >> (bits - 1)) & 1)
 				t |= ~bit_vect;
 
-			//if (print)
-				//std::cout << field->name << "{" << field->bits << "} = " << *(uint32_t*)toF << std::endl;
+			if (print)
+				std::cout << field->name << "{" << field->bits << "} = " << *(uint32_t*)toF << std::endl;
 			*(uint32_t*)toF = t;
 		}
 	}
@@ -572,17 +572,18 @@ namespace Iswenzz
 		return lastChanged;
 	}
 
-	int Demo::ReadDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, int number)
+	void Demo::ReadDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, int number, 
+		bool isBaseLine)
 	{
 		int numFields = sizeof(entityStateFields) / sizeof(entityStateFields[0]);
-		return ReadDeltaStruct(msg, time, (unsigned char*)from, (unsigned char*)to, number,
+		ReadDeltaStruct(msg, time, (unsigned char*)from, (unsigned char*)to, number,
 			numFields, GetMinBitCount(MAX_CLIENTS - 1), entityStateFields);
 	}
 
-	int Demo::ReadDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, int number)
+	void Demo::ReadDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, int number)
 	{
 		int numFields = sizeof(clientStateFields) / sizeof(clientStateFields[0]);
-		return ReadDeltaStruct(msg, time, (unsigned char*)from, (unsigned char*)to, number,
+		ReadDeltaStruct(msg, time, (unsigned char*)from, (unsigned char*)to, number,
 			numFields, GetMinBitCount(MAX_CLIENTS - 1), clientStateFields);
 	}
 
@@ -606,6 +607,7 @@ namespace Iswenzz
 			*(uint32_t*)&((unsigned char*)to)[offset] = *(uint32_t*)&((unsigned char*)from)[offset];
 		}
 
+		// Stats
 		if (msg.ReadBit())
 		{
 			int statsbits = msg.ReadBits(5);
@@ -620,14 +622,7 @@ namespace Iswenzz
 				to->stats[4] = msg.ReadByte();
 		}
 
-		for (i = 0; i < 31; i++)
-		{
-			hudelem_t hud = to->hud.current[i];
-			/*if (hud.value > 0)
-				std::cout << "HUD Velocity: " << hud.value << std::endl;*/
-		}
-
-		// ammo stored
+		// Ammo stored
 		if (msg.ReadBit())
 		{
 			// check for any ammo change (0-63)
@@ -645,7 +640,7 @@ namespace Iswenzz
 			}
 		}
 
-		// ammo in clip
+		// Ammo in clip
 		for (j = 0; j < 8; j++)
 		{
 			if (msg.ReadBit())
@@ -659,6 +654,7 @@ namespace Iswenzz
 			}
 		}
 
+		// Objectives
 		int numObjective = sizeof(from->objective) / sizeof(from->objective[0]);
 		if (msg.ReadBit())
 		{
@@ -668,12 +664,15 @@ namespace Iswenzz
 				ReadDeltaObjectiveFields(msg, time, &from->objective[fieldNum], &to->objective[fieldNum]);
 			}
 		}
+
+		// HUDs
 		if (msg.ReadBit())
 		{
 			ReadDeltaHudElems(msg, time, from->hud.archival, to->hud.archival, 31);
 			ReadDeltaHudElems(msg, time, from->hud.current, to->hud.current, 31);
 		}
 
+		// Weapon models
 		if (msg.ReadBit())
 		{
 			for (i = 0; i < 128; ++i)
