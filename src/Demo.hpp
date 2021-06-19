@@ -101,6 +101,8 @@ namespace Iswenzz
 		std::array<unsigned char, MAX_GENTITIES> ActiveEntities{ };
 		std::array<clientState_t, MAX_CLIENTS> ActiveClients{ };
 
+		int TestIndex = 0; // @TODO remove debug
+
 		/// <summary>
 		/// Read the snapshot header.
 		/// </summary>

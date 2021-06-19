@@ -27,7 +27,6 @@ namespace Iswenzz
 		{
 			MSGType msgType = { };
 			DemoFile.read(reinterpret_cast<char*>(&msgType), sizeof(char));
-			std::cout << "msg: " << static_cast<int>(msgType) << std::endl;
 
 			switch (msgType)
 			{
@@ -43,6 +42,7 @@ namespace Iswenzz
 					ParseArchiveHeader();
 					break;
 				}
+				break;
 			}
 		}
 	}
@@ -161,13 +161,15 @@ namespace Iswenzz
 		svc_ops_e command = { };
 		int newnum = -1, idx = -1;
 
+		msg.ClearLastReferencedEntity();
 		ServerCommandSequence = msg.ReadInt();
 		MatchInProgress = true;
+
+		int currIndex = 0;
 
 		while (true)
 		{
 			command = static_cast<svc_ops_e>(msg.ReadByte());
-			std::cout << "gamestate cmd: " << static_cast<int>(command) << std::endl;
 			if (command == svc_ops_e::svc_EOF)
 				break;
 
@@ -183,7 +185,6 @@ namespace Iswenzz
 					else idx = msg.ReadBits(12);
 
 					std::string s = msg.ReadString();
-					std::cout << "configString: " << s << std::endl;
 					
 					if (!(idx < 0 || idx >= MAX_CONFIGSTRINGS))
 					{
@@ -198,20 +199,7 @@ namespace Iswenzz
 			}
 			else if (command == svc_ops_e::svc_baseline)
 			{
-				if (msg.ReadBit())
-					newnum++;
-				else
-				{
-					if (!msg.ReadBit())
-					{
-						int c = msg.ReadBits(4);
-						newnum += c;
-					}
-					else
-						newnum = msg.ReadBits(GENTITYNUM_BITS);
-				}
-				if (newnum < 0 || newnum >= MAX_GENTITIES)
-					break;
+				newnum = ReadEntityIndex(msg, 10);
 
 				entityState_t es = EntityBaselines[newnum];
 				ReadDeltaEntity(msg, 0, &NullEntityState, &es, newnum, true);
@@ -219,6 +207,7 @@ namespace Iswenzz
 			}
 			else
 				break;
+			currIndex++;
 		}
 	}
 
@@ -229,7 +218,7 @@ namespace Iswenzz
 		std::string s = msg.ReadString();
 
 		index = seq & 0x7F;
-		std::cout << "Server Command: " << index << " " << s << std::endl;
+		std::cout << "server Command: " << index << " " << s << std::endl;
 	}
 
 	// @TODO
@@ -292,7 +281,8 @@ namespace Iswenzz
 	void Demo::ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to, unsigned int number,
 		int numFields, int indexBits, netField_t* stateFields)
 	{
-		if (msg.ReadBit() == 1) 
+		int a = msg.ReadBit();
+		if (a == 1) 
 			return;
 		*(uint32_t*)to = number;
 		ReadDeltaFields(msg, time, reinterpret_cast<const unsigned char*>(from),
@@ -317,8 +307,19 @@ namespace Iswenzz
 			return;
 		}
 
-		for (i = 0; i < lc; ++i)
-			ReadDeltaField(msg, time, from, to, &stateFields[i], false, true);
+		// Get the right field list from the eType value
+		ReadDeltaField(msg, time, from, to, &stateFields[0], false, false);
+		
+		int entityFieldOffset = *reinterpret_cast<int*>(reinterpret_cast<int>(to) + stateFields[0].offset);
+		if (entityFieldOffset > NET_FIELDS_COUNT - 1)
+			entityFieldOffset = NET_FIELDS_COUNT - 1;
+
+		netFieldList_t fieldList = netFieldList[entityFieldOffset];
+		stateFields = fieldList.field;
+		numFields = fieldList.numFields;
+
+		for (i = 1; i < lc; ++i)
+			ReadDeltaField(msg, time, from, to, &stateFields[i], false, false);
 		for (i = lc; i < numFields; ++i)
 		{
 			int offset = stateFields[i].offset;
@@ -351,6 +352,8 @@ namespace Iswenzz
 				return;
 			}
 		}
+		std::cout << "bits[" << TestIndex << "]: " << field->bits << std::endl;
+		TestIndex++;
 
 		//Changed field
 		bits = field->bits;
@@ -598,7 +601,7 @@ namespace Iswenzz
 		for (int i = 0; i < lastChangedField; ++i)
 		{
 			bool noXor = predictedFieldsIgnoreXor && readOriginAndVel && stateFields[i].changeHints == 3;
-			ReadDeltaField(msg, time, from, to, &stateFields[i], noXor, true);
+			ReadDeltaField(msg, time, from, to, &stateFields[i], noXor, false);
 		}
 
 		for (i = lastChangedField; i < PLAYER_STATE_FIELDS_COUNT; ++i)
@@ -730,13 +733,12 @@ namespace Iswenzz
 	// @TODO
 	int Demo::ReadEntityIndex(Msg &msg, int indexBits)
 	{
-		/*if (msg.ReadBit())
-			++lastRefEntity;
+		if (msg.ReadBit())
+			++msg.lastRefEntity;
 		else if (indexBits != 10 || msg.ReadBit())
-			lastRefEntity = msg.ReadBits(indexBits);
+			msg.lastRefEntity = msg.ReadBits(indexBits);
 		else
-			lastRefEntity += msg.ReadBits(4);
-		return lastRefEntity;*/
-		return -1;
+			msg.lastRefEntity += msg.ReadBits(4);
+		return msg.lastRefEntity;
 	}
 }

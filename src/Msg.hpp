@@ -84,6 +84,7 @@ namespace Iswenzz
 		int	splitSize = 0;
 		int	readcount = 0;
 		int	bit = 0;
+		int lastRefEntity = 0;
 
 		/// <summary>
 		/// Initialize a new Msg object.
@@ -215,5 +216,10 @@ namespace Iswenzz
 		/// </summary>
 		/// <returns></returns>
 		int GetNumBitsRead();
+
+		/// <summary>
+		/// Clear the last referenced entity.
+		/// </summary>
+		void ClearLastReferencedEntity();
 	};
 }

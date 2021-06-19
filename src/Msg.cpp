@@ -325,4 +325,9 @@ namespace Iswenzz
 	{
 		return 8 * readcount - ((8 - bit) & 7);
 	}
+
+	void Msg::ClearLastReferencedEntity()
+	{
+		lastRefEntity = -1;
+	}
 }
