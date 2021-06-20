@@ -5,7 +5,12 @@
 
 namespace Iswenzz
 {
-	Demo::Demo(std::string filepath)
+	Demo::Demo(std::string filepath) : FilePath(filepath), Verbose(false)
+	{
+		Open(filepath);
+	}
+
+	Demo::Demo(std::string filepath, bool verbose) : FilePath(filepath), Verbose(verbose)
 	{
 		Open(filepath);
 	}
@@ -23,11 +28,11 @@ namespace Iswenzz
 		DemoFilePath = filepath;
 
 		DemoFile.open(filepath, std::ios::binary);
-		while (DemoFile.is_open())
+		while (DemoFile.is_open() && CurrentCompressedMsg.srvMsgSeq != -1)
 		{
 			MSGType msgType = { };
 			DemoFile.read(reinterpret_cast<char*>(&msgType), sizeof(char));
-			std::cout << static_cast<int>(msgType) << std::endl;
+			VerboseLog("msg: " << static_cast<int>(msgType) << std::endl);
 
 			switch (msgType)
 			{
@@ -76,6 +81,10 @@ namespace Iswenzz
 		DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.cursize), sizeof(int));
 		DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.dummy), sizeof(int));
 
+		// EOF
+		if (CurrentCompressedMsg.srvMsgSeq == -1)
+			return;
+
 		// Read the client message
 		CurrentCompressedMsg.cursize -= sizeof(int);
 		CurrentCompressedMsg.Initialize(CurrentCompressedMsg.cursize);
@@ -96,7 +105,7 @@ namespace Iswenzz
 
 			// Read command
 			command = static_cast<svc_ops_e>(CurrentUncompressedMsg.ReadByte());
-			std::cout << "cmd: " << static_cast<int>(command) << std::endl;
+			VerboseLog("cmd: " << static_cast<int>(command) << std::endl);
 			if (command == svc_ops_e::svc_EOF)
 				break;
 
@@ -222,7 +231,7 @@ namespace Iswenzz
 		std::string s = msg.ReadString();
 
 		index = seq & 0x7F;
-		std::cout << "server Command: " << index << " " << s << std::endl;
+		VerboseLog("server command[" << index << "]: " << s << std::endl);
 	}
 
 	void Demo::ParseSnapshot(Msg& msg)
@@ -366,11 +375,10 @@ namespace Iswenzz
 				return;
 			}
 		}
-		std::cout << "bits[" << TestIndex << "]: " << field->bits << std::endl;
-		TestIndex++;
 
 		//Changed field
 		bits = field->bits;
+		VerboseLog("bits: " << field->bits << std::endl);
 		if (!bits)
 		{
 			if (!msg.ReadBit())
@@ -383,17 +391,15 @@ namespace Iswenzz
 				b = msg.ReadBits(5);
 				v = ((32 * msg.ReadByte() + b) ^ ((signed int)*(float*)fromF + 4096)) - 4096;
 				*(float*)toF = (double)v;
-				if (print)
-					std::cout << field->name << "{" << field->bits << "} = " << v << std::endl;
+				LogIf(print, field->name << "{" << field->bits << "} = " << v << std::endl);
 				return;
 			}
 			l = msg.ReadInt();
 			*(uint32_t*)toF = l;
 			*(uint32_t*)toF = l ^ *(uint32_t*)fromF;
 
-			if (!print) return;
 			f = *(float*)toF;
-			std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
+			LogIf(print, field->name << "{" << field->bits << "} = " << f << std::endl);
 			return;
 		}
 
@@ -406,25 +412,22 @@ namespace Iswenzz
 				b = msg.ReadBits(5);
 				l = ((32 * msg.ReadByte() + b) ^ ((signed int)*(float*)fromF + 4096)) - 4096;
 				*(float*)toF = (double)l;
-				if (print)
-					std::cout << field->name << "{" << field->bits << "} = " << l << std::endl;
+				LogIf(print, field->name << "{" << field->bits << "} = " << l << std::endl);
 				return;
 			}
 			l = msg.ReadInt();
 			*(uint32_t*)toF = l ^ *(uint32_t*)fromF;
 
-			if (!print) return;
 			f = *(float*)toF;
-			std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
+			LogIf(print, field->name << "{" << field->bits << "} = " << f << std::endl);
 			return;
 
 		case -88:
 			l = msg.ReadInt();
 			*(uint32_t*)toF = l ^ *(uint32_t*)fromF;
 
-			if (!print) return;
 			f = *(float*)toF;
-			std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
+			LogIf(print, field->name << "{" << field->bits << "} = " << f << std::endl);
 			return;
 
 		case -100:
@@ -444,16 +447,14 @@ namespace Iswenzz
 					b = msg.ReadBits(4);
 					v = ((16 * msg.ReadByte() + b) ^ ((signed int)*(float*)fromF + 2048)) - 2048;
 					*(float*)toF = (double)v;
-					if (print)
-						std::cout << field->name << "{" << field->bits << "} = " << (int)v << std::endl;
+					LogIf(print, field->name << "{" << field->bits << "} = " << (int)v << std::endl);
 					return;
 				}
 				l = msg.ReadInt();
 				*(uint32_t*)toF = l ^ *(uint32_t*)fromF;
 
-				if (!print) return;
 				f = *(float*)toF;
-				std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
+				LogIf(print, field->name << "{" << field->bits << "} = " << f << std::endl);
 				return;
 			}
 			*(uint32_t*)toF = 0;
@@ -487,16 +488,14 @@ namespace Iswenzz
 		case -91:
 			f = msg.ReadOriginFloat(bits, *(float*)fromF);
 			*(float*)toF = f;
-			if (print)
-				std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
+			LogIf(print, field->name << "{" << field->bits << "} = " << f << std::endl);
 			return;
 
 		case -90:
 			f = msg.ReadOriginZFloat(*(float*)fromF);
 			*(float*)toF = f;
 
-			if (!print) return;
-				std::cout << field->name << "{" << field->bits << "} = " << f << std::endl;
+			LogIf(print, field->name << "{" << field->bits << "} = " << f << std::endl);
 			return;
 
 		case -87:
@@ -545,8 +544,7 @@ namespace Iswenzz
 			if (field->bits < 0 && (t >> (bits - 1)) & 1)
 				t |= ~bit_vect;
 
-			if (print)
-				std::cout << field->name << "{" << field->bits << "} = " << *(uint32_t*)toF << std::endl;
+			LogIf(print, field->name << "{" << field->bits << "} = " << *(uint32_t*)toF << std::endl);
 			*(uint32_t*)toF = t;
 		}
 	}
@@ -574,7 +572,7 @@ namespace Iswenzz
 
 		while (!msg.overflowed)
 		{
-			std::cout << "entitynum: " << newnum << std::endl;
+			VerboseLog("entitynum: " << newnum << std::endl);
 			newnum = ReadEntityIndex(msg, GENTITYNUM_BITS);
 			if (newnum == 1023)
 				break;
@@ -656,7 +654,7 @@ namespace Iswenzz
 
 		while (!msg.overflowed && msg.ReadBit())
 		{
-			std::cout << "clientnum: " << newnum << std::endl;
+			VerboseLog("clientnum: " << newnum << std::endl);
 			newnum = ReadEntityIndex(msg, 5);
 			if (msg.readcount > msg.cursize)
 				return;

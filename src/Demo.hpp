@@ -25,9 +25,18 @@ namespace Iswenzz
 		/// <summary>
 		/// Initialize a new Demo object with the specified demo file path.
 		/// </summary>
-		/// <param name="filepath"></param>
+		/// <param name="filepath">File path to a demo file (.dm_1)</param>
+		/// <param name="verbose">Prints debug informations.</param>
 		/// <returns></returns>
 		Demo(std::string filepath);
+
+		/// <summary>
+		/// Initialize a new Demo object with the specified demo file path.
+		/// </summary>
+		/// <param name="filepath">File path to a demo file (.dm_1)</param>
+		/// <param name="verbose">Prints debug informations.</param>
+		/// <returns></returns>
+		Demo(std::string filepath, bool verbose);
 		~Demo();
 
 		/// <summary>
@@ -43,6 +52,8 @@ namespace Iswenzz
 
 	private:
 		std::ifstream DemoFile;
+		std::string FilePath;
+		bool Verbose;
 
 		Msg CurrentCompressedMsg = { };
 		Msg CurrentUncompressedMsg = { };
@@ -100,8 +111,6 @@ namespace Iswenzz
 		std::array<unsigned char, MAX_GENTITIES> ActiveBaselines{ };
 		std::array<unsigned char, MAX_GENTITIES> ActiveEntities{ };
 		std::array<clientState_t, MAX_CLIENTS> ActiveClients{ };
-
-		int TestIndex = 0; // @TODO remove debug
 
 		/// <summary>
 		/// Read the snapshot header.

@@ -37,6 +37,11 @@
 #define ENTITYNUM_WORLD MAX_GENTITIES - 2
 #define ENTITYNUM_MAX_NORMAL MAX_GENTITIES - 2
 
+#define LogIf(printIf, ostream) \
+	if (printIf) std::cout << ostream
+#define VerboseLog(ostream) \
+	if (Verbose) std::cout << ostream
+
 namespace Iswenzz
 {
 	typedef unsigned int clipHandle_t;
