@@ -92,8 +92,8 @@ namespace Iswenzz
 		std::array<std::string, MAX_CONFIGSTRINGS> ValidConfigStrings{ };
 		std::array<std::string, MAX_CONFIGSTRINGS> ConfigStrings{ };
 		std::array<entityState_t, MAX_GENTITIES> EntityBaselines{ };
-		std::array<entityState_t, MAX_PARSE_ENTITIES> EntityStates{ };
-		std::array<clientState_t, MAX_PARSE_CLIENTS> ClientStates{ };
+		std::array<entityState_t, MAX_PARSE_ENTITIES> ParseEntities{ };
+		std::array<clientState_t, MAX_PARSE_CLIENTS> ParseClients{ };
 		std::array<clientSnapshot_t, PACKET_BACKUP> Snapshots{ };
 		std::array<archivedFrame_t, MAX_FRAMES> Frames{ };
 
@@ -196,7 +196,7 @@ namespace Iswenzz
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="number">Entity number.</param>
 		/// <param name="isBaseLine">Is it a baseline entity.</param>
-		void ReadDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, int number, bool isBaseLine);
+		void ReadDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, int number);
 
 		/// <summary>
 		/// Read a delta compressed client state.
@@ -239,24 +239,24 @@ namespace Iswenzz
 			bool predictedFieldsIgnoreXor);
 
 		/// <summary>
-		/// Read all clients.
+		/// Parse all entities.
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
 		/// <param name="time">Server time.</param>
-		/// <param name="from">Pointer to the old struct state.</param>
-		/// <param name="to">Pointer to the new struct state.</param>
+		/// <param name="from">Pointer to the old snapshot state.</param>
+		/// <param name="to">Pointer to the new snapshot state.</param>
 		/// <returns></returns>
-		int ReadClients(Msg& msg, const int time, clientState_t* from, clientState_t* to);
+		int ParsePacketEntities(Msg& msg, const int time, clientSnapshot_t* from, clientSnapshot_t* to);
 
 		/// <summary>
-		/// Read all entities.
+		/// Parse all clients.
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
 		/// <param name="time">Server time.</param>
-		/// <param name="from">Pointer to the old struct state.</param>
-		/// <param name="to">Pointer to the new struct state.</param>
+		/// <param name="from">Pointer to the old snapshot state.</param>
+		/// <param name="to">Pointer to the new snapshot state.</param>
 		/// <returns></returns>
-		int ReadEntities(Msg& msg, const int time, entityState_t* from, entityState_t* to);
+		int ParsePacketClients(Msg& msg, const int time, clientSnapshot_t* from, clientSnapshot_t* to);
 
 		/// <summary>
 		/// Read last changed net field.
@@ -273,5 +273,15 @@ namespace Iswenzz
 		/// <param name="oldValue"></param>
 		/// <returns></returns>
 		int ReadEntityIndex(Msg &msg, int indexBits);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="msg"></param>
+		/// <param name="time"></param>
+		/// <param name="frame"></param>
+		/// <param name="newnum"></param>
+		/// <param name="old"></param>
+		void DeltaEntity(Msg& msg, const int time, clientSnapshot_t* frame, int newnum, entityState_t* old);
 	};
 }
