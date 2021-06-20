@@ -255,8 +255,7 @@ namespace Iswenzz
 		/// <param name="time">Server time.</param>
 		/// <param name="from">Pointer to the old snapshot state.</param>
 		/// <param name="to">Pointer to the new snapshot state.</param>
-		/// <returns></returns>
-		int ParsePacketClients(Msg& msg, const int time, clientSnapshot_t* from, clientSnapshot_t* to);
+		void ParsePacketClients(Msg& msg, const int time, clientSnapshot_t* from, clientSnapshot_t* to);
 
 		/// <summary>
 		/// Read last changed net field.
@@ -283,5 +282,17 @@ namespace Iswenzz
 		/// <param name="newnum"></param>
 		/// <param name="old"></param>
 		void DeltaEntity(Msg& msg, const int time, clientSnapshot_t* frame, int newnum, entityState_t* old);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="msg"></param>
+		/// <param name="time"></param>
+		/// <param name="frame"></param>
+		/// <param name="newnum"></param>
+		/// <param name="old"></param>
+		/// <param name="unchanged"></param>
+		void DeltaClient(Msg& msg, const int time, clientSnapshot_t* frame, int newnum,
+			clientState_t* old, bool unchanged);
 	};
 }

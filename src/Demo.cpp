@@ -204,6 +204,8 @@ namespace Iswenzz
 				newnum = ReadEntityIndex(msg, GENTITYNUM_BITS);
 
 				entityState_t *es = &EntityBaselines[newnum];
+				NullEntityState = { 0 };
+
 				ReadDeltaEntity(msg, 0, &NullEntityState, es, newnum);
 				ActiveBaselines[newnum] = 1;
 			}
@@ -223,7 +225,6 @@ namespace Iswenzz
 		std::cout << "server Command: " << index << " " << s << std::endl;
 	}
 
-	// @TODO
 	void Demo::ParseSnapshot(Msg& msg)
 	{
 		clientSnapshot_t old = { 0 };
@@ -252,17 +253,31 @@ namespace Iswenzz
 
 		// Entities State
 		ParsePacketEntities(msg, CurrentSnapshot.serverTime, &old, &CurrentSnapshot);
+		msg.ClearLastReferencedEntity();
 
 		// Clients State
-		//ReadClients(msg, serverTime, from, frame);
+		ParsePacketClients(msg, CurrentSnapshot.serverTime, &old, &CurrentSnapshot);
 
-		//int isZero = msg.ReadBit();
-		//std::cout << "IsZero: " << isZero << std::endl;
-		//if (sv_padPackets->integer) // if server has packet padding
-		//{
-		//	for (int i = 0; i < sv_padPackets->integer; i++)
-		//		msg.ReadByte(); // svc_nop
-		//}
+		// Dump if not valid
+		if (!CurrentSnapshot.valid)
+			return;
+
+		/* Clear the valid flags of any snapshots between the last received and this one,
+			so if there was a dropped packet it won't look like something valid to delta from next time
+			we wrap around in the buffer. */
+		int oldMessageNum = SnapMessageNum + 1;
+		if (CurrentSnapshot.messageNum - oldMessageNum >= PACKET_BACKUP)
+			oldMessageNum = CurrentSnapshot.messageNum - (PACKET_BACKUP - 1);
+		while (oldMessageNum < CurrentSnapshot.messageNum)
+		{
+			Snapshots[oldMessageNum & PACKET_MASK].valid = false;
+			oldMessageNum++;
+		}
+		SnapMessageNum = CurrentSnapshot.messageNum;
+		CurrentSnapshot.ping = 999;
+
+		// Save the snapshot in the backup array for later delta comparisons
+		std::memcpy(&Snapshots[SnapMessageNum & PACKET_MASK], &CurrentSnapshot, sizeof(clientSnapshot_t));
 	}
 
 	int Demo::ReadDeltaGroundEntity(Msg& msg)
@@ -294,7 +309,6 @@ namespace Iswenzz
 
 		if (!msg.ReadBit())
 		{
-			// @TODO
 			std::memcpy(to, from, 4 * numFields + 4);
 			return;
 		}
@@ -305,19 +319,19 @@ namespace Iswenzz
 			msg.overflowed = 1;
 			return;
 		}
-
-		// Get the right field list from the eType value
 		ReadDeltaField(msg, time, from, to, &stateFields[0], false, false);
 		
-		int entityFieldOffset = *reinterpret_cast<int*>(reinterpret_cast<int>(to) + stateFields[0].offset);
-		if (entityFieldOffset > NET_FIELDS_COUNT - 1)
-			entityFieldOffset = NET_FIELDS_COUNT - 1;
+		// Get the right field list from the eType value
+		if (std::string{ stateFields[0].name } == "eType")
+		{
+			int entityFieldOffset = *reinterpret_cast<int*>(reinterpret_cast<int>(to) + stateFields[0].offset);
+			if (entityFieldOffset > NET_FIELDS_COUNT - 1)
+				entityFieldOffset = NET_FIELDS_COUNT - 1;
 
-		netFieldList_t fieldList = netFieldList[entityFieldOffset];
-		stateFields = fieldList.field;
-		numFields = fieldList.numFields;
-
-		std::cout << "fieldList: " << entityFieldOffset << std::endl;
+			netFieldList_t fieldList = netFieldList[entityFieldOffset];
+			stateFields = fieldList.field;
+			numFields = fieldList.numFields;
+		}
 
 		for (i = 1; i < lc; ++i)
 			ReadDeltaField(msg, time, from, to, &stateFields[i], false, false);
@@ -328,7 +342,6 @@ namespace Iswenzz
 		}
 	}
 
-	// @TODO
 	void Demo::ReadDeltaField(Msg& msg, int time, const void* from, const void* to, const netField_t* field,
 		bool noXor, bool print)
 	{
@@ -538,7 +551,6 @@ namespace Iswenzz
 		}
 	}
 
-	// @TODO
 	int Demo::ParsePacketEntities(Msg& msg, const int time, clientSnapshot_t* from, clientSnapshot_t* to)
 	{
 		entityState_s* oldstate = nullptr;
@@ -562,20 +574,20 @@ namespace Iswenzz
 
 		while (!msg.overflowed)
 		{
-			std::cout << "newnum: " << newnum << std::endl;
+			std::cout << "entitynum: " << newnum << std::endl;
 			newnum = ReadEntityIndex(msg, GENTITYNUM_BITS);
 			if (newnum == 1023)
 				break;
 			if (msg.readcount > msg.cursize)
 				return -1;
 
-			while (oldnum < newnum && !msg.overflowed)
+			while (oldnum < newnum && !msg.overflowed && oldstate)
 			{
 				std::memcpy(&ParseEntities[ParseEntitiesNum++ & MAX_PARSE_ENTITIES - 1],
 					oldstate, sizeof(entityState_t));
 				++to->numEntities;
 
-				if (++oldindex < from->numEntities)
+				if (from && ++oldindex < from->numEntities)
 				{
 					oldstate = &ParseEntities[(oldindex + from->parseEntitiesNum) & MAX_PARSE_ENTITIES - 1];
 					oldnum = oldstate->number;
@@ -588,7 +600,7 @@ namespace Iswenzz
 				++numChanged;
 				DeltaEntity(msg, time, to, newnum, oldstate);
 
-				if (++oldindex < from->numEntities)
+				if (from && ++oldindex < from->numEntities)
 				{
 					oldstate = &ParseEntities[(oldindex + from->parseEntitiesNum) & MAX_PARSE_ENTITIES - 1];
 					oldnum = oldstate->number;
@@ -596,7 +608,7 @@ namespace Iswenzz
 				else
 					oldnum = 99999;
 			}
-			else
+			else if (newnum <= MAX_GENTITIES - 1)
 			{
 				++numChanged;
 				DeltaEntity(msg, time, to, newnum, &EntityBaselines[newnum]);
@@ -621,18 +633,78 @@ namespace Iswenzz
 		return numChanged;
 	}
 
-	// @TODO
-	int Demo::ParsePacketClients(Msg& msg, const int time, clientSnapshot_t* from, clientSnapshot_t* to)
+	void Demo::ParsePacketClients(Msg& msg, const int time, clientSnapshot_t* from, clientSnapshot_t* to)
 	{
-		//while (!overflowed)
-		//{
-		//	int newnum = msg.ReadEntityIndex(GetMinBitCount(MAX_CLIENTS - 1));
-		//	//std::cout << "CS NN: " << newnum << std::endl;
-		//	ReadDeltaClient(time, from, to, newnum);
-		//	++to->sn.num_clients;
-		//}
-		//return to->sn.num_clients;
-		return -1;
+		clientState_s* oldstate = nullptr;
+		int oldnum = 0, oldindex = 0, newnum = -1;
+
+		to->parseClientsNum = ParseClientsNum;
+		to->numClients = 0;
+
+		if (from)
+		{
+			if (oldindex < from->numClients)
+			{
+				oldstate = &ParseClients[(oldindex + from->parseClientsNum) & MAX_PARSE_CLIENTS - 1];
+				oldnum = oldstate->clientIndex;
+			}
+			else
+				oldnum = 99999;
+		}
+		else
+			oldnum = 99999;
+
+		while (!msg.overflowed && msg.ReadBit())
+		{
+			std::cout << "clientnum: " << newnum << std::endl;
+			newnum = ReadEntityIndex(msg, 5);
+			if (msg.readcount > msg.cursize)
+				return;
+
+			while (oldnum < newnum)
+			{
+				DeltaClient(msg, time, to, oldnum, oldstate, true);
+
+				if (from && ++oldindex < from->numClients)
+				{
+					oldstate = &ParseClients[(oldindex + from->parseClientsNum) & MAX_PARSE_CLIENTS - 1];
+					oldnum = oldstate->clientIndex;
+				}
+				else
+					oldnum = 99999;
+			}
+
+			if (oldnum == newnum)
+			{
+				DeltaClient(msg, time, to, newnum, oldstate, false);
+
+				if (from && ++oldindex < from->numClients)
+				{
+					oldstate = &ParseClients[(oldindex + from->parseClientsNum) & MAX_PARSE_CLIENTS - 1];
+					oldnum = oldstate->clientIndex;
+				}
+				else
+					oldnum = 99999;
+			}
+			else
+			{
+				NullClientState = { 0 };
+				DeltaClient(msg, time, to, newnum, &NullClientState, 0);
+			}
+		}
+
+		while (oldnum != 99999 && !msg.overflowed)
+		{
+			DeltaClient(msg, time, to, oldnum, oldstate, true);
+
+			if (++oldindex < from->numClients)
+			{
+				oldstate = &ParseClients[(oldindex + from->parseClientsNum) & MAX_PARSE_CLIENTS - 1];
+				oldnum = oldstate->clientIndex;
+			}
+			else
+				oldnum = 99999;
+		}
 	}
 
 	int Demo::ReadLastChangedField(Msg& msg, int totalFields)
@@ -797,7 +869,6 @@ namespace Iswenzz
 		}
 	}
 
-	// @TODO
 	int Demo::ReadEntityIndex(Msg &msg, int indexBits)
 	{
 		if (msg.ReadBit())
@@ -814,5 +885,23 @@ namespace Iswenzz
 		ReadDeltaEntity(msg, time, old, &ParseEntities[ParseEntitiesNum & MAX_PARSE_ENTITIES - 1], newnum);
 		++ParseEntitiesNum;
 		++frame->numEntities;
+	}
+
+	void Demo::DeltaClient(Msg& msg, const int time, clientSnapshot_t* frame, int newnum, 
+		clientState_t* old, bool unchanged)
+	{
+		clientState_t* state = nullptr;
+		state = &ParseClients[ParseClientsNum & MAX_PARSE_CLIENTS - 1];
+
+		if (unchanged)
+			std::memcpy(state, old, sizeof(clientState_s));
+		ReadDeltaClient(msg, time, old, state, newnum);
+
+		// Entity was delta removed
+		if (state->clientIndex == MAX_GENTITIES - 1)
+			return;
+
+		++ParseClientsNum;
+		++frame->numClients;
 	}
 }
