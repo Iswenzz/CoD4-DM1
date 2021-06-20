@@ -178,23 +178,23 @@ namespace Iswenzz
 		double ReadAngle16();
 
 		/// <summary>
-		/// 
+		/// Read an enum flag.
 		/// </summary>
-		/// <param name="indexBits"></param>
+		/// <param name="oldFlags">The old flag value.</param>
 		/// <returns></returns>
 		int ReadEFlags(int oldFlags);
 
 		/// <summary>
-		/// 
+		/// Read an origin vector.
 		/// </summary>
-		/// <param name="oldValue"></param>
+		/// <param name="oldValue">The old vector value.</param>
 		/// <returns></returns>
 		float ReadOriginFloat(int bits, float oldValue);
 
 		/// <summary>
-		/// 
+		/// Read an origin vector Z.
 		/// </summary>
-		/// <param name="oldValue"></param>
+		/// <param name="oldValue">The old vector value.</param>
 		float ReadOriginZFloat(float oldValue);
 
 		/// <summary>

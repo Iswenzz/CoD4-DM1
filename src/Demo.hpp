@@ -275,32 +275,32 @@ namespace Iswenzz
 		int ReadLastChangedField(Msg& msg, int totalFields);
 
 		/// <summary>
-		/// 
+		/// Read the entity bits.
 		/// </summary>
-		/// <param name="bits"></param>
-		/// <param name="oldValue"></param>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="bits">Entity bits to read.</param>
 		/// <returns></returns>
 		int ReadEntityIndex(Msg &msg, int indexBits);
 
 		/// <summary>
-		/// 
+		/// Parse a delta entity.
 		/// </summary>
-		/// <param name="msg"></param>
-		/// <param name="time"></param>
-		/// <param name="frame"></param>
-		/// <param name="newnum"></param>
-		/// <param name="old"></param>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="time">Server time.</param>
+		/// <param name="frame">The old snapshot frame.</param>
+		/// <param name="newnum">The entity num.</param>
+		/// <param name="old">The old entity state.</param>
 		void DeltaEntity(Msg& msg, const int time, clientSnapshot_t* frame, int newnum, entityState_t* old);
 
 		/// <summary>
-		/// 
+		/// Parse a delta client.
 		/// </summary>
-		/// <param name="msg"></param>
-		/// <param name="time"></param>
-		/// <param name="frame"></param>
-		/// <param name="newnum"></param>
-		/// <param name="old"></param>
-		/// <param name="unchanged"></param>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="time">Server time.</param>
+		/// <param name="frame">The old snapshot frame.</param>
+		/// <param name="newnum">The entity num.</param>
+		/// <param name="old">The old client state.</param>
+		/// <param name="unchanged">Should not update.</param>
 		void DeltaClient(Msg& msg, const int time, clientSnapshot_t* frame, int newnum,
 			clientState_t* old, bool unchanged);
 	};
