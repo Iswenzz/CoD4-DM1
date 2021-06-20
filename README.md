@@ -20,5 +20,8 @@ Reverse CoD4x & 1.7 ``.DM_1`` demo files.
 * Detect game version
 * API
 
+## Building
+This project can be built with [Visual Studio](https://visualstudio.microsoft.com/) or [CMake](https://cmake.org/).
+
 ## Contributors:
 ***Note:*** If you would like to contribute to this repository, feel free to send a pull request, and I will review your code. Also feel free to post about any problems that may arise in the issues section of the repository.
