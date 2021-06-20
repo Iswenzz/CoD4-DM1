@@ -2,9 +2,45 @@
 #include <vector>
 #include <array>
 
+#define GENTITYNUM_BITS 10
+#define BIG_INFO_STRING 8192
+#define PACKET_BACKUP 32
+#define PACKET_MASK PACKET_BACKUP - 1
+
+#define FREETEXT_STARTINDEX 309
+#define MATERIAL_STARTINDEX 2002
+
+#define GROUND_CLIENT_NUM 1022
+#define KILLCAM_ENTITY_ON 1023
+#define KILLCAM_ENTITY_OFF 0
+
 #define MAX_HUDELEMENTS 31
 #define MAX_HUDELEMS_ARCHIVAL MAX_HUDELEMENTS
 #define MAX_HUDELEMS_CURRENT MAX_HUDELEMENTS
+#define MAX_CONFIGSTRINGS 3000
+#define MAX_GENTITIES 1 << GENTITYNUM_BITS
+#define MAX_STRING_CHARS 1024 
+#define MAX_FRAMES 256
+#define MAX_CLIENTS 64
+#define MAX_CMDSTRINGS 2048
+#define MAX_STATS 5
+#define MAX_WEAPONS 16
+#define MAX_PS_EVENTS 4
+#define MAX_RELIABLE_COMMANDS 128
+#define MAX_MAP_AREA_BYTES 32
+#define MAX_PARSE_ENTITIES 2048
+#define MAX_PARSE_CLIENTS 2048
+#define MAX_CLIENTEVENTS 128
+#define MAX_KILLFEED 128
+	         
+#define ENTITYNUM_NONE MAX_GENTITIES - 1
+#define ENTITYNUM_WORLD MAX_GENTITIES - 2
+#define ENTITYNUM_MAX_NORMAL MAX_GENTITIES - 2
+
+#define LogIf(printIf, ostream) \
+	if (printIf) std::cout << ostream
+#define VerboseLog(ostream) \
+	if (Verbose) std::cout << ostream
 
 namespace Iswenzz
 {
@@ -323,19 +359,22 @@ namespace Iswenzz
 	} playerState_t;					//Size: 0x2f64
 
 	typedef struct 
-	{									// (0x2146c)
-		playerState_t ps;				// (0x2146c)
-		int	num_entities;
-		int	num_clients;				// (0x2f68)
-		int	first_entity;				// (0x2f6c)into the circular sv_packet_entities[]
-		int	first_client;
-		// the entities MUST be in increasing state number
-		// order, otherwise the delta compression will fail
-		unsigned int messageSent;		// (0x243e0 | 0x2f74) time the message was transmitted
-		unsigned int messageAcked;		// (0x243e4 | 0x2f78) time the message was acked
-		int	messageSize;				// (0x243e8 | 0x2f7c) used to rate drop packets
-		int	var_03;
-	} clientSnapshot_t;					// size: 0x2f84
+	{
+		bool valid;
+		int snapFlags;
+		int serverTime;
+		int messageNum;
+		int deltaNum;
+		int ping;
+		std::array<unsigned char, MAX_MAP_AREA_BYTES> areamask;
+		int cmdNum;
+		playerState_t ps;
+		int numEntities;
+		int parseEntitiesNum;
+		int numClients;
+		int parseClientsNum;
+		int serverCommandNum;
+	} clientSnapshot_t;
 
 	enum entityType_t
 	{
@@ -391,7 +430,7 @@ namespace Iswenzz
 
 	struct LerpEntityStateAnonymous
 	{
-		int data[7];
+		int buffer[7];
 	};
 
 	struct LerpEntityStateExplosion
@@ -469,7 +508,7 @@ namespace Iswenzz
 	typedef enum 
 	{
 		TR_STATIONARY,
-		TR_INTERPOLATE,				// non-parametric, but interpolate between snapshots
+		TR_INTERPOLATE,				// non-parametric, but interpolate between Snapshots
 		TR_LINEAR,
 		TR_LINEAR_STOP,
 		TR_SINE,					// value = base + sin( time / duration ) * delta
@@ -584,12 +623,14 @@ namespace Iswenzz
 		archivedEntityShared_t r;
 	} archivedEntity_t;
 
-	struct ClientSnapshotData
+	typedef struct archivedFrame_s
 	{
-		int lastClientCommand;
-		int lastServerCommand;
-		clientSnapshot_t sn;
-		std::array<entityState_t, 1024> es;
-		std::array<clientState_t, 64> cs;
-	};
+		int index;
+		float origin[3];
+		float velocity[3];
+		int movementDir;
+		int bobCycle;
+		int commandTime;
+		float angles[3];
+	} archivedFrame_t;
 }
