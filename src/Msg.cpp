@@ -25,21 +25,21 @@ namespace Iswenzz
 	{
 		cursize = len;
 		maxsize = NETCHAN_UNSENTBUFFER_SIZE;
-		buffer = std::vector<unsigned char>(len);
+		buffer.resize(len);
 	}
 
 	void Msg::Initialize(unsigned char* buf, int len, MSGCrypt mode)
 	{
 		if (mode == MSGCrypt::MSG_CRYPT_NONE)
 		{
-			buffer = std::vector<unsigned char>(len);
+			buffer.resize(len);
 			cursize = buffer.size();
 			maxsize = NETCHAN_MAXBUFFER_SIZE;
 			std::memcpy(buffer.data(), buf, buffer.size());
 		}
 		else if (mode == MSGCrypt::MSG_CRYPT_HUFFMAN)
 		{
-			buffer = std::vector<unsigned char>(NETCHAN_MAXBUFFER_SIZE);
+			buffer.resize(NETCHAN_MAXBUFFER_SIZE);
 			cursize = Huffman::Decompress(buf, len, buffer.data(), buffer.size());
 			maxsize = NETCHAN_MAXBUFFER_SIZE;
 		}

@@ -27,6 +27,7 @@ namespace Iswenzz
 		{
 			MSGType msgType = { };
 			DemoFile.read(reinterpret_cast<char*>(&msgType), sizeof(char));
+			std::cout << static_cast<int>(msgType) << std::endl;
 
 			switch (msgType)
 			{
@@ -42,7 +43,6 @@ namespace Iswenzz
 					ParseArchiveHeader();
 					break;
 				}
-				break;
 			}
 		}
 	}
