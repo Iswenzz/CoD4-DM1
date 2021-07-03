@@ -33,8 +33,8 @@ int main()
 {
     Huffman::InitMain(); // Initialize huffman compression
 
-    //std::string demoPath = R"(C:\Users\Iswenzz\Desktop\test.dm_1)";
-    std::string demoPath = R"(C:\Users\Iswenzz\Desktop\ez2.dm_1)";
+    std::string demoPath = R"(C:\Users\Iswenzz\Desktop\test.dm_1)";
+    //std::string demoPath = R"(C:\Users\Iswenzz\Desktop\ez2.dm_1)";
     std::cout << "Openning " << demoPath << " demo." << std::endl;
 
     std::unique_ptr<Demo> demo = std::make_unique<Demo>(demoPath);

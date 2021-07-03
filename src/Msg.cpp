@@ -16,14 +16,16 @@ namespace Iswenzz
 		268435455, 536870911, 1073741823, 2147483647, 4294967295
 	};
 
-	Msg::Msg(unsigned char* buf, int len, MSGCrypt mode)
+	Msg::Msg(int protocol) : protocol(protocol) { }
+
+	Msg::Msg(unsigned char* buf, int len, MSGCrypt mode, int protocol)
 	{
-		Initialize(buf, len, mode);
+		Initialize(buf, len, mode, protocol);
 	}
 
 	Msg::Msg(Msg& msg, MSGCrypt mode)
 	{
-		Initialize(msg.buffer.data(), msg.cursize, mode);
+		Initialize(msg.buffer.data(), msg.cursize, mode, msg.protocol);
 		srvMsgSeq = msg.srvMsgSeq;
 		dummy = msg.dummy;
 	}
@@ -35,7 +37,7 @@ namespace Iswenzz
 		buffer.resize(len);
 	}
 
-	void Msg::Initialize(unsigned char* buf, int len, MSGCrypt mode)
+	void Msg::Initialize(unsigned char* buf, int len, MSGCrypt mode, int protocol)
 	{
 		if (mode == MSGCrypt::MSG_CRYPT_NONE)
 		{
@@ -51,6 +53,7 @@ namespace Iswenzz
 			maxsize = NETCHAN_MAXBUFFER_SIZE;
 		}
 		readcount = 0;
+		this->protocol = protocol;
 	}
 
 	int Msg::ReadBit()
@@ -217,6 +220,10 @@ namespace Iswenzz
 	float Msg::ReadOriginFloat(int bits, float oldValue)
 	{
 		signed int coord;
+
+		if (protocol != 17)
+			return ReadFloat();
+
 		if (ReadBit())
 		{
 			float center[3]{ 0, 0, 0 };
@@ -229,6 +236,10 @@ namespace Iswenzz
 	float Msg::ReadOriginZFloat(float oldValue)
 	{
 		signed int coord;
+
+		if (protocol != 17)
+			return ReadFloat();
+
 		if (ReadBit())
 		{
 			float center[3]{ 0, 0, 0 };

@@ -18,7 +18,9 @@ namespace Iswenzz
 	enum class MSGType
 	{
 		MSG_SNAPSHOT,
-		MSG_FRAME
+		MSG_FRAME,
+		MSG_PROTOCOL,
+		MSG_RELIABLE
 	};
 
 	enum class MSGCrypt
@@ -72,6 +74,7 @@ namespace Iswenzz
 		MSGType type = { };
 		int srvMsgSeq = 0;
 		int dummy = 0;
+		int protocol = 16;
 
 		bool overflowed = 0;
 		bool readonly = 0;
@@ -93,13 +96,20 @@ namespace Iswenzz
 		~Msg() = default;
 
 		/// <summary>
+		/// Initialize a new Msg object with the specified game protocol.
+		/// </summary>
+		/// <param name="protocol">The game protocol.</param>
+		Msg(int protocol);
+
+		/// <summary>
 		/// Initialize a new Msg object with specified buffer and crypt mode.
 		/// </summary>
 		/// <param name="buffer">The buffer to read.</param>
 		/// <param name="len">Length of the buffer.</param>
 		/// <param name="mode">The crypt mode.</param>
+		/// <param name="protocol">The game protocol.</param>
 		/// <returns></returns>
-		Msg(unsigned char *buffer, int len, MSGCrypt mode);
+		Msg(unsigned char *buffer, int len, MSGCrypt mode, int protocol);
 
 		/// <summary>
 		/// Initialize a new Msg object from an existing msg.
@@ -120,8 +130,9 @@ namespace Iswenzz
 		/// <param name="buffer">The buffer to read.</param>
 		/// <param name="len">Length of the buffer.</param>
 		/// <param name="mode">Crypt mode.</param>
+		/// <param name="protocol">The game protocol.</param>
 		/// <returns></returns>
-		void Initialize(unsigned char* buf, int len, MSGCrypt mode);
+		void Initialize(unsigned char* buf, int len, MSGCrypt mode, int protocol);
 
 		/// <summary>
 		/// Read one bit.
