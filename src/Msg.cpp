@@ -21,6 +21,13 @@ namespace Iswenzz
 		Initialize(buf, len, mode);
 	}
 
+	Msg::Msg(Msg& msg, MSGCrypt mode)
+	{
+		Initialize(msg.buffer.data(), msg.cursize, mode);
+		srvMsgSeq = msg.srvMsgSeq;
+		dummy = msg.dummy;
+	}
+
 	void Msg::Initialize(int len)
 	{
 		cursize = len;

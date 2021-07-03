@@ -97,9 +97,16 @@ namespace Iswenzz
 		/// </summary>
 		/// <param name="buffer">The buffer to read.</param>
 		/// <param name="len">Length of the buffer.</param>
-		/// <param name="mode">Crypt mode.</param>
+		/// <param name="mode">The crypt mode.</param>
 		/// <returns></returns>
 		Msg(unsigned char *buffer, int len, MSGCrypt mode);
+
+		/// <summary>
+		/// Initialize a new Msg object from an existing msg.
+		/// </summary>
+		/// <param name="msg">The message to copy.</param>
+		/// <param name="mode">The crypto mode.</param>
+		Msg(Msg& msg, MSGCrypt mode);
 
 		/// <summary>
 		/// Initialize the msg buffer with the specified buffer length.
