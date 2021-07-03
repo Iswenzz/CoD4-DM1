@@ -95,8 +95,7 @@ namespace Iswenzz
 	void Demo::ParseSnapshotHeader()
 	{
 		svc_ops_e command = { };
-		CurrentUncompressedMsg = Msg{ CurrentCompressedMsg.buffer.data(), 
-			CurrentCompressedMsg.cursize, MSGCrypt::MSG_CRYPT_HUFFMAN };
+		CurrentUncompressedMsg = Msg{ CurrentCompressedMsg, MSGCrypt::MSG_CRYPT_HUFFMAN };
 
 		while (true)
 		{
@@ -117,8 +116,7 @@ namespace Iswenzz
 				case svc_ops_e::svc_serverCommand:
 					ParseCommandString(CurrentUncompressedMsg);
 					break;
-				case svc_ops_e::svc_download:
-					//ParseDownload(CurrentUncompressedMsg);
+				case svc_ops_e::svc_download: 
 					break;
 				case svc_ops_e::svc_snapshot:
 					ParseSnapshot(CurrentUncompressedMsg);
@@ -164,7 +162,7 @@ namespace Iswenzz
 			CurrentFrameTime = frame.commandTime;
 
 		LastFrameSrvMsgSeq = CurrentCompressedMsg.srvMsgSeq;
-		std::memcpy(&Frames[LastFrameSrvMsgSeq & MAX_FRAMES], &frame, sizeof(archivedFrame_t));
+		std::memcpy(&Frames[LastFrameSrvMsgSeq & MAX_FRAMES - 1], &frame, sizeof(archivedFrame_t));
 	}
 
 	void Demo::ParseGamestate(Msg& msg)
