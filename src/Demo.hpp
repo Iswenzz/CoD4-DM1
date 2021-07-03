@@ -55,6 +55,8 @@ namespace Iswenzz
 		std::string FilePath;
 		bool Verbose;
 
+		int Protocol = 16;
+
 		Msg CurrentCompressedMsg = { };
 		Msg CurrentUncompressedMsg = { };
 		Msg CurrentWritingMsg = { };
@@ -113,30 +115,31 @@ namespace Iswenzz
 		std::array<clientState_t, MAX_CLIENTS> ActiveClients{ };
 
 		/// <summary>
-		/// Read the snapshot header.
+		/// Read the message.
 		/// </summary>
-		void ReadSnapshotHeader();
+		void ReadMessage();
 
 		/// <summary>
-		/// Read the archive header.
+		/// Read the archive.
 		/// </summary>
-		void ReadArchiveHeader();
+		void ReadArchive();
 
 		/// <summary>
-		/// Parse the snapshot header.
+		/// Read the protocol.
 		/// </summary>
-		void ParseSnapshotHeader();
-
-		/// <summary>
-		/// Parse the archive header.
-		/// </summary>
-		void ParseArchiveHeader();
+		void ReadProtocol();
 
 		/// <summary>
 		/// Parse a gamestate.
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
 		void ParseGamestate(Msg& msg);
+
+		/// <summary>
+		/// Parse a CoD4X gamestate.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		void ParseGamestateX(Msg& msg);
 
 		/// <summary>
 		/// Parse a server snapshot.

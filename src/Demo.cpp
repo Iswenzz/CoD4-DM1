@@ -36,47 +36,37 @@ namespace Iswenzz
 
 			switch (msgType)
 			{
-				case MSGType::MSG_SNAPSHOT:
-				{
-					ReadSnapshotHeader();
-					ParseSnapshotHeader();
-					break;
-				}
-				case MSGType::MSG_FRAME:
-				{
-					ReadArchiveHeader();	
-					ParseArchiveHeader();
-					break;
-				}
+			case MSGType::MSG_SNAPSHOT:
+				ReadMessage();
+				break;
+			case MSGType::MSG_FRAME:
+				ReadArchive();	
+				break;
+			case MSGType::MSG_PROTOCOL:
+				ReadProtocol();
+				break;
+			case MSGType::MSG_RELIABLE:
+				std::cout << "reliable msg" << std::endl;
+				break;
 			}
 		}
 	}
 
 	void Demo::Close()
-	{
+	{ 
 		if (DemoFile.is_open())
 			DemoFile.close();
 		IsDemoOpen = false;
 	}
 
-	void Demo::ReadSnapshotHeader()
+	void Demo::ReadMessage()
 	{
-		CurrentCompressedMsg = Msg{ };
+		CurrentCompressedMsg = Msg{ Protocol };
 
 		unsigned char slen = 0;
 		int protocol = 0, messageLength = 0;
 		int dummy[2] = { };
 
-		// CoD4X
-		//DemoFile.read(reinterpret_cast<char*>(&protocol), sizeof(int));
-		//DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.dummy), sizeof(int)); // datalen (-1 = demo ended)
-		//DemoFile.read(reinterpret_cast<char*>(&dummy[1]), sizeof(int));
-		//DemoFile.read(reinterpret_cast<char*>(&dummy[2]), sizeof(int));
-		//DemoFile.read(reinterpret_cast<char*>(&slen), sizeof(unsigned char));
-		//DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.srvMsgSeq), sizeof(int));
-		//DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.maxsize), sizeof(int));
-
-		// 1.7
 		DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.srvMsgSeq), sizeof(int));
 		DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.cursize), sizeof(int));
 		DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.dummy), sizeof(int));
@@ -90,20 +80,15 @@ namespace Iswenzz
 		CurrentCompressedMsg.Initialize(CurrentCompressedMsg.cursize);
 		DemoFile.read(reinterpret_cast<char*>(CurrentCompressedMsg.buffer.data()), 
 			CurrentCompressedMsg.cursize);
-	}
 
-	void Demo::ParseSnapshotHeader()
-	{
+		// Parse message
 		svc_ops_e command = { };
-		CurrentUncompressedMsg = Msg{ CurrentCompressedMsg.buffer.data(), 
-			CurrentCompressedMsg.cursize, MSGCrypt::MSG_CRYPT_HUFFMAN };
-
+		CurrentUncompressedMsg = Msg{ CurrentCompressedMsg, MSGCrypt::MSG_CRYPT_HUFFMAN };
 		while (true)
 		{
 			if (CurrentUncompressedMsg.readcount > CurrentUncompressedMsg.cursize)
 				break;
 
-			// Read command
 			command = static_cast<svc_ops_e>(CurrentUncompressedMsg.ReadByte());
 			VerboseLog("cmd: " << static_cast<int>(command) << std::endl);
 			if (command == svc_ops_e::svc_EOF)
@@ -111,37 +96,36 @@ namespace Iswenzz
 
 			switch (command)
 			{
-				case svc_ops_e::svc_gamestate:
-					ParseGamestate(CurrentUncompressedMsg);
-					break;
-				case svc_ops_e::svc_serverCommand:
-					ParseCommandString(CurrentUncompressedMsg);
-					break;
-				case svc_ops_e::svc_download:
-					//ParseDownload(CurrentUncompressedMsg);
-					break;
-				case svc_ops_e::svc_snapshot:
-					ParseSnapshot(CurrentUncompressedMsg);
-					break;
-				default:
-					return;
+			case svc_ops_e::svc_gamestate:
+				ParseGamestateX(CurrentUncompressedMsg);
+				break;
+			case svc_ops_e::svc_serverCommand:
+				ParseCommandString(CurrentUncompressedMsg);
+				break;
+			case svc_ops_e::svc_download:
+				std::cout << "download" << std::endl;
+				break;
+			case svc_ops_e::svc_snapshot:
+				ParseSnapshot(CurrentUncompressedMsg);
+				break;
+			case svc_ops_e::svc_configstring:
+				std::cout << "configstring" << std::endl;
+				break;
+			default:
+				return;
 			}
 		}
 	}
 
-	void Demo::ReadArchiveHeader()
+	void Demo::ReadArchive()
 	{
 		int len = 48;
-		CurrentCompressedMsg = Msg{ };
+		archivedFrame_t frame = { 0 };
+
+		CurrentCompressedMsg = Msg{ Protocol };
 		CurrentCompressedMsg.Initialize(len);
 
 		DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.srvMsgSeq), sizeof(int));
-	}
-
-	void Demo::ParseArchiveHeader()
-	{
-		archivedFrame_t frame = { 0 };
-	
 		DemoFile.read(reinterpret_cast<char*>(&frame.origin[0]), sizeof(float));
 		DemoFile.read(reinterpret_cast<char*>(&frame.origin[1]), sizeof(float));
 		DemoFile.read(reinterpret_cast<char*>(&frame.origin[2]), sizeof(float));
@@ -164,19 +148,27 @@ namespace Iswenzz
 			CurrentFrameTime = frame.commandTime;
 
 		LastFrameSrvMsgSeq = CurrentCompressedMsg.srvMsgSeq;
-		std::memcpy(&Frames[LastFrameSrvMsgSeq & MAX_FRAMES], &frame, sizeof(archivedFrame_t));
+		std::memcpy(&Frames[LastFrameSrvMsgSeq & MAX_FRAMES - 1], &frame, sizeof(archivedFrame_t));
+	}
+
+	void Demo::ReadProtocol()
+	{
+		int legacyEnd = 0;
+		uint64_t reserved = 0;
+
+		DemoFile.read(reinterpret_cast<char*>(&Protocol), sizeof(uint32_t));
+		DemoFile.read(reinterpret_cast<char*>(&legacyEnd), sizeof(int));
+		DemoFile.read(reinterpret_cast<char*>(&reserved), sizeof(uint64_t));
 	}
 
 	void Demo::ParseGamestate(Msg& msg)
 	{
 		svc_ops_e command = { };
-		int newnum = -1, idx = -1;
+		int newnum = -1, idx = -1, currIndex = 0;
 
 		msg.ClearLastReferencedEntity();
 		ServerCommandSequence = msg.ReadInt();
 		MatchInProgress = true;
-
-		int currIndex = 0;
 
 		while (true)
 		{
@@ -199,7 +191,7 @@ namespace Iswenzz
 					
 					if (!(idx < 0 || idx >= MAX_CONFIGSTRINGS))
 					{
-						if (s.size() != std::string::npos)
+						if (s.size() > 0)
 						{
 							ConfigStrings[idx] = s;
 							ValidConfigStrings[idx] = 1;
@@ -217,6 +209,69 @@ namespace Iswenzz
 
 				ReadDeltaEntity(msg, 0, &NullEntityState, es, newnum);
 				ActiveBaselines[newnum] = 1;
+			}
+			else
+				break;
+			currIndex++;
+		}
+	}
+
+	void Demo::ParseGamestateX(Msg& msg)
+	{
+		svc_ops_e command = { };
+		int newnum = -1, clientnum = -1, idx = -1, currIndex = 0;
+
+		msg.ClearLastReferencedEntity();
+		ServerCommandSequence = msg.ReadInt();
+		MatchInProgress = true;
+
+		while (true)
+		{
+			command = static_cast<svc_ops_e>(msg.ReadByte());
+			if (command == svc_ops_e::svc_EOF)
+				break;
+
+			if (command == svc_ops_e::svc_configstring)
+			{
+				int i = msg.ReadInt();
+				if (i < 0 || i >= 2 * MAX_CONFIGSTRINGS)
+					break;
+
+				while (i > 0)
+				{
+					idx = msg.ReadInt();
+
+					std::string s = msg.ReadString();
+
+					if (!(idx < 0 || idx >= 2 * MAX_CONFIGSTRINGS))
+					{
+						if (s.size() > 0)
+						{
+							ConfigStrings[idx] = s;
+							ValidConfigStrings[idx] = 1;
+						}
+					}
+					i--;
+				}
+			}
+			else if (command == svc_ops_e::svc_baseline)
+			{
+				newnum = ReadEntityIndex(msg, GENTITYNUM_BITS);
+
+				entityState_t* es = &EntityBaselines[newnum];
+				NullEntityState = { 0 };
+
+				ReadDeltaEntity(msg, 0, &NullEntityState, es, newnum);
+				ActiveBaselines[newnum] = 1;
+			}
+			else if (command == svc_ops_e::svc_configclient)
+			{
+				clientnum = msg.ReadByte();
+				if (clientnum >= MAX_CLIENTS)
+					break;
+
+				std::string name = msg.ReadString();
+				std::string clantag = msg.ReadString();
 			}
 			else
 				break;
