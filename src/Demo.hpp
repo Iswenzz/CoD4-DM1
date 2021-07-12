@@ -13,46 +13,19 @@ namespace Iswenzz
 	class Demo
 	{
 	public:
-		std::string DemoFilePath;
-		bool IsDemoOpen = false;
-
 		/// <summary>
-		/// Initialize a new Demo object, demo file can be opened with the Open() function.
+		/// Initialize a new Demo object with the specified demo file path, output file path and verbosity.
 		/// </summary>
-		/// <returns></returns>
-		Demo() = default;
-
-		/// <summary>
-		/// Initialize a new Demo object with the specified demo file path.
-		/// </summary>
-		/// <param name="filepath">File path to a demo file (.dm_1)</param>
+		/// <param name="inputFilePath">File path to a demo file (.dm_1)</param>
+		/// <param name="outputFilePath">Output path, file will be filled with all frames</param>
 		/// <param name="verbose">Prints debug informations.</param>
 		/// <returns></returns>
-		Demo(std::string filepath);
-
-		/// <summary>
-		/// Initialize a new Demo object with the specified demo file path.
-		/// </summary>
-		/// <param name="filepath">File path to a demo file (.dm_1)</param>
-		/// <param name="verbose">Prints debug informations.</param>
-		/// <returns></returns>
-		Demo(std::string filepath, bool verbose);
+		Demo(std::string inputFilePath, std::string outputFilePath, bool verbose = false);
 		~Demo();
-
-		/// <summary>
-		/// Open a demo file from specified path.
-		/// </summary>
-		/// <param name="filepath">File path to a demo file (.dm_1).</param>
-		void Open(std::string filepath);
-
-		/// <summary>
-		/// Close the demo file and free resources.
-		/// </summary>
-		void Close();
 
 	private:
 		std::ifstream DemoFile;
-		std::string FilePath;
+		std::ofstream OutputFile;
 		bool Verbose;
 
 		int Protocol = 16;
@@ -113,6 +86,16 @@ namespace Iswenzz
 		std::array<unsigned char, MAX_GENTITIES> ActiveBaselines{ };
 		std::array<unsigned char, MAX_GENTITIES> ActiveEntities{ };
 		std::array<clientState_t, MAX_CLIENTS> ActiveClients{ };
+
+		/// <summary>
+		/// Start parsing the demo file
+		/// </summary>
+		void Parse();
+
+		/// <summary>
+		/// Dump some interesting info from the struct to the console
+		/// </summary>
+		void Dump(archivedFrame_t &rFrame);
 
 		/// <summary>
 		/// Read the message.

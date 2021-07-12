@@ -5,29 +5,30 @@
 
 namespace Iswenzz
 {
-	Demo::Demo(std::string filepath) : FilePath(filepath), Verbose(false)
+	Demo::Demo(std::string inputFilePath, std::string outputFilePath, bool verbose) : Verbose(false)
 	{
-		Open(filepath);
-	}
+		// Set up input file
+		DemoFile.open(inputFilePath, std::ios::binary);
 
-	Demo::Demo(std::string filepath, bool verbose) : FilePath(filepath), Verbose(verbose)
-	{
-		Open(filepath);
+		// Set up output file
+		OutputFile.open(outputFilePath);
+		OutputFile << "frameNr,origin[0],origin[1],origin[2],velocity[0],velocity[1],velocity[2],angles[0],angles[1],angles[2],movementDir,commandTime" << std::endl;
+
+		// Parse the demo
+		Parse();
 	}
 
 	Demo::~Demo()
 	{
-		Close();
+		if (DemoFile.is_open())
+			DemoFile.close();
+
+		if (OutputFile.is_open())
+			OutputFile.close();
 	}
 
-	void Demo::Open(std::string filepath)
+	void Demo::Parse()
 	{
-		if (IsDemoOpen)
-			Close();
-		IsDemoOpen = true;
-		DemoFilePath = filepath;
-
-		DemoFile.open(filepath, std::ios::binary);
 		while (DemoFile.is_open() && CurrentCompressedMsg.srvMsgSeq != -1)
 		{
 			MSGType msgType = { };
@@ -52,11 +53,19 @@ namespace Iswenzz
 		}
 	}
 
-	void Demo::Close()
-	{ 
-		if (DemoFile.is_open())
-			DemoFile.close();
-		IsDemoOpen = false;
+	void Demo::Dump(archivedFrame_t &rFrame)
+	{
+		static int cnt = 0;
+
+		OutputFile << cnt <<
+			"," << rFrame.origin[0]		<< "," << rFrame.origin[1]		<< "," << rFrame.origin[2]		<<
+			"," << rFrame.velocity[0]	<< "," << rFrame.velocity[1]	<< "," << rFrame.velocity[2]	<<
+			"," << rFrame.angles[0]		<< "," << rFrame.angles[1]		<< "," << rFrame.angles[2]		<<
+			"," << rFrame.movementDir	<<
+			"," << rFrame.commandTime	<<
+			std::endl;
+
+		cnt++;
 	}
 
 	void Demo::ReadMessage()
@@ -149,6 +158,9 @@ namespace Iswenzz
 
 		LastFrameSrvMsgSeq = CurrentCompressedMsg.srvMsgSeq;
 		std::memcpy(&Frames[LastFrameSrvMsgSeq & MAX_FRAMES - 1], &frame, sizeof(archivedFrame_t));
+
+		// Dump interesting info from it to console
+		Dump(frame);
 	}
 
 	void Demo::ReadProtocol()
@@ -445,7 +457,7 @@ namespace Iswenzz
 			{
 				b = msg.ReadBits(5);
 				v = ((32 * msg.ReadByte() + b) ^ ((signed int)*(float*)fromF + 4096)) - 4096;
-				*(float*)toF = (double)v;
+				*(float*)toF = (float)v;
 				LogIf(print, field->name << "{" << field->bits << "} = " << v << std::endl);
 				return;
 			}
@@ -466,7 +478,7 @@ namespace Iswenzz
 			{
 				b = msg.ReadBits(5);
 				l = ((32 * msg.ReadByte() + b) ^ ((signed int)*(float*)fromF + 4096)) - 4096;
-				*(float*)toF = (double)l;
+				*(float*)toF = (float)l;
 				LogIf(print, field->name << "{" << field->bits << "} = " << l << std::endl);
 				return;
 			}
@@ -491,7 +503,7 @@ namespace Iswenzz
 				*(float*)toF = 0.0;
 				return;
 			}
-			*(float*)toF = msg.ReadAngle16();
+			*(float*)toF = (float)msg.ReadAngle16();
 			return;
 
 		case -99:
@@ -501,7 +513,7 @@ namespace Iswenzz
 				{
 					b = msg.ReadBits(4);
 					v = ((16 * msg.ReadByte() + b) ^ ((signed int)*(float*)fromF + 2048)) - 2048;
-					*(float*)toF = (double)v;
+					*(float*)toF = (float)v;
 					LogIf(print, field->name << "{" << field->bits << "} = " << (int)v << std::endl);
 					return;
 				}
@@ -542,23 +554,23 @@ namespace Iswenzz
 		case -92:
 		case -91:
 			f = msg.ReadOriginFloat(bits, *(float*)fromF);
-			*(float*)toF = f;
+			*(float*)toF = (float)f;
 			LogIf(print, field->name << "{" << field->bits << "} = " << f << std::endl);
 			return;
 
 		case -90:
 			f = msg.ReadOriginZFloat(*(float*)fromF);
-			*(float*)toF = f;
+			*(float*)toF = (float)f;
 
 			LogIf(print, field->name << "{" << field->bits << "} = " << f << std::endl);
 			return;
 
 		case -87:
-			*(float*)toF = msg.ReadAngle16();
+			*(float*)toF = (float)msg.ReadAngle16();
 			return;
 
 		case -86:
-			*(float*)toF = (double)msg.ReadBits(5) / 10.0 + 1.399999976158142;
+			*(float*)toF = (float)((double)msg.ReadBits(5) / 10.0 + 1.399999976158142);
 			return;
 
 		case -85:
@@ -661,7 +673,7 @@ namespace Iswenzz
 				else
 					oldnum = 99999;
 			}
-			else if (newnum <= MAX_GENTITIES - 1)
+			else if (newnum <= (MAX_GENTITIES - 1))
 			{
 				++numChanged;
 				DeltaEntity(msg, time, to, newnum, &EntityBaselines[newnum]);
@@ -894,7 +906,7 @@ namespace Iswenzz
 	void Demo::ReadDeltaHudElems(Msg& msg, const int time, hudelem_t* from, hudelem_t* to, int count)
 	{
 		int alignY, alignX, inuse;
-		unsigned int lc;
+		int lc;
 		int i, y;
 
 		inuse = msg.ReadBits(5);
@@ -951,7 +963,7 @@ namespace Iswenzz
 		ReadDeltaClient(msg, time, old, state, newnum);
 
 		// Entity was delta removed
-		if (state->clientIndex == MAX_GENTITIES - 1)
+		if (state->clientIndex == (MAX_GENTITIES - 1))
 			return;
 
 		++ParseClientsNum;
