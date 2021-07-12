@@ -13,7 +13,7 @@ namespace Iswenzz
 		0, 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191,
 		16383, 32767, 65535, 131071, 262143, 524287, 1048575, 2097151,
 		4194303, 8388607, 16777215, 33554431, 67108863, 134217727,
-		268435455, 536870911, 1073741823, 2147483647, 4294967295
+		268435455, 536870911, 1073741823, 2147483647, 4294967295 // Yocairo: this last value doesn't actually fit inside an int
 	};
 
 	Msg::Msg(int protocol) : protocol(protocol) { }
@@ -124,7 +124,7 @@ namespace Iswenzz
 	int Msg::ReadByte()
 	{
 		unsigned char* c;
-		if (readcount + sizeof(unsigned char) > cursize)
+		if (readcount + (int)sizeof(unsigned char) > cursize)
 		{
 			overflowed = 1;
 			return -1;
@@ -138,7 +138,7 @@ namespace Iswenzz
 	int Msg::ReadShort()
 	{
 		signed short* c;
-		if (readcount + sizeof(short) > cursize) 
+		if (readcount + (int)sizeof(short) > cursize) 
 		{
 			overflowed = 1;
 			return -1;
@@ -153,7 +153,7 @@ namespace Iswenzz
 	{
 		int32_t* c;
 
-		if (readcount + sizeof(int32_t) > cursize) 
+		if (readcount + (int)sizeof(int32_t) > cursize) 
 		{
 			overflowed = 1;
 			return -1;
@@ -167,7 +167,7 @@ namespace Iswenzz
 	int64_t Msg::ReadInt64()
 	{
 		int64_t* c;
-		if (readcount + sizeof(int64_t) > cursize) 
+		if (readcount + (int)sizeof(int64_t) > cursize) 
 		{
 			overflowed = 1;
 			return -1;
@@ -181,7 +181,7 @@ namespace Iswenzz
 	float Msg::ReadFloat()
 	{
 		float* c;
-		if (readcount + sizeof(float) > cursize) 
+		if (readcount + (int)sizeof(float) > cursize) 
 		{
 			overflowed = 1;
 			return -1;
@@ -225,9 +225,9 @@ namespace Iswenzz
 		{
 			float center[3]{ 0, 0, 0 };
 			coord = (signed int)(center[bits != -92] + 0.5);
-			return (double)((((signed int)oldValue - coord + 0x8000) ^ ReadBits(16)) + coord - 0x8000);
+			return (float)((((signed int)oldValue - coord + 0x8000) ^ ReadBits(16)) + coord - 0x8000);
 		}
-		return (double)(ReadBits(7) - 64) + oldValue;
+		return (float)(ReadBits(7) - 64) + oldValue;
 	}
 
 	float Msg::ReadOriginZFloat(float oldValue)
@@ -238,9 +238,9 @@ namespace Iswenzz
 		{
 			float center[3]{ 0, 0, 0 };
 			coord = (signed int)(center[2] + 0.5);
-			return (double)((((signed int)oldValue - coord + 0x8000) ^ ReadBits(16)) + coord - 0x8000);
+			return (float)((((signed int)oldValue - coord + 0x8000) ^ ReadBits(16)) + coord - 0x8000);
 		}
-		return (double)(ReadBits(7) - 64) + oldValue;
+		return (float)(ReadBits(7) - 64) + oldValue;
 	}
 
 	std::string Msg::ReadString()

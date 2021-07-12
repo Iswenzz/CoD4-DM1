@@ -27,17 +27,27 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <memory>
 
+#define INPUT_FILE_LOC          "R:\\Games\\CoD4\\"
+#define INPUT_FILE_NAME         "demo0003"
+#define DEMO_FILE_EXTENSION     ".dm_1"
+#define OUTPUT_FILE_EXTENSION   DEMO_FILE_EXTENSION ".frames"
+
 using namespace Iswenzz;
 
 int main()
 {
     Huffman::InitMain(); // Initialize huffman compression
 
-    std::string demoPath = R"(C:\Users\Iswenzz\Desktop\test.dm_1)";
-    //std::string demoPath = R"(C:\Users\Iswenzz\Desktop\ez2.dm_1)";
-    std::cout << "Openning " << demoPath << " demo." << std::endl;
+    std::string demoPath =      INPUT_FILE_LOC INPUT_FILE_NAME DEMO_FILE_EXTENSION;
+    std::string outputPath =    INPUT_FILE_LOC INPUT_FILE_NAME OUTPUT_FILE_EXTENSION;
 
-    std::unique_ptr<Demo> demo = std::make_unique<Demo>(demoPath);
+    std::cout << "Opening demo: " << demoPath << std::endl;
+    std::cout << "Parsing frames to: " << outputPath << std::endl;
+
+    Demo *pDemo = new Demo(demoPath, outputPath);
+    delete pDemo; // Ensure the output file flushes
+
+    std::cout << "Finished parsing demo" << std::endl;
 
     return 0;
 }
