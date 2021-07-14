@@ -636,7 +636,7 @@ namespace Iswenzz
 			newnum = ReadEntityIndex(msg, GENTITYNUM_BITS);
 			if (newnum == 1023)
 				break;
-			if (msg.readcount > msg.cursize)
+			if (msg.readcount >= msg.cursize)
 				return -1;
 
 			while (oldnum < newnum && !msg.overflowed && oldstate)
@@ -716,7 +716,7 @@ namespace Iswenzz
 		{
 			VerboseLog("clientnum: " << newnum << std::endl);
 			newnum = ReadEntityIndex(msg, 5);
-			if (msg.readcount > msg.cursize)
+			if (msg.readcount >= msg.cursize)
 				return;
 
 			while (oldnum < newnum)
