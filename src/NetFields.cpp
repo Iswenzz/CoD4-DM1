@@ -1,5 +1,6 @@
 #include "NetFields.hpp"
 #include "DemoData.hpp"
+#include <intrin.h>
 
 #ifdef _MSC_VER
 #define __clz __lzcnt

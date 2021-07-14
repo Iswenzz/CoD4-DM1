@@ -221,6 +221,12 @@ namespace Iswenzz
 	{
 		signed int coord;
 
+		if (protocol > 17)
+		{
+			int intf = ReadInt();
+			return *(float*)&intf;
+		}
+
 		if (ReadBit())
 		{
 			float center[3]{ 0, 0, 0 };
@@ -233,6 +239,12 @@ namespace Iswenzz
 	float Msg::ReadOriginZFloat(float oldValue)
 	{
 		signed int coord;
+
+		if (protocol > 17)
+		{
+			int intf = ReadInt();
+			return *(float*)&intf;
+		}
 
 		if (ReadBit())
 		{

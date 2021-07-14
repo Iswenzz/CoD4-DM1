@@ -97,7 +97,10 @@ namespace Iswenzz
 			switch (command)
 			{
 			case svc_ops_e::svc_gamestate:
-				ParseGamestateX(CurrentUncompressedMsg);
+				if (Protocol == 16)
+					ParseGamestate(CurrentUncompressedMsg);
+				else
+					ParseGamestateX(CurrentUncompressedMsg);
 				break;
 			case svc_ops_e::svc_serverCommand:
 				ParseCommandString(CurrentUncompressedMsg);
@@ -159,6 +162,8 @@ namespace Iswenzz
 		DemoFile.read(reinterpret_cast<char*>(&Protocol), sizeof(uint32_t));
 		DemoFile.read(reinterpret_cast<char*>(&legacyEnd), sizeof(int));
 		DemoFile.read(reinterpret_cast<char*>(&reserved), sizeof(uint64_t));
+
+		std::cout << "Protocol: " << Protocol << std::endl;
 	}
 
 	void Demo::ParseGamestate(Msg& msg)
@@ -631,7 +636,7 @@ namespace Iswenzz
 			newnum = ReadEntityIndex(msg, GENTITYNUM_BITS);
 			if (newnum == 1023)
 				break;
-			if (msg.readcount > msg.cursize)
+			if (msg.readcount >= msg.cursize)
 				return -1;
 
 			while (oldnum < newnum && !msg.overflowed && oldstate)
@@ -711,7 +716,7 @@ namespace Iswenzz
 		{
 			VerboseLog("clientnum: " << newnum << std::endl);
 			newnum = ReadEntityIndex(msg, 5);
-			if (msg.readcount > msg.cursize)
+			if (msg.readcount >= msg.cursize)
 				return;
 
 			while (oldnum < newnum)
@@ -948,7 +953,8 @@ namespace Iswenzz
 
 		if (unchanged)
 			std::memcpy(state, old, sizeof(clientState_s));
-		ReadDeltaClient(msg, time, old, state, newnum);
+		else
+			ReadDeltaClient(msg, time, old, state, newnum);
 
 		// Entity was delta removed
 		if (state->clientIndex == MAX_GENTITIES - 1)

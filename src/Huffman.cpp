@@ -44,80 +44,36 @@ namespace Iswenzz
 
 	int Huffman::Decompress(unsigned char* bufIn, int lenIn, unsigned char* bufOut, int lenOut)
 	{
-		unsigned char* pOut = 0;
-		bloc = 0;
-		if (lenIn <= 0 || lenOut <= 0)
-			return -1;
+		lenIn *= 8;
+		unsigned char* outptr = bufOut;
 
-		*reinterpret_cast<unsigned char*>((reinterpret_cast<int>(bufIn) + lenIn)) = 0;
-		int cch = lenOut, c = 0, ch = 0;
+		int get;
+		int offset;
+		int i;
 
-		for (int j = 0; j <= cch; j++)
+		if (lenIn <= 0)
+			return 0;
+
+		for (offset = 0, i = 0; offset < lenIn && i < lenOut; i++) 
 		{
-			pOut = reinterpret_cast<unsigned char*>((reinterpret_cast<int>(bufOut) + j));
-			ch = 0;
-
-			if (bloc >> 3 > lenIn)
-			{
-				*pOut = 0;
-				break;
-			}
-			Huff_Receive(msgHuff.decompressor.tree, &ch, bufIn);
-
-			if (ch == NYT)
-			{
-				ch = 0;
-				for (int i = 0; i < 7; i++)
-					ch <<= 1 + GetBit(bufIn);
-			}
-			*pOut = static_cast<unsigned char>(ch);
-
-			c++;
-			if (c >= lenOut)
-				break;
+			Huff_OffsetReceive(msgHuff.decompressor.tree, &get, bufIn, &offset);
+			*outptr = (unsigned char)get;
+			outptr++;
 		}
-		
-		lenOut = c;
-		return lenOut;
+		return i;
 	}
 
 	int Huffman::Compress(unsigned char* bufIn, int lenIn, unsigned char* bufOut, int lenOut)
 	{
-		unsigned char* pIn = 0;
-		int ch = 0;
+		int offset;
+		int i;
 
-		bloc = 0;
-		if (lenIn <= 0 || lenOut <= 0)
-			return -1;
+		if (lenIn <= 0)
+			return 0;
 
-		for (int i = 0; i <= lenIn; i++)
-		{
-			pIn = reinterpret_cast<unsigned char*>(reinterpret_cast<int>(bufIn) + i);
-			ch = *pIn;
-
-			if ((bloc & 7) == 0)
-				*reinterpret_cast<unsigned char*>(reinterpret_cast<int>(bufOut) + bloc >> 3) = 0;
-			Huff_Transmit(&msgHuff.compressor, ch, bufOut);
-
-			if (bloc << 3 >= lenOut)
-				break;
-		}
-
-		if ((bloc & 7) != 0)
-		{
-			int i = bloc << 3;
-			while ((bloc << 3) == i)
-			{
-				ch = 0x6;
-				Huff_Transmit(&msgHuff.compressor, ch, bufOut);
-
-				if (bloc << 3 >= lenOut)
-					break;
-			}
-		}
-
-		lenOut = bloc << 3;
-		return lenOut;
+		for (offset = 0, i = 0; i < lenIn; i++)
+			Huff_OffsetTransmit(&msgHuff.compressor, (int)bufIn[i], bufOut, &offset);
+		return (offset + 7) / 8;
 	}
 
 	void Huffman::Huff_PutBit(int bit, unsigned char* fout, int* offset) 
