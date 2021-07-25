@@ -1,8 +1,8 @@
 # CoD4 DM1
-Reverse CoD4x & 1.7 ``.DM_1`` demo files.
+Reverse CoD4 & CoD4X ``.DM_1`` demo files.
 
 ## Working
-* CoD4x & 1.7 Header
+* Protocol 16/17/18
 * Read snapshots and frames
 * Parsing gamestate
 * Parsing snapshot
@@ -13,11 +13,7 @@ Reverse CoD4x & 1.7 ``.DM_1`` demo files.
 * Msg parsing
 
 ## TODO
-* CoD4x gamestate
-* CoD4X config client data
 * Some delta field are not parsed correctly
-* Copy old/new frames
-* Detect game version
 * API
 
 ## Building
