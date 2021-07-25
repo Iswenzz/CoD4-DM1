@@ -397,14 +397,15 @@ namespace Iswenzz
 		return value;
 	}
 
-	void Demo::ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to, unsigned int number,
+	bool Demo::ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to, unsigned int number,
 		int numFields, int indexBits, netField_t* stateFields)
 	{
 		if (msg.ReadBit() == 1)
-			return;
+			return true;
 		*(uint32_t*)to = number;
 		ReadDeltaFields(msg, time, reinterpret_cast<const unsigned char*>(from),
 			reinterpret_cast<unsigned char*>(to), numFields, stateFields);
+		return false;
 	}
 
 	void Demo::ReadDeltaFields(Msg& msg, const int time, const unsigned char* from, unsigned char* to,
@@ -417,7 +418,7 @@ namespace Iswenzz
 			std::memcpy(to, from, 4 * numFields + 4);
 			return;
 		}
-		lc = ReadLastChangedField(msg, 0x3D);
+		lc = ReadLastChangedField(msg, numFields);
 
 		if (lc > numFields)
 		{
@@ -815,17 +816,17 @@ namespace Iswenzz
 		return lastChanged;
 	}
 
-	void Demo::ReadDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, int number)
+	bool Demo::ReadDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, int number)
 	{
 		int numFields = sizeof(entityStateFields) / sizeof(entityStateFields[0]);
-		ReadDeltaStruct(msg, time, (unsigned char*)from, (unsigned char*)to, number,
+		return ReadDeltaStruct(msg, time, (unsigned char*)from, (unsigned char*)to, number,
 			numFields, GetMinBitCount(MAX_CLIENTS - 1), entityStateFields);
 	}
 
-	void Demo::ReadDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, int number)
+	bool Demo::ReadDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, int number)
 	{
 		int numFields = sizeof(clientStateFields) / sizeof(clientStateFields[0]);
-		ReadDeltaStruct(msg, time, (unsigned char*)from, (unsigned char*)to, number,
+		return ReadDeltaStruct(msg, time, (unsigned char*)from, (unsigned char*)to, number,
 			numFields, GetMinBitCount(MAX_CLIENTS - 1), clientStateFields);
 	}
 
@@ -1006,9 +1007,11 @@ namespace Iswenzz
 
 	void Demo::DeltaEntity(Msg& msg, const int time, clientSnapshot_t* frame, int newnum, entityState_t* old)
 	{
-		ReadDeltaEntity(msg, time, old, &ParseEntities[ParseEntitiesNum & MAX_PARSE_ENTITIES - 1], newnum);
-		++ParseEntitiesNum;
-		++frame->numEntities;
+		if (!ReadDeltaEntity(msg, time, old, &ParseEntities[ParseEntitiesNum & MAX_PARSE_ENTITIES - 1], newnum))
+		{
+			++ParseEntitiesNum;
+			++frame->numEntities;
+		}
 	}
 
 	void Demo::DeltaClient(Msg& msg, const int time, clientSnapshot_t* frame, int newnum, 

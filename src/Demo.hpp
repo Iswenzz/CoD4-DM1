@@ -171,7 +171,7 @@ namespace Iswenzz
 		/// <param name="numFields">Struct field count.</param>
 		/// <param name="indexBits">Min bit count.</param>
 		/// <param name="stateFields">Netfield fields.</param>
-		void ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to,
+		bool ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to,
 			unsigned int number, int numFields, int indexBits, netField_t* stateFields);
 
 		/// <summary>
@@ -208,7 +208,7 @@ namespace Iswenzz
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="number">Entity number.</param>
 		/// <param name="isBaseLine">Is it a baseline entity.</param>
-		void ReadDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, int number);
+		bool ReadDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, int number);
 
 		/// <summary>
 		/// Read a delta compressed client state.
@@ -218,7 +218,7 @@ namespace Iswenzz
 		/// <param name="from">Pointer to the old struct state.</param>
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="number">Entity number.</param>
-		void ReadDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, int number);
+		bool ReadDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, int number);
 
 		/// <summary>
 		/// Read a delta compressed objective struct.
