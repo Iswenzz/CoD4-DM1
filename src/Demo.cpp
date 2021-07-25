@@ -219,6 +219,11 @@ namespace Iswenzz
 				break;
 			currIndex++;
 		}
+
+		int clientNum = msg.ReadInt();
+		if (clientNum >= 64 || clientNum < 0)
+			return;
+		int checksumFeed = msg.ReadInt();
 	}
 
 	void Demo::ParseGamestateX(Msg& msg)
@@ -282,6 +287,18 @@ namespace Iswenzz
 				break;
 			currIndex++;
 		}
+
+		int serverConfigDataSequence = msg.ReadInt();
+		int clientNum = msg.ReadInt();
+		if (clientNum >= 64 || clientNum < 0)
+			return;
+		int checksumFeed = msg.ReadInt();
+
+		if (Protocol != 17)
+		{
+			int dbchecksumFeed = msg.ReadInt();
+			//DB_SetPureChecksumFeed(dbchecksumFeed);
+		}
 	}
 
 	void Demo::ParseCommandString(Msg& msg)
@@ -306,13 +323,32 @@ namespace Iswenzz
 		CurrentSnapshot.deltaNum = !deltaNum ? -1 : CurrentSnapshot.messageNum - deltaNum;
 		CurrentSnapshot.snapFlags = msg.ReadByte();
 
-		if (CurrentSnapshot.deltaNum <= 0)
-			CurrentSnapshot.valid = true;
-		else
+		// Integrity checks
+		if (CurrentSnapshot.deltaNum > 0) 
 		{
 			old = Snapshots[CurrentSnapshot.deltaNum & PACKET_MASK];
-			CurrentSnapshot.valid = old.valid;
+			if (!old.valid) 
+			{
+				msg.Discard();
+				return;
+			}
+			if (Snapshots[CurrentSnapshot.deltaNum & PACKET_MASK].messageNum != CurrentSnapshot.deltaNum) 
+			{
+				msg.Discard();
+				return;
+			}
+			if (ParseEntitiesNum - Snapshots[CurrentSnapshot.deltaNum & PACKET_MASK].parseEntitiesNum > 1920) 
+			{
+				msg.Discard();
+				return;
+			}
+			if (ParseClientsNum - Snapshots[CurrentSnapshot.deltaNum & PACKET_MASK].parseClientsNum > 1920) 
+			{
+				msg.Discard();
+				return;
+			}
 		}
+		CurrentSnapshot.valid = true;
 
 		if (old.valid)
 			ReadDeltaPlayerState(msg, CurrentSnapshot.serverTime, &old.ps, &CurrentSnapshot.ps, true);
@@ -381,7 +417,7 @@ namespace Iswenzz
 			std::memcpy(to, from, 4 * numFields + 4);
 			return;
 		}
-		lc = ReadLastChangedField(msg, numFields);
+		lc = ReadLastChangedField(msg, 0x3D);
 
 		if (lc > numFields)
 		{
@@ -636,8 +672,11 @@ namespace Iswenzz
 			newnum = ReadEntityIndex(msg, GENTITYNUM_BITS);
 			if (newnum == 1023)
 				break;
-			if (msg.readcount >= msg.cursize)
+			if (msg.readcount > msg.cursize)
+			{
+				VerboseLog("Error parsing entities");
 				return -1;
+			}
 
 			while (oldnum < newnum && !msg.overflowed && oldstate)
 			{
@@ -666,7 +705,7 @@ namespace Iswenzz
 				else
 					oldnum = 99999;
 			}
-			else if (newnum <= MAX_GENTITIES - 1)
+			else
 			{
 				++numChanged;
 				DeltaEntity(msg, time, to, newnum, &EntityBaselines[newnum]);
@@ -716,8 +755,11 @@ namespace Iswenzz
 		{
 			VerboseLog("clientnum: " << newnum << std::endl);
 			newnum = ReadEntityIndex(msg, 5);
-			if (msg.readcount >= msg.cursize)
+			if (msg.readcount > msg.cursize)
+			{
+				VerboseLog("Error parsing clients");
 				return;
+			}
 
 			while (oldnum < newnum)
 			{
@@ -791,6 +833,15 @@ namespace Iswenzz
 		bool predictedFieldsIgnoreXor)
 	{
 		int i, j;
+		playerState_t dst;
+
+		if (!from)
+		{
+			from = &dst;
+			std::memset(&dst, 0, sizeof(dst));
+		}
+		std::memcpy(to, from, sizeof(playerState_t));
+
 		bool readOriginAndVel = msg.ReadBit() > 0;
 		int lastChangedField = msg.ReadBits(GetMinBitCount(PLAYER_STATE_FIELDS_COUNT));
 
@@ -807,18 +858,33 @@ namespace Iswenzz
 			*(uint32_t*)&((unsigned char*)to)[offset] = *(uint32_t*)&((unsigned char*)from)[offset];
 		}
 
+		if (!readOriginAndVel) 
+		{
+			if (!GetPredictedOriginForServerTime(to->commandTime, to->origin, 
+				to->velocity, to->viewangles, &to->bobCycle, &to->movementDir)) 
+			{
+				VectorCopy(from->origin, to->origin);
+				VectorCopy(from->velocity, to->velocity);
+				VectorCopy(from->viewangles, to->viewangles);
+
+				to->bobCycle = from->bobCycle;
+				to->movementDir = from->movementDir;
+			}
+		}
+
 		// Stats
 		if (msg.ReadBit())
 		{
 			int statsbits = msg.ReadBits(5);
-			for (i = 0; i < 3; i++)
-			{
-				if (statsbits & (1 << i))
-					to->stats[i] = msg.ReadShort();
-			}
+			if (statsbits & 1)
+				to->stats[0] = msg.ReadShort();
+			if (statsbits & 2)
+				to->stats[1] = msg.ReadShort();
+			if (statsbits & 4)
+				to->stats[2] = msg.ReadShort();
 			if (statsbits & 8)
 				to->stats[3] = msg.ReadBits(6);
-			if (statsbits & 0x10)
+			if (statsbits & 16)
 				to->stats[4] = msg.ReadByte();
 		}
 
@@ -962,5 +1028,36 @@ namespace Iswenzz
 
 		++ParseClientsNum;
 		++frame->numClients;
+	}
+
+	bool Demo::GetPredictedOriginForServerTime(const int serverTime, float* predictedOrigin, float* predictedVelocity, float* predictedViewangles, int* bobCycle, int* movementDir)
+	{
+		int index = -1;
+		int counter = 0;
+
+		for (int i = LastFrameSrvMsgSeq; counter <= 256; --i, ++counter) 
+		{
+			i += 256;
+			i %= 256;
+
+			if (Frames[i].commandTime <= serverTime) 
+			{
+				index = i;
+				break;
+			}
+		}
+
+		if (index < 0)
+			return false;
+		else 
+		{
+			VectorCopy(Frames[index].origin, predictedOrigin);
+			VectorCopy(Frames[index].velocity, predictedVelocity);
+			VectorCopy(Frames[index].angles, predictedViewangles);
+
+			*bobCycle = Frames[index].bobCycle;
+			*movementDir = Frames[index].movementDir;
+			return true;
+		}
 	}
 }

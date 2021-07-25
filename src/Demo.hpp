@@ -306,5 +306,8 @@ namespace Iswenzz
 		/// <param name="unchanged">Should not update.</param>
 		void DeltaClient(Msg& msg, const int time, clientSnapshot_t* frame, int newnum,
 			clientState_t* old, bool unchanged);
+
+		bool GetPredictedOriginForServerTime(const int serverTime, float* predictedOrigin, 
+			float* predictedVelocity, float* predictedViewangles, int* bobCycle, int* movementDir);
 	};
 }
