@@ -1022,11 +1022,7 @@ namespace Iswenzz
 
 		if (unchanged)
 			std::memcpy(state, old, sizeof(clientState_s));
-		else
-			ReadDeltaClient(msg, time, old, state, newnum);
-
-		// Entity was delta removed
-		if (state->clientIndex == MAX_GENTITIES - 1)
+		else if (ReadDeltaClient(msg, time, old, state, newnum))
 			return;
 
 		++ParseClientsNum;
