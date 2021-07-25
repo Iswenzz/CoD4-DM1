@@ -22,13 +22,22 @@ namespace Iswenzz
 
 	void Demo::Open(std::string filepath)
 	{
-		if (IsDemoOpen)
+		if (IsOpen)
 			Close();
-		IsDemoOpen = true;
-		DemoFilePath = filepath;
+		IsOpen = true;
+		Filepath = filepath;
 
 		DemoFile.open(filepath, std::ios::binary);
-		while (DemoFile.is_open() && CurrentCompressedMsg.srvMsgSeq != -1)
+	}
+
+	void Demo::Parse()
+	{
+		while (Next());
+	}
+
+	bool Demo::Next()
+	{
+		if (DemoFile.is_open() && CurrentCompressedMsg.srvMsgSeq != -1)
 		{
 			MSGType msgType = { };
 			DemoFile.read(reinterpret_cast<char*>(&msgType), sizeof(char));
@@ -40,7 +49,7 @@ namespace Iswenzz
 				ReadMessage();
 				break;
 			case MSGType::MSG_FRAME:
-				ReadArchive();	
+				ReadArchive();
 				break;
 			case MSGType::MSG_PROTOCOL:
 				ReadProtocol();
@@ -49,14 +58,16 @@ namespace Iswenzz
 				std::cout << "reliable msg" << std::endl;
 				break;
 			}
+			return true;
 		}
+		return false;
 	}
 
 	void Demo::Close()
 	{ 
 		if (DemoFile.is_open())
 			DemoFile.close();
-		IsDemoOpen = false;
+		IsOpen = false;
 	}
 
 	void Demo::ReadMessage()
@@ -362,10 +373,6 @@ namespace Iswenzz
 
 		// Clients State
 		ParsePacketClients(msg, CurrentSnapshot.serverTime, &old, &CurrentSnapshot);
-
-		// Dump if not valid
-		if (!CurrentSnapshot.valid)
-			return;
 
 		/* Clear the valid flags of any snapshots between the last received and this one,
 			so if there was a dropped packet it won't look like something valid to delta from next time
@@ -1029,7 +1036,7 @@ namespace Iswenzz
 		++frame->numClients;
 	}
 
-	bool Demo::GetPredictedOriginForServerTime(const int serverTime, float* predictedOrigin, float* predictedVelocity, float* predictedViewangles, int* bobCycle, int* movementDir)
+	bool Demo::GetPredictedOriginForServerTime(const int time, float* predictedOrigin, float* predictedVelocity, float* predictedViewangles, int* bobCycle, int* movementDir)
 	{
 		int index = -1;
 		int counter = 0;
@@ -1039,7 +1046,7 @@ namespace Iswenzz
 			i += 256;
 			i %= 256;
 
-			if (Frames[i].commandTime <= serverTime) 
+			if (Frames[i].commandTime <= time)
 			{
 				index = i;
 				break;

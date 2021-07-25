@@ -13,8 +13,8 @@ namespace Iswenzz
 	class Demo
 	{
 	public:
-		std::string DemoFilePath;
-		bool IsDemoOpen = false;
+		std::string Filepath;
+		bool IsOpen = false;
 
 		/// <summary>
 		/// Initialize a new Demo object, demo file can be opened with the Open() function.
@@ -44,6 +44,17 @@ namespace Iswenzz
 		/// </summary>
 		/// <param name="filepath">File path to a demo file (.dm_1).</param>
 		void Open(std::string filepath);
+
+		/// <summary>
+		/// Parse the opened demo file.
+		/// </summary>
+		void Parse();
+
+		/// <summary>
+		/// Reads the next demo message.
+		/// </summary>
+		/// <returns></returns>
+		bool Next();
 
 		/// <summary>
 		/// Close the demo file and free resources.
@@ -307,7 +318,16 @@ namespace Iswenzz
 		void DeltaClient(Msg& msg, const int time, clientSnapshot_t* frame, int newnum,
 			clientState_t* old, bool unchanged);
 
-		bool GetPredictedOriginForServerTime(const int serverTime, float* predictedOrigin, 
-			float* predictedVelocity, float* predictedViewangles, int* bobCycle, int* movementDir);
+		/// <summary>
+		/// Get a predicted origin for server time.
+		/// </summary>
+		/// <param name="time">Server time.</param>
+		/// <param name="predictedOrigin">The origin to predict.</param>
+		/// <param name="predictedVelocity">The velocity to predict.</param>
+		/// <param name="predictedViewangles">The viewangles to predict.</param>
+		/// <param name="bobCycle">Bob cycle value</param>
+		/// <param name="movementDir">Movement direction.</param>
+		bool GetPredictedOriginForServerTime(const int time, float* predictedOrigin, float* predictedVelocity, 
+			float* predictedViewangles, int* bobCycle, int* movementDir);
 	};
 }
