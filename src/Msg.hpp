@@ -84,7 +84,7 @@ namespace Iswenzz
 
 		int	maxsize = 0;
 		int	cursize = 0;
-		int	splitSize = 0;
+		int	splitsize = 0;
 		int	readcount = 0;
 		int	bit = 0;
 		int lastRefEntity = 0;
@@ -239,5 +239,10 @@ namespace Iswenzz
 		/// Clear the last referenced entity.
 		/// </summary>
 		void ClearLastReferencedEntity();
+
+		/// <summary>
+		/// Discard the message.
+		/// </summary>
+		void Discard();
 	};
 }

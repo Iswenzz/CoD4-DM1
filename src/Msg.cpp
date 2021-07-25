@@ -63,7 +63,7 @@ namespace Iswenzz
 		oldbit7 = bit & 7;
 		if (!oldbit7)
 		{
-			if (readcount >= cursize + splitSize)
+			if (readcount >= cursize + splitsize)
 			{
 				overflowed = 1;
 				return -1;
@@ -96,7 +96,7 @@ namespace Iswenzz
 			{
 				if (!(bit & 7))
 				{
-					if (readcount >= splitSize + cursize)
+					if (readcount >= splitsize + cursize)
 					{
 						overflowed = 1;
 						return -1;
@@ -353,5 +353,12 @@ namespace Iswenzz
 	void Msg::ClearLastReferencedEntity()
 	{
 		lastRefEntity = -1;
+	}
+
+	void Msg::Discard()
+	{
+		cursize = readcount;
+		splitsize = 0;
+		overflowed = true;
 	}
 }
