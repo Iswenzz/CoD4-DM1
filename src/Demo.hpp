@@ -14,7 +14,60 @@ namespace Iswenzz
 	{
 	public:
 		std::string Filepath;
+		std::ifstream DemoFile;
 		bool IsOpen = false;
+		bool Verbose;
+
+		int Protocol = 16;
+
+		bool MatchInProgress = false;
+		int StartFrameTime = 0;
+		int CurrentFrameTime = 0;
+		int LastFrameSrvMsgSeq = 0;
+		int FirstFrameSrvMsgSeq = 0;
+
+		int MatchNum = 0;
+		int RoundNum = 0;
+		int ClientNum = 0;
+		int TeamNum = 0;
+		int PlayerClientNum = 0;
+		int PlayerClientNumOld = 0;
+		int KillCamEntity = 0;
+		int KillCamEntityOld = 0;
+		bool DemoStartedInKillCam = 0;
+		int ChecksumFeed = 0;
+		int ServerCommandSequence = 0;
+		clientSnapshot_t CurrentSnapshot = { 0 };
+		float LerpPosOffsets[3] = { 0, 0, 0 };
+		int IsNewRound = 0;
+
+		bool ModDM = false;
+		std::string TeamNameAllies;
+		std::string TeamScoreAllies;
+		std::string TeamNameAxis;
+		std::string TeamScoreAxis;
+		std::string DefaultWeapon_mp;
+		std::string FogParams;
+
+		int ServCmdSequence = 0;
+		int ParseEntitiesNum = 0;
+		int WriteEntitiesNum = 0;
+		int ParseClientsNum = 0;
+		int WriteClientsNum = 0;
+		int SnapMessageNum = 0;
+
+		std::array<std::string, MAX_CMDSTRINGS> CommandStrings{ };
+		std::array<std::string, MAX_CONFIGSTRINGS> ValidConfigStrings{ };
+		std::array<std::string, MAX_CONFIGSTRINGS> ConfigStrings{ };
+		std::array<entityState_t, MAX_GENTITIES> EntityBaselines{ };
+		std::array<entityState_t, MAX_PARSE_ENTITIES> ParseEntities{ };
+		std::array<clientState_t, MAX_PARSE_CLIENTS> ParseClients{ };
+		std::array<clientSnapshot_t, PACKET_BACKUP> Snapshots{ };
+		std::array<archivedFrame_t, MAX_FRAMES> Frames{ };
+
+		std::array<unsigned char, MAX_GENTITIES> ActiveBaselines{ };
+		std::array<unsigned char, MAX_GENTITIES> ActiveEntities{ };
+		std::array<clientState_t, MAX_CLIENTS> ActiveClients{ };
 
 		/// <summary>
 		/// Initialize a new Demo object, demo file can be opened with the Open() function.
@@ -62,68 +115,13 @@ namespace Iswenzz
 		void Close();
 
 	private:
-		std::ifstream DemoFile;
-		std::string FilePath;
-		bool Verbose;
-
-		int Protocol = 16;
-
 		Msg CurrentCompressedMsg = { };
 		Msg CurrentUncompressedMsg = { };
 		Msg CurrentWritingMsg = { };
 
-		bool MatchInProgress = false;
-		int StartFrameTime = 0;
-		int CurrentFrameTime = 0;
-		int LastFrameSrvMsgSeq = 0;
-		int FirstFrameSrvMsgSeq = 0;
-
-		int MatchNum = 0;
-		int RoundNum = 0;
-		int ClientNum = 0;
-		int TeamNum = 0;
-		int PlayerClientNum = 0;
-		int PlayerClientNumOld = 0;
-		int KillCamEntity = 0;
-		int KillCamEntityOld = 0;
-		bool DemoStartedInKillCam = 0;
-		int ChecksumFeed = 0;
-		int ServerCommandSequence = 0;
-		clientSnapshot_t CurrentSnapshot = { 0 };
-		float LerpPosOffsets[3] = { 0, 0, 0 };
-		int IsNewRound = 0;
-
-		bool ModDM = false;
-		std::string TeamNameAllies;
-		std::string TeamScoreAllies;
-		std::string TeamNameAxis;
-		std::string TeamScoreAxis;
-		std::string DefaultWeapon_mp;
-		std::string FogParams;
-
-		int ServCmdSequence = 0;
-		int ParseEntitiesNum = 0;
-		int WriteEntitiesNum = 0;
-		int ParseClientsNum = 0;
-		int WriteClientsNum = 0;
-		int SnapMessageNum = 0;
-
 		playerState_t NullPlayerState = { 0 };
 		entityState_t NullEntityState = { 0 };
 		clientState_t NullClientState = { 0 };
-
-		std::array<std::string, MAX_CMDSTRINGS> CommandStrings{ };
-		std::array<std::string, MAX_CONFIGSTRINGS> ValidConfigStrings{ };
-		std::array<std::string, MAX_CONFIGSTRINGS> ConfigStrings{ };
-		std::array<entityState_t, MAX_GENTITIES> EntityBaselines{ };
-		std::array<entityState_t, MAX_PARSE_ENTITIES> ParseEntities{ };
-		std::array<clientState_t, MAX_PARSE_CLIENTS> ParseClients{ };
-		std::array<clientSnapshot_t, PACKET_BACKUP> Snapshots{ };
-		std::array<archivedFrame_t, MAX_FRAMES> Frames{ };
-
-		std::array<unsigned char, MAX_GENTITIES> ActiveBaselines{ };
-		std::array<unsigned char, MAX_GENTITIES> ActiveEntities{ };
-		std::array<clientState_t, MAX_CLIENTS> ActiveClients{ };
 
 		/// <summary>
 		/// Read the message.

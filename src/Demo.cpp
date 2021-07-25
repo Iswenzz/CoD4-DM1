@@ -5,12 +5,12 @@
 
 namespace Iswenzz
 {
-	Demo::Demo(std::string filepath) : FilePath(filepath), Verbose(false)
+	Demo::Demo(std::string filepath) : Filepath(filepath), Verbose(false)
 	{
 		Open(filepath);
 	}
 
-	Demo::Demo(std::string filepath, bool verbose) : FilePath(filepath), Verbose(verbose)
+	Demo::Demo(std::string filepath, bool verbose) : Filepath(filepath), Verbose(verbose)
 	{
 		Open(filepath);
 	}
