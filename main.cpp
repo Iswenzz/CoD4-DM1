@@ -39,6 +39,7 @@ int main()
     std::cout << "Openning " << demoPath << " demo." << std::endl;
 
     std::unique_ptr<Demo> demo = std::make_unique<Demo>(demoPath);
+    demo->Parse();
 
     return 0;
 }

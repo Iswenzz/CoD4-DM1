@@ -22,13 +22,22 @@ namespace Iswenzz
 
 	void Demo::Open(std::string filepath)
 	{
-		if (IsDemoOpen)
+		if (IsOpen)
 			Close();
-		IsDemoOpen = true;
-		DemoFilePath = filepath;
+		IsOpen = true;
+		Filepath = filepath;
 
 		DemoFile.open(filepath, std::ios::binary);
-		while (DemoFile.is_open() && CurrentCompressedMsg.srvMsgSeq != -1)
+	}
+
+	void Demo::Parse()
+	{
+		while (Next());
+	}
+
+	bool Demo::Next()
+	{
+		if (DemoFile.is_open() && CurrentCompressedMsg.srvMsgSeq != -1)
 		{
 			MSGType msgType = { };
 			DemoFile.read(reinterpret_cast<char*>(&msgType), sizeof(char));
@@ -40,7 +49,7 @@ namespace Iswenzz
 				ReadMessage();
 				break;
 			case MSGType::MSG_FRAME:
-				ReadArchive();	
+				ReadArchive();
 				break;
 			case MSGType::MSG_PROTOCOL:
 				ReadProtocol();
@@ -49,14 +58,16 @@ namespace Iswenzz
 				std::cout << "reliable msg" << std::endl;
 				break;
 			}
+			return true;
 		}
+		return false;
 	}
 
 	void Demo::Close()
 	{ 
 		if (DemoFile.is_open())
 			DemoFile.close();
-		IsDemoOpen = false;
+		IsOpen = false;
 	}
 
 	void Demo::ReadMessage()
@@ -363,10 +374,6 @@ namespace Iswenzz
 		// Clients State
 		ParsePacketClients(msg, CurrentSnapshot.serverTime, &old, &CurrentSnapshot);
 
-		// Dump if not valid
-		if (!CurrentSnapshot.valid)
-			return;
-
 		/* Clear the valid flags of any snapshots between the last received and this one,
 			so if there was a dropped packet it won't look like something valid to delta from next time
 			we wrap around in the buffer. */
@@ -397,14 +404,15 @@ namespace Iswenzz
 		return value;
 	}
 
-	void Demo::ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to, unsigned int number,
+	bool Demo::ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to, unsigned int number,
 		int numFields, int indexBits, netField_t* stateFields)
 	{
 		if (msg.ReadBit() == 1)
-			return;
+			return true;
 		*(uint32_t*)to = number;
 		ReadDeltaFields(msg, time, reinterpret_cast<const unsigned char*>(from),
 			reinterpret_cast<unsigned char*>(to), numFields, stateFields);
+		return false;
 	}
 
 	void Demo::ReadDeltaFields(Msg& msg, const int time, const unsigned char* from, unsigned char* to,
@@ -417,7 +425,7 @@ namespace Iswenzz
 			std::memcpy(to, from, 4 * numFields + 4);
 			return;
 		}
-		lc = ReadLastChangedField(msg, 0x3D);
+		lc = ReadLastChangedField(msg, numFields);
 
 		if (lc > numFields)
 		{
@@ -815,17 +823,17 @@ namespace Iswenzz
 		return lastChanged;
 	}
 
-	void Demo::ReadDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, int number)
+	bool Demo::ReadDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, int number)
 	{
 		int numFields = sizeof(entityStateFields) / sizeof(entityStateFields[0]);
-		ReadDeltaStruct(msg, time, (unsigned char*)from, (unsigned char*)to, number,
+		return ReadDeltaStruct(msg, time, (unsigned char*)from, (unsigned char*)to, number,
 			numFields, GetMinBitCount(MAX_CLIENTS - 1), entityStateFields);
 	}
 
-	void Demo::ReadDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, int number)
+	bool Demo::ReadDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, int number)
 	{
 		int numFields = sizeof(clientStateFields) / sizeof(clientStateFields[0]);
-		ReadDeltaStruct(msg, time, (unsigned char*)from, (unsigned char*)to, number,
+		return ReadDeltaStruct(msg, time, (unsigned char*)from, (unsigned char*)to, number,
 			numFields, GetMinBitCount(MAX_CLIENTS - 1), clientStateFields);
 	}
 
@@ -1006,9 +1014,11 @@ namespace Iswenzz
 
 	void Demo::DeltaEntity(Msg& msg, const int time, clientSnapshot_t* frame, int newnum, entityState_t* old)
 	{
-		ReadDeltaEntity(msg, time, old, &ParseEntities[ParseEntitiesNum & MAX_PARSE_ENTITIES - 1], newnum);
-		++ParseEntitiesNum;
-		++frame->numEntities;
+		if (!ReadDeltaEntity(msg, time, old, &ParseEntities[ParseEntitiesNum & MAX_PARSE_ENTITIES - 1], newnum))
+		{
+			++ParseEntitiesNum;
+			++frame->numEntities;
+		}
 	}
 
 	void Demo::DeltaClient(Msg& msg, const int time, clientSnapshot_t* frame, int newnum, 
@@ -1019,18 +1029,14 @@ namespace Iswenzz
 
 		if (unchanged)
 			std::memcpy(state, old, sizeof(clientState_s));
-		else
-			ReadDeltaClient(msg, time, old, state, newnum);
-
-		// Entity was delta removed
-		if (state->clientIndex == MAX_GENTITIES - 1)
+		else if (ReadDeltaClient(msg, time, old, state, newnum))
 			return;
 
 		++ParseClientsNum;
 		++frame->numClients;
 	}
 
-	bool Demo::GetPredictedOriginForServerTime(const int serverTime, float* predictedOrigin, float* predictedVelocity, float* predictedViewangles, int* bobCycle, int* movementDir)
+	bool Demo::GetPredictedOriginForServerTime(const int time, float* predictedOrigin, float* predictedVelocity, float* predictedViewangles, int* bobCycle, int* movementDir)
 	{
 		int index = -1;
 		int counter = 0;
@@ -1040,7 +1046,7 @@ namespace Iswenzz
 			i += 256;
 			i %= 256;
 
-			if (Frames[i].commandTime <= serverTime) 
+			if (Frames[i].commandTime <= time)
 			{
 				index = i;
 				break;

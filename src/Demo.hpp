@@ -13,8 +13,8 @@ namespace Iswenzz
 	class Demo
 	{
 	public:
-		std::string DemoFilePath;
-		bool IsDemoOpen = false;
+		std::string Filepath;
+		bool IsOpen = false;
 
 		/// <summary>
 		/// Initialize a new Demo object, demo file can be opened with the Open() function.
@@ -44,6 +44,17 @@ namespace Iswenzz
 		/// </summary>
 		/// <param name="filepath">File path to a demo file (.dm_1).</param>
 		void Open(std::string filepath);
+
+		/// <summary>
+		/// Parse the opened demo file.
+		/// </summary>
+		void Parse();
+
+		/// <summary>
+		/// Reads the next demo message.
+		/// </summary>
+		/// <returns></returns>
+		bool Next();
 
 		/// <summary>
 		/// Close the demo file and free resources.
@@ -171,7 +182,7 @@ namespace Iswenzz
 		/// <param name="numFields">Struct field count.</param>
 		/// <param name="indexBits">Min bit count.</param>
 		/// <param name="stateFields">Netfield fields.</param>
-		void ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to,
+		bool ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to,
 			unsigned int number, int numFields, int indexBits, netField_t* stateFields);
 
 		/// <summary>
@@ -208,7 +219,7 @@ namespace Iswenzz
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="number">Entity number.</param>
 		/// <param name="isBaseLine">Is it a baseline entity.</param>
-		void ReadDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, int number);
+		bool ReadDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, int number);
 
 		/// <summary>
 		/// Read a delta compressed client state.
@@ -218,7 +229,7 @@ namespace Iswenzz
 		/// <param name="from">Pointer to the old struct state.</param>
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="number">Entity number.</param>
-		void ReadDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, int number);
+		bool ReadDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, int number);
 
 		/// <summary>
 		/// Read a delta compressed objective struct.
@@ -307,7 +318,16 @@ namespace Iswenzz
 		void DeltaClient(Msg& msg, const int time, clientSnapshot_t* frame, int newnum,
 			clientState_t* old, bool unchanged);
 
-		bool GetPredictedOriginForServerTime(const int serverTime, float* predictedOrigin, 
-			float* predictedVelocity, float* predictedViewangles, int* bobCycle, int* movementDir);
+		/// <summary>
+		/// Get a predicted origin for server time.
+		/// </summary>
+		/// <param name="time">Server time.</param>
+		/// <param name="predictedOrigin">The origin to predict.</param>
+		/// <param name="predictedVelocity">The velocity to predict.</param>
+		/// <param name="predictedViewangles">The viewangles to predict.</param>
+		/// <param name="bobCycle">Bob cycle value</param>
+		/// <param name="movementDir">Movement direction.</param>
+		bool GetPredictedOriginForServerTime(const int time, float* predictedOrigin, float* predictedVelocity, 
+			float* predictedViewangles, int* bobCycle, int* movementDir);
 	};
 }
