@@ -7,7 +7,6 @@
 #define NETCHAN_MAXBUFFER_SIZE			NETCHAN_UNSENTBUFFER_SIZE * 10
 #define SYS_COMMONVERSION				17.5
 #define	PROTOCOL_VERSION				(unsigned int)(SYS_COMMONVERSION + 0.00001)
-#define MAX_CLIENTS						64
 
 #define VectorCopy(a, b)	((b)[0]=(a)[0],(b)[1]=(a)[1],(b)[2]=(a)[2])
 #define	ANGLE2SHORT(x)		((int)((x)*65536.0f/360.0f) & 65535)

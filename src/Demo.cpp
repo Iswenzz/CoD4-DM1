@@ -425,7 +425,11 @@ namespace Iswenzz
 			std::memcpy(to, from, 4 * numFields + 4);
 			return;
 		}
-		lc = ReadLastChangedField(msg, numFields);
+
+		if (numFields == ENTITY_STATE_FIELDS_COUNT)
+			lc = ReadLastChangedField(msg, 0x3D); // The game parse entities using 0x3D instead of 0x3B
+		else
+			lc = ReadLastChangedField(msg, numFields);
 
 		if (lc > numFields)
 		{
@@ -827,7 +831,7 @@ namespace Iswenzz
 	{
 		int numFields = sizeof(entityStateFields) / sizeof(entityStateFields[0]);
 		return ReadDeltaStruct(msg, time, (unsigned char*)from, (unsigned char*)to, number,
-			numFields, GetMinBitCount(MAX_CLIENTS - 1), entityStateFields);
+			numFields, GetMinBitCount(MAX_GENTITIES - 1), entityStateFields);
 	}
 
 	bool Demo::ReadDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, int number)
@@ -851,7 +855,7 @@ namespace Iswenzz
 		std::memcpy(to, from, sizeof(playerState_t));
 
 		bool readOriginAndVel = msg.ReadBit() > 0;
-		int lastChangedField = msg.ReadBits(GetMinBitCount(PLAYER_STATE_FIELDS_COUNT));
+		int lastChangedField = ReadLastChangedField(msg, PLAYER_STATE_FIELDS_COUNT);
 
 		netField_t* stateFields = playerStateFields;
 		for (int i = 0; i < lastChangedField; ++i)
