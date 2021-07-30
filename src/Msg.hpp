@@ -1,6 +1,6 @@
 #pragma once
 #include "DemoData.hpp"
-#include <string>
+#include <vector>
 
 #define NETCHAN_UNSENTBUFFER_SIZE		0x20000
 #define NETCHAN_FRAGMENTBUFFER_SIZE		0x800

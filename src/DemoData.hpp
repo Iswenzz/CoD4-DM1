@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include <string>
 #include <array>
 
 #define GENTITYNUM_BITS 10
@@ -580,7 +580,8 @@ namespace Iswenzz
 		unsigned int partBits[4];		// 0xe4
 	} entityState_t;					// sizeof(entityState_t): 0xf4
 
-	#define MAX_NETNAME 16
+	#define MAX_NETNAME 32
+	#define MAX_CLANNAME 16
 
 	typedef enum team_s 
 	{
@@ -606,6 +607,12 @@ namespace Iswenzz
 		int attachedVehEntNum;			// 96
 		int attachedVehSlotIndex;		// 100
 	} clientState_t;
+
+	typedef struct
+	{
+		std::string netname;
+		std::string clantag;
+	} clientNames_t;
 
 	/* 7472 */
 	typedef struct

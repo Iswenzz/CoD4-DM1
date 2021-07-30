@@ -290,9 +290,9 @@ namespace Iswenzz
 				clientnum = msg.ReadByte();
 				if (clientnum >= MAX_CLIENTS)
 					break;
-
-				std::string name = msg.ReadString();
-				std::string clantag = msg.ReadString();
+	
+				ClientNames[clientnum].netname = msg.ReadString();
+				ClientNames[clientnum].clantag = msg.ReadString();
 			}
 			else
 				break;
@@ -373,6 +373,9 @@ namespace Iswenzz
 
 		// Clients State
 		ParsePacketClients(msg, CurrentSnapshot.serverTime, &old, &CurrentSnapshot);
+
+		if (msg.overflowed)
+			return;
 
 		/* Clear the valid flags of any snapshots between the last received and this one,
 			so if there was a dropped packet it won't look like something valid to delta from next time
@@ -1035,6 +1038,9 @@ namespace Iswenzz
 			std::memcpy(state, old, sizeof(clientState_s));
 		else if (ReadDeltaClient(msg, time, old, state, newnum))
 			return;
+
+		if (Protocol == 16)
+			ClientNames[newnum].netname = state->netname;
 
 		++ParseClientsNum;
 		++frame->numClients;
