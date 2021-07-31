@@ -108,7 +108,7 @@ namespace Iswenzz
 			switch (command)
 			{
 			case svc_ops_e::svc_gamestate:
-				if (Protocol == 16)
+				if (Protocol == COD4_PROTOCOL)
 					ParseGamestate(CurrentUncompressedMsg);
 				else
 					ParseGamestateX(CurrentUncompressedMsg);
@@ -305,7 +305,7 @@ namespace Iswenzz
 			return;
 		int checksumFeed = msg.ReadInt();
 
-		if (Protocol != 17)
+		if (Protocol != COD4X_FALLBACK_PROTOCOL)
 		{
 			int dbchecksumFeed = msg.ReadInt();
 			//DB_SetPureChecksumFeed(dbchecksumFeed);
@@ -1039,7 +1039,7 @@ namespace Iswenzz
 		else if (ReadDeltaClient(msg, time, old, state, newnum))
 			return;
 
-		if (Protocol == 16)
+		if (Protocol == COD4_PROTOCOL)
 			ClientNames[newnum].netname = state->netname;
 
 		++ParseClientsNum;

@@ -18,7 +18,7 @@ namespace Iswenzz
 		bool IsOpen = false;
 		bool Verbose;
 
-		int Protocol = 16;
+		int Protocol = COD4_PROTOCOL;
 
 		bool MatchInProgress = false;
 		int StartFrameTime = 0;
