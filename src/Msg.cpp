@@ -221,7 +221,7 @@ namespace Iswenzz
 	{
 		signed int coord;
 
-		if (protocol > 17)
+		if (protocol > COD4X_FALLBACK_PROTOCOL)
 		{
 			int intf = ReadInt();
 			return *(float*)&intf;
@@ -240,7 +240,7 @@ namespace Iswenzz
 	{
 		signed int coord;
 
-		if (protocol > 17)
+		if (protocol > COD4X_FALLBACK_PROTOCOL)
 		{
 			int intf = ReadInt();
 			return *(float*)&intf;

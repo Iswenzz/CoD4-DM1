@@ -5,12 +5,12 @@
 
 namespace Iswenzz
 {
-	Demo::Demo(std::string filepath) : FilePath(filepath), Verbose(false)
+	Demo::Demo(std::string filepath) : Filepath(filepath), Verbose(false)
 	{
 		Open(filepath);
 	}
 
-	Demo::Demo(std::string filepath, bool verbose) : FilePath(filepath), Verbose(verbose)
+	Demo::Demo(std::string filepath, bool verbose) : Filepath(filepath), Verbose(verbose)
 	{
 		Open(filepath);
 	}
@@ -108,7 +108,7 @@ namespace Iswenzz
 			switch (command)
 			{
 			case svc_ops_e::svc_gamestate:
-				if (Protocol == 16)
+				if (Protocol == COD4_PROTOCOL)
 					ParseGamestate(CurrentUncompressedMsg);
 				else
 					ParseGamestateX(CurrentUncompressedMsg);
@@ -290,9 +290,9 @@ namespace Iswenzz
 				clientnum = msg.ReadByte();
 				if (clientnum >= MAX_CLIENTS)
 					break;
-
-				std::string name = msg.ReadString();
-				std::string clantag = msg.ReadString();
+	
+				ClientNames[clientnum].netname = msg.ReadString();
+				ClientNames[clientnum].clantag = msg.ReadString();
 			}
 			else
 				break;
@@ -305,7 +305,7 @@ namespace Iswenzz
 			return;
 		int checksumFeed = msg.ReadInt();
 
-		if (Protocol != 17)
+		if (Protocol != COD4X_FALLBACK_PROTOCOL)
 		{
 			int dbchecksumFeed = msg.ReadInt();
 			//DB_SetPureChecksumFeed(dbchecksumFeed);
@@ -374,6 +374,9 @@ namespace Iswenzz
 		// Clients State
 		ParsePacketClients(msg, CurrentSnapshot.serverTime, &old, &CurrentSnapshot);
 
+		if (msg.overflowed)
+			return;
+
 		/* Clear the valid flags of any snapshots between the last received and this one,
 			so if there was a dropped packet it won't look like something valid to delta from next time
 			we wrap around in the buffer. */
@@ -425,7 +428,11 @@ namespace Iswenzz
 			std::memcpy(to, from, 4 * numFields + 4);
 			return;
 		}
-		lc = ReadLastChangedField(msg, numFields);
+
+		if (numFields == ENTITY_STATE_FIELDS_COUNT)
+			lc = ReadLastChangedField(msg, 0x3D); // The game parse entities using 0x3D instead of 0x3B
+		else
+			lc = ReadLastChangedField(msg, numFields);
 
 		if (lc > numFields)
 		{
@@ -827,7 +834,7 @@ namespace Iswenzz
 	{
 		int numFields = sizeof(entityStateFields) / sizeof(entityStateFields[0]);
 		return ReadDeltaStruct(msg, time, (unsigned char*)from, (unsigned char*)to, number,
-			numFields, GetMinBitCount(MAX_CLIENTS - 1), entityStateFields);
+			numFields, GetMinBitCount(MAX_GENTITIES - 1), entityStateFields);
 	}
 
 	bool Demo::ReadDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, int number)
@@ -851,7 +858,7 @@ namespace Iswenzz
 		std::memcpy(to, from, sizeof(playerState_t));
 
 		bool readOriginAndVel = msg.ReadBit() > 0;
-		int lastChangedField = msg.ReadBits(GetMinBitCount(PLAYER_STATE_FIELDS_COUNT));
+		int lastChangedField = ReadLastChangedField(msg, PLAYER_STATE_FIELDS_COUNT);
 
 		netField_t* stateFields = playerStateFields;
 		for (int i = 0; i < lastChangedField; ++i)
@@ -1031,6 +1038,9 @@ namespace Iswenzz
 			std::memcpy(state, old, sizeof(clientState_s));
 		else if (ReadDeltaClient(msg, time, old, state, newnum))
 			return;
+
+		if (Protocol == COD4_PROTOCOL)
+			ClientNames[newnum].netname = state->netname;
 
 		++ParseClientsNum;
 		++frame->numClients;
