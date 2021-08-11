@@ -319,6 +319,8 @@ namespace Iswenzz
 		std::string s = msg.ReadString();
 
 		index = seq & 0x7F;
+		CommandStrings[index] = s;
+
 		VerboseLog("server command[" << index << "]: " << s << std::endl);
 	}
 

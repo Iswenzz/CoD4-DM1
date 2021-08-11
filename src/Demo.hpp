@@ -92,6 +92,10 @@ namespace Iswenzz
 		/// <param name="verbose">Prints debug informations.</param>
 		/// <returns></returns>
 		Demo(std::string filepath, bool verbose);
+
+		/// <summary>
+		/// Dispose all resources.
+		/// </summary>
 		~Demo();
 
 		/// <summary>
