@@ -795,7 +795,7 @@ namespace Iswenzz
 		while (!msg.overflowed && msg.ReadBit())
 		{
 			VerboseLog("clientnum: " << newnum << std::endl);
-			newnum = ReadEntityIndex(msg, 5);
+			newnum = ReadEntityIndex(msg, 6);
 			if (msg.readcount > msg.cursize)
 			{
 				VerboseLog("Error parsing clients");
