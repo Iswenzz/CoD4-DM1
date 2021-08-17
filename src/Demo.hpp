@@ -37,6 +37,7 @@ namespace Iswenzz
 		bool DemoStartedInKillCam = 0;
 		int ChecksumFeed = 0;
 		int ServerCommandSequence = 0;
+		int ServerConfigSequence = 0;
 		clientSnapshot_t CurrentSnapshot = { 0 };
 		float LerpPosOffsets[3] = { 0, 0, 0 };
 		int IsNewRound = 0;
@@ -167,6 +168,12 @@ namespace Iswenzz
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
 		void ParseCommandString(Msg& msg);
+
+		/// <summary>
+		/// Parse a config client.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		void ParseConfigClient(Msg& msg);
 
 		/// <summary>
 		/// Read a delta compressed ground entity.
