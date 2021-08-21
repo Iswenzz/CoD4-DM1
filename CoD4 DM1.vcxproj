@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\DemoReader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\Demo.cpp" />
     <ClCompile Include="src\Huffman.cpp" />
@@ -158,11 +159,13 @@
     <ClCompile Include="src\NetFields.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\DemoReader.hpp" />
     <ClInclude Include="src\DemoData.hpp" />
     <ClInclude Include="src\Demo.hpp" />
     <ClInclude Include="src\Huffman.hpp" />
     <ClInclude Include="src\Msg.hpp" />
     <ClInclude Include="src\NetFields.hpp" />
+    <ClInclude Include="src\Utility.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

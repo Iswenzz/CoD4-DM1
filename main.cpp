@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#include "src/Demo.hpp"
+#include "src/DemoReader.hpp"
 #include "src/Huffman.hpp"
 
 #include <iostream>
@@ -29,17 +29,31 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace Iswenzz;
 
+#define DEMO_PATH R"(C:\Users\Iswenzz\Desktop\1.9.dm_1)"
+//#define DEMO_PATH R"(C:\Users\Iswenzz\Desktop\1.7.dm_1)"
+//#define DEMO_PATH R"(C:\Users\Iswenzz\Desktop\1.6.dm_1)"
+
+void TestReader()
+{
+    std::unique_ptr<DemoReader> demoReader = std::make_unique<DemoReader>(DEMO_PATH);
+    while (demoReader->Next())
+    {
+        //std::cout << demoReader->GetCurrentFrame().commandTime << std::endl;
+    }
+}
+
+void TestDemo()
+{
+    std::unique_ptr<Demo> demo = std::make_unique<Demo>(DEMO_PATH);
+    demo->Parse();
+}
+
 int main()
 {
     Huffman::InitMain(); // Initialize huffman compression
 
-    std::string demoPath = R"(C:\Users\Iswenzz\Desktop\1.9.dm_1)";
-    //std::string demoPath = R"(C:\Users\Iswenzz\Desktop\1.7.dm_1)";
-    //std::string demoPath = R"(C:\Users\Iswenzz\Desktop\1.6.dm_1)";
-    std::cout << "Openning " << demoPath << " demo." << std::endl;
-
-    std::unique_ptr<Demo> demo = std::make_unique<Demo>(demoPath);
-    demo->Parse();
+    TestDemo();
+    //TestReader();
 
     return 0;
 }

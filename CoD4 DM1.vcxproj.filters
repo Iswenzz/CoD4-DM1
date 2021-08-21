@@ -16,6 +16,7 @@
     <ClCompile Include="main.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\DemoReader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -38,5 +39,7 @@
     <ClInclude Include="src\DemoData.hpp">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\DemoReader.hpp" />
+    <ClInclude Include="src\Utility.hpp" />
   </ItemGroup>
 </Project>

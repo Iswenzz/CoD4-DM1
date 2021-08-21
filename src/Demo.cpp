@@ -116,14 +116,11 @@ namespace Iswenzz
 			case svc_ops_e::svc_serverCommand:
 				ParseCommandString(CurrentUncompressedMsg);
 				break;
-			case svc_ops_e::svc_download:
-				std::cout << "download" << std::endl;
-				break;
 			case svc_ops_e::svc_snapshot:
 				ParseSnapshot(CurrentUncompressedMsg);
 				break;
-			case svc_ops_e::svc_configstring:
-				std::cout << "configstring" << std::endl;
+			case svc_ops_e::svc_configclient:
+				ParseConfigClient(CurrentUncompressedMsg);
 				break;
 			default:
 				return;
@@ -299,7 +296,7 @@ namespace Iswenzz
 			currIndex++;
 		}
 
-		int serverConfigDataSequence = msg.ReadInt();
+		ServerConfigSequence = msg.ReadInt();
 		int clientNum = msg.ReadInt();
 		if (clientNum >= 64 || clientNum < 0)
 			return;
@@ -319,7 +316,36 @@ namespace Iswenzz
 		std::string s = msg.ReadString();
 
 		index = seq & 0x7F;
+		CommandStrings[index] = s;
+
 		VerboseLog("server command[" << index << "]: " << s << std::endl);
+	}
+
+	void Demo::ParseConfigClient(Msg& msg)
+	{
+		std::string name;
+		std::string clantag;
+		unsigned int clientnum, sequence;
+
+		sequence = msg.ReadInt();
+		if (sequence != ServerConfigSequence + 1) 
+		{
+			msg.ReadByte();
+			name = msg.ReadString();
+			clantag = msg.ReadString();
+			return;
+		}
+		ServerConfigSequence = sequence;
+
+		clientnum = msg.ReadByte();
+		name = msg.ReadString();
+		clantag = msg.ReadString();
+
+		if (clientnum >= 64 || clientnum < 0)
+			return;
+
+		ClientNames[clientnum].netname = name;
+		ClientNames[clientnum].clantag = clantag;
 	}
 
 	void Demo::ParseSnapshot(Msg& msg)
@@ -769,7 +795,7 @@ namespace Iswenzz
 		while (!msg.overflowed && msg.ReadBit())
 		{
 			VerboseLog("clientnum: " << newnum << std::endl);
-			newnum = ReadEntityIndex(msg, 5);
+			newnum = ReadEntityIndex(msg, 6);
 			if (msg.readcount > msg.cursize)
 			{
 				VerboseLog("Error parsing clients");

@@ -2,7 +2,7 @@
 Reverse CoD4 & CoD4X ``.DM_1`` demo files.
 
 ## Working
-* Protocol 16/17/18
+* Protocol CoD4 & CoD4X 16+
 * Read snapshots and frames
 * Parsing gamestate
 * Parsing snapshot
@@ -11,10 +11,12 @@ Reverse CoD4 & CoD4X ``.DM_1`` demo files.
 * Parsing server messages
 * CoD4 & Q3 huffman code
 * Msg parsing
+* Demo reader API
 
 ## TODO
-* Some delta field are not parsed correctly
-* API
+* Demo writer API
+* Demo splitting
+* CLI
 
 ## Building
 This project can be built with [Visual Studio](https://visualstudio.microsoft.com/) or [CMake](https://cmake.org/).
