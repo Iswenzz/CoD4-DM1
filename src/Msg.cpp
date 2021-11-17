@@ -30,11 +30,18 @@ namespace Iswenzz
 		dummy = msg.dummy;
 	}
 
-	void Msg::Initialize(int len)
+	void Msg::Initialize(int len, bool read)
 	{
-		cursize = len;
-		maxsize = NETCHAN_UNSENTBUFFER_SIZE;
-		buffer.resize(len);
+		if (read) {
+			cursize = len;
+			maxsize = NETCHAN_UNSENTBUFFER_SIZE;
+			buffer.resize(len);
+		}
+		else {
+			cursize = 0;
+			maxsize = NETCHAN_UNSENTBUFFER_SIZE;
+			buffer.resize(len);
+		}
 	}
 
 	void Msg::Initialize(unsigned char* buf, int len, MSGCrypt mode, int protocol)
@@ -230,6 +237,8 @@ namespace Iswenzz
 		if (ReadBit())
 		{
 			float center[3]{ 0, 0, 0 };
+			VectorCopy(center, mapCenter);
+			
 			coord = (signed int)(center[bits != -92] + 0.5);
 			return (double)((((signed int)oldValue - coord + 0x8000) ^ ReadBits(16)) + coord - 0x8000);
 		}
@@ -249,6 +258,8 @@ namespace Iswenzz
 		if (ReadBit())
 		{
 			float center[3]{ 0, 0, 0 };
+			VectorCopy(center, mapCenter);
+			
 			coord = (signed int)(center[2] + 0.5);
 			return (double)((((signed int)oldValue - coord + 0x8000) ^ ReadBits(16)) + coord - 0x8000);
 		}
@@ -360,5 +371,185 @@ namespace Iswenzz
 		cursize = readcount;
 		splitsize = 0;
 		overflowed = true;
+	}
+	
+	void Msg::WriteInt(int c) 
+	{
+		int32_t* dst;
+
+		if (maxsize - cursize < 4) {
+			overflowed = true;
+			return;
+		}
+		dst = (int32_t*)& buffer[cursize];
+		*dst = c;
+		cursize += sizeof(int32_t);
+	}
+
+	void Msg::WriteByte(int c) 
+	{
+		int8_t* dst;
+
+		if (maxsize - cursize < 1) {
+			overflowed = true;
+			return;
+		}
+		dst = (int8_t*)& buffer[cursize];
+		*dst = c;
+		cursize += sizeof(int8_t);
+	}
+
+	void Msg::WriteShort(int c) 
+	{
+		signed short* dst;
+
+		if (maxsize - cursize < 2) {
+			overflowed = true;
+			return;
+		}
+		dst = (int16_t*)& buffer[cursize];
+		*dst = c;
+		cursize += sizeof(short);
+	}
+
+	void Msg::WriteBit0()
+	{
+		if (!(bit & 7))
+		{
+			if (maxsize <= cursize)
+			{
+				overflowed = true;
+				return;
+			}
+			bit = cursize * 8;
+			buffer[cursize] = 0;
+			cursize++;
+		}
+		bit++;
+	}
+
+	void Msg::WriteBit1()
+	{
+		if (!(bit & 7))
+		{
+			if (cursize >= maxsize)
+			{
+				overflowed = true;
+				return;
+			}
+			bit = 8 * cursize;
+			buffer[cursize] = 0;
+			cursize++;
+		}
+		buffer[bit >> 3] |= 1 << (bit & 7);
+		bit++;
+	}
+
+	void Msg::WriteBits(int bits, int bitcount)
+	{
+		int i;
+
+		if (maxsize - cursize < 4)
+		{
+			overflowed = true;
+			return;
+		}
+
+		for (i = 0; bitcount != i; i++)
+		{
+
+			if (!(bit & 7))
+			{
+				bit = 8 * cursize;
+				buffer[cursize] = 0;
+				cursize++;
+			}
+
+			if (bits & 1)
+				buffer[bit >> 3] |= 1 << (bit & 7);
+
+			bit++;
+			bits >>= 1;
+		}
+	}
+
+	void Msg::WriteString(const char* s) 
+	{
+		for (int i = 0; i < strlen(s); i++) 
+		{
+			WriteByte(s[i]);
+		}
+
+		WriteByte('\0');
+	}
+
+	int Msg::GetUsedBitCount()
+	{
+		return ((cursize + splitsize) * 8) - ((8 - bit) & 7);
+	}
+
+	void Msg::WriteOriginFloat(int bits, float value, float oldValue)
+	{
+		signed int ival;
+		signed int ioldval;
+		signed int mcenterbits, delta;
+		float center[3];
+
+		if (protocol > COD4X_FALLBACK_PROTOCOL)
+		{
+			ival = *(int*)& value;
+			WriteInt(ival);
+			return;
+		}
+
+		ival = (signed int)floorf(value + 0.5f);
+		ioldval = (signed int)floorf(oldValue + 0.5f);
+		delta = ival - ioldval;
+
+		if ((unsigned int)(delta + 64) > 127)
+		{
+			VectorCopy(mapCenter, center);
+
+			WriteBit1();
+			mcenterbits = (signed int)(center[bits != -92] + 0.5);
+			WriteBits((ival - mcenterbits + 0x8000) ^ (ioldval - mcenterbits + 0x8000), 16);
+		}
+		else
+		{
+			WriteBit0();
+			WriteBits(delta + 64, 7);
+		}
+	}
+
+	void Msg::WriteOriginZFloat(float value, float oldValue)
+	{
+		signed int ival;
+		signed int ioldval;
+		signed int mcenterbits;
+		float center[3];
+
+		if (protocol > COD4X_FALLBACK_PROTOCOL)
+		{
+			ival = *(int*)& value;
+			WriteInt(ival);
+			return;
+		}
+
+		ival = (signed int)floorf(value + 0.5f);
+		ioldval = (signed int)floorf(oldValue + 0.5f);
+
+		if ((unsigned int)(ival - ioldval + 64) > 127)
+		{
+			VectorCopy(mapCenter, center);
+
+			WriteBit1();
+			mcenterbits = (signed int)(center[2] + 0.5);
+			WriteBits((ival - mcenterbits + 0x8000) ^ (ioldval - mcenterbits + 0x8000), 16);
+		}
+		else
+		{
+			WriteBit0();
+			WriteBits(ival - ioldval + 64, 7);
+		}
 	}
 }
