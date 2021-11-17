@@ -60,6 +60,18 @@ namespace Iswenzz
 	class Msg
 	{
 	public:
+		void WriteInt(int c);
+		void WriteByte(int c);
+		void WriteShort(int c);
+		void WriteBit0();
+		void WriteBit1();
+		void WriteBits(int bits, int bitcount);
+		void WriteString(const char* s);
+		void WriteOriginFloat(int bits, float value, float oldValue);
+		void WriteOriginZFloat(float value, float oldValue);
+		int GetUsedBitCount();
+		float mapCenter[3];
+		
 		MSGType type = { };
 		int srvMsgSeq = 0;
 		int dummy = 0;
@@ -81,7 +93,9 @@ namespace Iswenzz
 		/// <summary>
 		/// Initialize a new Msg object.
 		/// </summary>
-		Msg() = default;
+		Msg(float center[3]) {
+			VectorCopy(center, mapCenter);
+		}
 		~Msg() = default;
 
 		/// <summary>
@@ -111,7 +125,7 @@ namespace Iswenzz
 		/// Initialize the msg buffer with the specified buffer length.
 		/// </summary>
 		/// <param name="len">The buffer length.</param>
-		void Initialize(int len);
+		void Initialize(int len, bool read);
 
 		/// <summary>
 		/// Initialze the msg buffer with specified buffer and crypt mode.
