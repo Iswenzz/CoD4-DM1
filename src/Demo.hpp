@@ -13,6 +13,34 @@ namespace Iswenzz
 	class Demo
 	{
 	public:
+		void WriteGamestate(Msg& msg);
+		void WriteDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, bool force);
+		void WriteEntityRemoval(Msg& msg, unsigned char* from, int indexBits, unsigned char changeBit);
+		void WriteEntityIndex(Msg& msg, const int index, const int indexBits);
+		int WriteEntityDelta(Msg& msg, const int time, const unsigned char* from, const unsigned char* to, bool force, int numFields, int indexBits, netField_t* stateFields);
+		int WriteDeltaStruct(Msg& msg, const int time, const unsigned char* from, const unsigned char* to, bool force, int numFields, int indexBits, netField_t* stateFields, unsigned char bChangeBit);
+		bool ValuesAreEqual(int bits, const int* fromF, const int* toF);
+		void WriteDeltaField(Msg& msg, const int time, const unsigned char* from, const unsigned char* to, netField_s* field, int fieldNum, unsigned char forceSend);
+		void WriteAngle16(Msg& msg, float f);
+		void Write24BitFlag(Msg& msg, const int oldFlags, const int newFlags);
+		void WriteCommandString(Msg& msg, int seq);
+		void WriteConfigClient(Msg& msg, unsigned int clientnum);
+		void WriteSnapshot(Msg& msg, int oldSnapIndex, int newSnapIndex);
+		void WriteDeltaPlayerState(Msg& msg, const int time, playerState_t* from, playerState_t* to);
+		bool ShouldSendPSField(bool sendOriginAndVel, playerState_t* from, playerState_t* to, netField_t* field);
+		void WriteDeltaObjective(Msg& msg, const int time, objective_t* from, objective_t* to);
+		int WriteDelta_LastChangedField(unsigned char* from, unsigned char* to, netField_t* fields, int numFields);
+		void WriteDeltaHudElems(Msg& msg, const int time, hudelem_t* from, hudelem_t* to, const int count);
+		void WritePacketEntities(Msg& msg, const int time, clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
+		void WritePacketClients(Msg& msg, const int time, clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
+		void WriteDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, bool force);
+		void WriteClientDelta(Msg& msg, const int time, clientState_t* from, clientState_t* to, bool force, int numFields, int indexBits, netField_t* stateFields);
+
+		int clientNum = 0;
+		float mapCenter[3] = { 0, 0, 0 };
+		bool sendOriginAndVel = true;
+		std::ofstream DemoFileOut;
+		
 		std::string Filepath;
 		std::ifstream DemoFile;
 		bool IsOpen = false;
@@ -122,9 +150,10 @@ namespace Iswenzz
 		void Close();
 
 	private:
-		Msg CurrentCompressedMsg = { };
-		Msg CurrentUncompressedMsg = { };
-		Msg CurrentWritingMsg = { };
+		Msg CurrentCompressedMsg = { mapCenter };
+		Msg CurrentUncompressedMsg = { mapCenter };
+		Msg CurrentWritingMsg1 = { mapCenter };
+		Msg CurrentWritingMsg2 = { mapCenter };
 
 		playerState_t NullPlayerState = { 0 };
 		entityState_t NullEntityState = { 0 };
@@ -161,19 +190,19 @@ namespace Iswenzz
 		/// Parse a server snapshot.
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
-		void ParseSnapshot(Msg& msg);
+		void ParseSnapshot(Msg& msg, int& oldSnapIndex, int& newSnapIndex);
 
 		/// <summary>
 		/// Parse a command string.
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
-		void ParseCommandString(Msg& msg);
+		void ParseCommandString(Msg& msg, int& seq);
 
 		/// <summary>
 		/// Parse a config client.
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
-		void ParseConfigClient(Msg& msg);
+		void ParseConfigClient(Msg& msg, unsigned int clientnum);
 
 		/// <summary>
 		/// Read a delta compressed ground entity.
