@@ -1,0 +1,66 @@
+name: Application
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  BUILD_TYPE: Debug
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Conan
+      uses: turtlebrowser/get-conan@main
+
+    - name: Build
+      run: |
+        mkdir build && cd build
+        conan install .. -s build_type=${{env.BUILD_TYPE}}
+        cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        cmake --build . --config ${{env.BUILD_TYPE}}
+
+    - name: Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: build-artifact
+        path: build
+
+  tests:
+    runs-on: windows-latest
+    needs: [build]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: OpenCppCoverage
+      shell: bash
+      run: |
+        choco install -y opencppcoverage
+        echo "C:\Program Files\OpenCppCoverage" >> $GITHUB_PATH
+
+    - name: Artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: build-artifact
+        path: build
+
+    - name: Tests
+      run: |
+        opencppcoverage --quiet --export_type=cobertura:opencppcoverageCoverage.xml --working_dir build --sources src -- build/bin/IzInjectorTests.exe
+
+    - name: CodeCov
+      uses: codecov/codecov-action@v2
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./opencppcoverageCoverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
+        verbose: true
