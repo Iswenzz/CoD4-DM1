@@ -3,7 +3,7 @@
 
 TEST_F(DemoFixture, DemoReader)
 {
-    std::unique_ptr<DemoReader> demoReader = std::make_unique<DemoReader>(DEMO_PATH_19);
+    std::unique_ptr<DemoReader> demoReader = std::make_unique<DemoReader>(DEMO_19);
     while (demoReader->Next())
     {
         //std::cout << demoReader->GetCurrentFrame().commandTime << std::endl;
