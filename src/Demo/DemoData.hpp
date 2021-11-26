@@ -29,7 +29,7 @@
 #define MAX_HUDELEMENTS 31
 #define MAX_HUDELEMS_ARCHIVAL MAX_HUDELEMENTS
 #define MAX_HUDELEMS_CURRENT MAX_HUDELEMENTS
-#define MAX_CONFIGSTRINGS 3000
+#define MAX_CONFIGSTRINGS 2 * 2442
 #define MAX_GENTITIES (1 << GENTITYNUM_BITS)
 #define MAX_STRING_CHARS 1024 
 #define MAX_FRAMES 256
@@ -268,7 +268,7 @@ namespace Iswenzz
 		unsigned int eventParms[4];
 		int	oldEventSequence;
 
-		int	clientNum;					// 220
+		int	ClientNum;					// 220
 		int	offHandIndex;				// 224
 		OffhandSecondaryClass_t	offhandSecondary;  // 228
 		unsigned int weapon;			// 232
@@ -564,7 +564,7 @@ namespace Iswenzz
 		int	surfType;					// 0x84
 
 		clipHandle_t index;				// 0x88
-		int	clientNum;					// 0x8c 0 to (MAX_CLIENTS - 1), for players and corpses
+		int	ClientNum;					// 0x8c 0 to (MAX_CLIENTS - 1), for players and corpses
 		int	iHeadIcon;					// 0x90
 		int	iHeadIconTeam;				// 0x94
 		int	solid;						// 0x98 for client side prediction, trap_linkentity sets this properly	0x98
