@@ -2,50 +2,9 @@
 #include "DemoData.hpp"
 #include <intrin.h>
 
-#ifdef _MSC_VER
-#define __clz __lzcnt
-#else
-#define __clz __builtin_clz
-#endif
-
 namespace Iswenzz
 {
-	enum PacketEntityType
-	{
-		ANALYZE_DATATYPE_ENTITYTYPE_GENERALENTITY = 0x0,
-		ANALYZE_DATATYPE_ENTITYTYPE_PLAYERENTITY = 0x1,
-		ANALYZE_DATATYPE_ENTITYTYPE_PLAYERCORPSEENTITY = 0x2,
-		ANALYZE_DATATYPE_ENTITYTYPE_ITEMENTITY = 0x3,
-		ANALYZE_DATATYPE_ENTITYTYPE_MISSILEENTITY = 0x4,
-		ANALYZE_DATATYPE_ENTITYTYPE_INVISIBLEENTITY = 0x5,
-		ANALYZE_DATATYPE_ENTITYTYPE_SCRIPTMOVERENTITY = 0x6,
-		ANALYZE_DATATYPE_ENTITYTYPE_SOUNDBLENDENTITY = 0x7,
-		ANALYZE_DATATYPE_ENTITYTYPE_FXENTITY = 0x8,
-		ANALYZE_DATATYPE_ENTITYTYPE_LOOPFXENTITY = 0x9,
-		ANALYZE_DATATYPE_ENTITYTYPE_PRIMARYLIGHTENTITY = 0xA,
-		ANALYZE_DATATYPE_ENTITYTYPE_MG42ENTITY = 0xB,
-		ANALYZE_DATATYPE_ENTITYTYPE_HELICOPTER = 0xC,
-		ANALYZE_DATATYPE_ENTITYTYPE_PLANE = 0xD,
-		ANALYZE_DATATYPE_ENTITYTYPE_VEHICLE = 0xE,
-		ANALYZE_DATATYPE_ENTITYTYPE_VEHICLE_COLLMAP = 0xF,
-		ANALYZE_DATATYPE_ENTITYTYPE_VEHICLE_CORPSE = 0x10,
-		ANALYZE_DATATYPE_ENTITYTYPE_ACTOR = 0x11,
-		ANALYZE_DATATYPE_ENTITYTYPE_ACTOR_SPAWNER = 0x12,
-		ANALYZE_DATATYPE_ENTITYTYPE_ACTOR_CORPSE = 0x13,
-		ANALYZE_DATATYPE_ENTITYTYPE_STREAMER_HINT = 0x14,
-		ANALYZE_DATATYPE_ENTITYTYPE_TEMPENTITY = 0x15,
-		ANALYZE_DATATYPE_ENTITYTYPE_ARCHIVEDENTITY = 0x16,
-		ANALYZE_DATATYPE_ENTITYTYPE_MATCHSTATE = 0x17,
-		ANALYZE_DATATYPE_ENTITYTYPE_CLIENTSTATE = 0x18,
-		ANALYZE_DATATYPE_ENTITYTYPE_PLAYERSTATE = 0x19,
-		ANALYZE_DATATYPE_ENTITYTYPE_HUDELEM = 0x1A,
-		ANALYZE_DATATYPE_ENTITYTYPE_BASELINE = 0x1B,
-		ANALYZE_DATATYPE_ENTITYTYPE_COUNT = 0x1C,
-	};
-
-	#define NETF(x) const_cast<char *>(# x), (int)&((entityState_t*)0)->x
-
-	netField_t entityStateFields[ENTITY_STATE_FIELDS_COUNT] =
+	netField_t NetFields::EntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
 	{
 		{ NETF(eType), 8, 0 },
 		{ NETF(lerp.eFlags), -98, 0 },
@@ -67,7 +26,7 @@ namespace Iswenzz
 		{ NETF(un1), 8, 0 },
 		{ NETF(lerp.apos.trBase[1]), -100, 0 },
 		{ NETF(lerp.apos.trBase[0]), -100, 0 },
-		{ NETF(clientNum), 7, 0 },
+		{ NETF(ClientNum), 7, 0 },
 		{ NETF(lerp.pos.trDelta[0]), 0, 0 },
 		{ NETF(lerp.pos.trDelta[1]), 0, 0 },
 		{ NETF(lerp.pos.trDelta[2]), 0, 0 },
@@ -108,7 +67,7 @@ namespace Iswenzz
 		{ NETF(partBits[3]), 32, 0 }
 	};
 
-	netField_t playerEntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
+	netField_t NetFields::PlayerEntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
 	{
 		{ NETF(eType), 8, 1 },
 		{ NETF(lerp.pos.trBase[0]), -92, 2 },
@@ -138,7 +97,7 @@ namespace Iswenzz
 		{ NETF(lerp.pos.trType), 8, 0 },
 		{ NETF(lerp.apos.trType), 8, 0 },
 		{ NETF(lerp.apos.trBase[2]), -100, 0 },
-		{ NETF(clientNum), 7, 0 },
+		{ NETF(ClientNum), 7, 0 },
 		{ NETF(otherEntityNum), 10, 0 },
 		{ NETF(weaponModel), 4, 0 },
 		{ NETF(iHeadIcon), 4, 0 },
@@ -171,7 +130,7 @@ namespace Iswenzz
 		{ NETF(partBits[3]), 32, 1 }
 	};
 
-	netField_t corpseEntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
+	netField_t NetFields::CorpseEntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
 	{
 		{ NETF(eType), 8, 1 },
 		{ NETF(lerp.eFlags), -98, 0 },
@@ -182,7 +141,7 @@ namespace Iswenzz
 		{ NETF(lerp.pos.trType), 8, 0 },
 		{ NETF(lerp.apos.trType), 8, 0 },
 		{ NETF(lerp.apos.trBase[1]), -100, 0 },
-		{ NETF(clientNum), 7, 0 },
+		{ NETF(ClientNum), 7, 0 },
 		{ NETF(legsAnim), 10, 0 },
 		{ NETF(lerp.apos.trBase[0]), -100, 0 },
 		{ NETF(lerp.apos.trBase[2]), -100, 0 },
@@ -234,7 +193,7 @@ namespace Iswenzz
 		{ NETF(partBits[3]), 32, 1 }
 	};
 
-	netField_t itemEntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
+	netField_t NetFields::ItemEntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
 	{
 		{ NETF(eType), 8, 0 },
 		{ NETF(lerp.pos.trBase[2]), -90, 0 },
@@ -245,7 +204,7 @@ namespace Iswenzz
 		{ NETF(lerp.pos.trDelta[2]), 0, 2 },
 		{ NETF(lerp.pos.trDelta[0]), 0, 2 },
 		{ NETF(lerp.pos.trDelta[1]), 0, 0 },
-		{ NETF(clientNum), 7, 2 },
+		{ NETF(ClientNum), 7, 2 },
 		{ NETF(lerp.apos.trBase[1]), -100, 0 },
 		{ NETF(lerp.apos.trType), 8, 2 },
 		{ NETF(lerp.apos.trTime), -97, 2 },
@@ -297,7 +256,7 @@ namespace Iswenzz
 		{ NETF(partBits[3]), 32, 1 }
 	};
 
-	netField_t missleEntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
+	netField_t NetFields::MissleEntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
 	{
 		{ NETF(eType), 8, 0 },
 		{ NETF(lerp.pos.trBase[1]), -91, 0 },
@@ -325,7 +284,7 @@ namespace Iswenzz
 		{ NETF(events[0]), -94, 0 },
 		{ NETF(events[1]), -94, 0 },
 		{ NETF(index), 10, 0 },
-		{ NETF(clientNum), 7, 0 },
+		{ NETF(ClientNum), 7, 0 },
 		{ NETF(eventParms[1]), -93, 0 },
 		{ NETF(events[2]), -94, 0 },
 		{ NETF(eventParms[2]), -93, 0 },
@@ -360,7 +319,7 @@ namespace Iswenzz
 		{ NETF(partBits[3]), 32, 1 }
 	};
 
-	netField_t scriptMoverStateFields[ENTITY_STATE_FIELDS_COUNT] =
+	netField_t NetFields::ScriptMoverStateFields[ENTITY_STATE_FIELDS_COUNT] =
 	{
 		{ NETF(eType), 8, 0 },
 		{ NETF(lerp.pos.trBase[0]), -92, 0 },
@@ -397,7 +356,7 @@ namespace Iswenzz
 		{ NETF(solid), 24, 0 },
 		{ NETF(lerp.eFlags), -98, 0 },
 		{ NETF(groundEntityNum), -96, 0 },
-		{ NETF(clientNum), 7, 0 },
+		{ NETF(ClientNum), 7, 0 },
 		{ NETF(eventParm), -93, 0 },
 		{ NETF(weapon), 7, 0 },
 		{ NETF(surfType), 8, 0 },
@@ -423,7 +382,7 @@ namespace Iswenzz
 		{ NETF(partBits[3]), 32, 0 }
 	};
 
-	netField_t soundBlendEntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
+	netField_t NetFields::SoundBlendEntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
 	{
 		{ NETF(eType), 8, 1 },
 		{ NETF(lerp.pos.trTime), -97, 0 },
@@ -442,7 +401,7 @@ namespace Iswenzz
 		{ NETF(un1), 8, 0 },
 		{ NETF(lerp.eFlags), -98, 0 },
 		{ NETF(groundEntityNum), -96, 0 },
-		{ NETF(clientNum), 7, 0 },
+		{ NETF(ClientNum), 7, 0 },
 		{ NETF(events[0]), -94, 0 },
 		{ NETF(events[1]), -94, 0 },
 		{ NETF(events[2]), -94, 0 },
@@ -486,7 +445,7 @@ namespace Iswenzz
 		{ NETF(partBits[3]), 32, 1 }
 	};
 
-	netField_t fxStateFields[ENTITY_STATE_FIELDS_COUNT] =
+	netField_t NetFields::FxStateFields[ENTITY_STATE_FIELDS_COUNT] =
 	{
 		{ NETF(eType), 8, 0 },
 		{ NETF(time2), -97, 0 },
@@ -502,7 +461,7 @@ namespace Iswenzz
 		{ NETF(lerp.pos.trDelta[2]), 0, 0 },
 		{ NETF(lerp.pos.trDelta[0]), 0, 0 },
 		{ NETF(lerp.pos.trDelta[1]), 0, 0 },
-		{ NETF(clientNum), 7, 0 },
+		{ NETF(ClientNum), 7, 0 },
 		{ NETF(lerp.apos.trType), 8, 0 },
 		{ NETF(lerp.apos.trTime), -97, 0 },
 		{ NETF(lerp.apos.trDelta[0]), 0, 0 },
@@ -549,7 +508,7 @@ namespace Iswenzz
 		{ NETF(partBits[3]), 32, 1 }
 	};
 
-	netField_t loopFxEntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
+	netField_t NetFields::LoopFxEntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
 	{
 		{ NETF(eType), 8, 1 },
 		{ NETF(lerp.pos.trTime), -97, 0 },
@@ -570,7 +529,7 @@ namespace Iswenzz
 		{ NETF(un1), 8, 0 },
 		{ NETF(lerp.eFlags), -98, 0 },
 		{ NETF(groundEntityNum), -96, 0 },
-		{ NETF(clientNum), 7, 0 },
+		{ NETF(ClientNum), 7, 0 },
 		{ NETF(events[0]), -94, 0 },
 		{ NETF(events[1]), -94, 0 },
 		{ NETF(events[2]), -94, 0 },
@@ -612,7 +571,7 @@ namespace Iswenzz
 		{ NETF(partBits[3]), 32, 1 }
 	};
 
-	netField_t helicopterEntityStateFields[HELICOPTER_ENTITY_STATE_FIELDS_COUNT] =
+	netField_t NetFields::HelicopterEntityStateFields[HELICOPTER_ENTITY_STATE_FIELDS_COUNT] =
 	{
 		{ NETF(eType), 8, 1 },
 		{ NETF(lerp.pos.trBase[0]), -92, 0 },
@@ -674,7 +633,7 @@ namespace Iswenzz
 		{ NETF(partBits[3]), 32, 1 }
 	};
 
-	netField_t planeStateFields[PLANE_STATE_FIELDS_COUNT] =
+	netField_t NetFields::PlaneStateFields[PLANE_STATE_FIELDS_COUNT] =
 	{
 		{ NETF(eType), 8, 1 },
 		{ NETF(lerp.pos.trBase[0]), 0, 2 },
@@ -707,7 +666,7 @@ namespace Iswenzz
 		{ NETF(groundEntityNum), -96, 0 },
 		{ NETF(un1), 8, 0 },
 		{ NETF(lerp.apos.trBase[0]), -100, 0 },
-		{ NETF(clientNum), 7, 0 },
+		{ NETF(ClientNum), 7, 0 },
 		{ NETF(events[2]), -94, 0 },
 		{ NETF(eventParms[2]), -93, 0 },
 		{ NETF(events[3]), -94, 0 },
@@ -738,7 +697,7 @@ namespace Iswenzz
 		{ NETF(partBits[3]), 32, 1 }
 	};
 
-	netField_t vehicleEntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
+	netField_t NetFields::VehicleEntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
 	{
 		{ NETF(eType), 8, 1 },
 		{ NETF(lerp.pos.trTime), -97, 0 },
@@ -758,7 +717,7 @@ namespace Iswenzz
 		{ NETF(un1), 8, 0 },
 		{ NETF(lerp.eFlags), -98, 0 },
 		{ NETF(groundEntityNum), -96, 0 },
-		{ NETF(clientNum), 7, 0 },
+		{ NETF(ClientNum), 7, 0 },
 		{ NETF(events[0]), -94, 0 },
 		{ NETF(events[1]), -94, 0 },
 		{ NETF(events[2]), -94, 0 },
@@ -801,7 +760,7 @@ namespace Iswenzz
 		{ NETF(partBits[3]), 32, 1 }
 	};
 
-	netField_t eventEntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
+	netField_t NetFields::EventEntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
 	{
 		{ NETF(eType), 8, 0 },
 		{ NETF(lerp.pos.trBase[0]), -92, 0 },
@@ -815,7 +774,7 @@ namespace Iswenzz
 		{ NETF(lerp.u.anonymous.buffer[1]), 32, 0 },
 		{ NETF(attackerEntityNum), 10, 0 },
 		{ NETF(lerp.apos.trBase[0]), -100, 0 },
-		{ NETF(clientNum), 7, 0 },
+		{ NETF(ClientNum), 7, 0 },
 		{ NETF(weapon), 7, 0 },
 		{ NETF(weaponModel), 4, 0 },
 		{ NETF(lerp.u.anonymous.buffer[2]), 32, 0 },
@@ -864,33 +823,29 @@ namespace Iswenzz
 		{ NETF(partBits[3]), 32, 1 }
 	};
 
-	#define NETFE(x) x, sizeof(x) / sizeof(netField_t)
-
-	netFieldList_t netFieldList[NET_FIELDS_COUNT] =
+	netFieldList_t NetFields::List[NET_FIELDS_COUNT] =
 	{
-		{ NETFE(entityStateFields) },
-		{ NETFE(playerEntityStateFields) },
-		{ NETFE(corpseEntityStateFields) },
-		{ NETFE(itemEntityStateFields) },
-		{ NETFE(missleEntityStateFields) },
-		{ NETFE(entityStateFields) },
-		{ NETFE(scriptMoverStateFields) },
-		{ NETFE(soundBlendEntityStateFields) },
-		{ NETFE(fxStateFields) },
-		{ NETFE(loopFxEntityStateFields) },
-		{ NETFE(entityStateFields) },
-		{ NETFE(entityStateFields) },
-		{ NETFE(helicopterEntityStateFields) },
-		{ NETFE(planeStateFields) },
-		{ NETFE(vehicleEntityStateFields) },
-		{ NETFE(entityStateFields) },
-		{ NETFE(entityStateFields) },
-		{ NETFE(eventEntityStateFields) }
+		{ NETFE(EntityStateFields) },
+		{ NETFE(PlayerEntityStateFields) },
+		{ NETFE(CorpseEntityStateFields) },
+		{ NETFE(ItemEntityStateFields) },
+		{ NETFE(MissleEntityStateFields) },
+		{ NETFE(EntityStateFields) },
+		{ NETFE(ScriptMoverStateFields) },
+		{ NETFE(SoundBlendEntityStateFields) },
+		{ NETFE(FxStateFields) },
+		{ NETFE(LoopFxEntityStateFields) },
+		{ NETFE(EntityStateFields) },
+		{ NETFE(EntityStateFields) },
+		{ NETFE(HelicopterEntityStateFields) },
+		{ NETFE(PlaneStateFields) },
+		{ NETFE(VehicleEntityStateFields) },
+		{ NETFE(EntityStateFields) },
+		{ NETFE(EntityStateFields) },
+		{ NETFE(EventEntityStateFields) }
 	};
 
-	#define PSF(x) const_cast<char*>(# x), (int)&((playerState_t*)0)->x
-
-	netField_t playerStateFields[PLAYER_STATE_FIELDS_COUNT] =
+	netField_t NetFields::PlayerStateFields[PLAYER_STATE_FIELDS_COUNT] =
 	{
 		{ PSF(commandTime), -97, 0 },
 		{ PSF(viewangles[1]), -87, 0 },
@@ -954,7 +909,7 @@ namespace Iswenzz
 		{ PSF(actionSlotType[0]), 2, 0 },
 		{ PSF(dofNearBlur), 0, 0 },
 		{ PSF(dofFarBlur), 0, 0 },
-		{ PSF(clientNum), 8, 0 },
+		{ PSF(ClientNum), 8, 0 },
 		{ PSF(damageEvent), 8, 0 },
 		{ PSF(viewHeightLerpTarget), -8, 0 },
 		{ PSF(damageYaw), 8, 0 },
@@ -1035,9 +990,7 @@ namespace Iswenzz
 		{ PSF(adsDelayTime), 32, 1 }
 	};
 
-	#define HEF(x) const_cast<char*>(# x), (int)&((hudelem_t*)0)->x
-
-	netField_t hudElemFields[HUD_ELEM_FIELDS_COUNT] =
+	netField_t NetFields::HudElemFields[HUD_ELEM_FIELDS_COUNT] =
 	{
 		{ HEF(color.rgba), -85, 0 },
 		{ HEF(fadeStartTime), -97, 0 },
@@ -1081,9 +1034,7 @@ namespace Iswenzz
 		{ HEF(duration), 32, 0 }
 	};
 
-	#define CSF(x) const_cast<char*>(# x), (int)&((clientState_t*)0)->x
-
-	netField_t clientStateFields[CLIENT_STATE_FIELDS_COUNT] =
+	netField_t NetFields::ClientStateFields[CLIENT_STATE_FIELDS_COUNT] =
 	{
 		{ CSF(modelindex), 9, 0 },
 		{ CSF(netname[0]), 32, 0 },
@@ -1111,9 +1062,7 @@ namespace Iswenzz
 		{ CSF(attachModelIndex[5]), 9, 0 }
 	};
 
-	#define AEF(x) const_cast<char*>(# x), (int)&((archivedEntity_t*)0)->x
-
-	netField_t archivedEntityFields[ARCHIVED_ENTITY_FIELDS_COUNT] =
+	netField_t NetFields::ArchivedEntityFields[ARCHIVED_ENTITY_FIELDS_COUNT] =
 	{
 		{ AEF(r.absmin[1]), 0, 0 },
 		{ AEF(r.absmax[1]), 0, 0 },
@@ -1128,7 +1077,7 @@ namespace Iswenzz
 		{ AEF(s.lerp.apos.trBase[1]), 0, 0 },
 		{ AEF(s.eType), 8, 0 },
 		{ AEF(s.lerp.apos.trBase[0]), 0, 0 },
-		{ AEF(s.clientNum), 7, 0 },
+		{ AEF(s.ClientNum), 7, 0 },
 		{ AEF(s.lerp.apos.trBase[2]), 0, 0 },
 		{ AEF(s.lerp.eFlags), -98, 0 },
 		{ AEF(r.svFlags), 32, 0 },
@@ -1186,9 +1135,7 @@ namespace Iswenzz
 		{ AEF(s.partBits[3]), 32, 0 }
 	};
 
-	#define OBJF(x) const_cast<char*>(# x), (int)&((objective_t*)0)->x
-
-	netField_t objectiveFields[OBJECTIVE_FIELDS_COUNT] =
+	netField_t NetFields::ObjectiveFields[OBJECTIVE_FIELDS_COUNT] =
 	{
 		{ OBJF(origin[0]), 0, 0 },
 		{ OBJF(origin[1]), 0, 0 },
@@ -1198,7 +1145,7 @@ namespace Iswenzz
 		{ OBJF(teamNum), 4, 0 }
 	};
 
-	int GetMinBitCount(int x)
+	int NetFields::GetMinBitCount(int x)
 	{
 		return 32 - __clz(x);
 	}

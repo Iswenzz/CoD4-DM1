@@ -40,7 +40,7 @@ namespace Iswenzz
 
 	bool Demo::Next()
 	{
-		if (DemoFile.is_open() && CurrentCompressedMsg.srvMsgSeq != -1)
+		if (DemoFile.is_open() && CurrentCompressedMsg.SrvMsgSeq != -1)
 		{
 			MSGType msgType = { };
 			DemoFile.read(reinterpret_cast<char*>(&msgType), sizeof(char));
@@ -73,25 +73,26 @@ namespace Iswenzz
 		IsOpen = false;
 	}
 
-		void Demo::ReadMessage()
+	void Demo::ReadMessage()
 	{
 		CurrentCompressedMsg = Msg{ Protocol };
 		CurrentWritingMsg1 = Msg{ Protocol };
 		CurrentWritingMsg2 = Msg{ Protocol };
 
-		CurrentWritingMsg1.Initialize(0x20000, false);
-		CurrentWritingMsg2.Initialize(0x20000, false);
+		CurrentWritingMsg1.Initialize(NETCHAN_UNSENTBUFFER_SIZE, false);
+		CurrentWritingMsg2.Initialize(NETCHAN_UNSENTBUFFER_SIZE, false);
 
 		unsigned char slen = 0;
 		int protocol = 0, messageLength = 0;
 		int dummyEnd = -1;
 
-		DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.srvMsgSeq), sizeof(int));
-		DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.cursize), sizeof(int));
-		DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.dummy), sizeof(int));
+		DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.SrvMsgSeq), sizeof(int));
+		DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.CurSize), sizeof(int));
+		DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.Dummy), sizeof(int));
 
 		// EOF
-		if (CurrentCompressedMsg.srvMsgSeq == -1) {
+		if (CurrentCompressedMsg.SrvMsgSeq == -1) 
+		{
 			DemoFileOut.write(reinterpret_cast<char*>(&slen), sizeof(slen));
 			DemoFileOut.write(reinterpret_cast<char*>(&dummyEnd), sizeof(dummyEnd));
 			DemoFileOut.write(reinterpret_cast<char*>(&dummyEnd), sizeof(dummyEnd));
@@ -100,17 +101,17 @@ namespace Iswenzz
 		}
 
 		// Read the client message
-		CurrentCompressedMsg.cursize -= sizeof(int);
-		CurrentCompressedMsg.Initialize(CurrentCompressedMsg.cursize, true);
-		DemoFile.read(reinterpret_cast<char*>(CurrentCompressedMsg.buffer.data()), 
-			CurrentCompressedMsg.cursize);
+		CurrentCompressedMsg.CurSize -= sizeof(int);
+		CurrentCompressedMsg.Initialize(CurrentCompressedMsg.CurSize, true);
+		DemoFile.read(reinterpret_cast<char*>(CurrentCompressedMsg.Buffer.data()), 
+			CurrentCompressedMsg.CurSize);
 
 		// Parse message
 		svc_ops_e command = { };
 		CurrentUncompressedMsg = Msg{ CurrentCompressedMsg, MSGCrypt::MSG_CRYPT_HUFFMAN };
 		while (true)
 		{
-			if (CurrentUncompressedMsg.readcount > CurrentUncompressedMsg.cursize)
+			if (CurrentUncompressedMsg.ReadCount > CurrentUncompressedMsg.CurSize)
 				break;
 
 			command = static_cast<svc_ops_e>(CurrentUncompressedMsg.ReadByte());
@@ -126,7 +127,7 @@ namespace Iswenzz
 				else 
 					ParseGamestateX(CurrentUncompressedMsg);
 				
-				VectorCopy(CurrentUncompressedMsg.mapCenter, CurrentWritingMsg1.mapCenter);
+				VectorCopy(CurrentUncompressedMsg.MapCenter, CurrentWritingMsg1.MapCenter);
 				WriteGamestate(CurrentWritingMsg1);
 				break;
 			case svc_ops_e::svc_serverCommand: 
@@ -157,17 +158,20 @@ namespace Iswenzz
 				return;
 			}
 		}
-
 		CurrentWritingMsg1.WriteByte(static_cast<int>(svc_ops_e::svc_EOF));
-		CurrentWritingMsg2.cursize = 4 + Huffman::Compress(&CurrentWritingMsg1.buffer[0], CurrentWritingMsg1.cursize, &CurrentWritingMsg2.buffer[0], NULL);
+		CurrentWritingMsg2.CurSize = 4 + Huffman::Compress(&CurrentWritingMsg1.Buffer[0], 
+			CurrentWritingMsg1.CurSize, &CurrentWritingMsg2.Buffer[0], 0);
 
 		char seq = 0;
 		DemoFileOut.write(reinterpret_cast<char*>(&seq), sizeof(seq));
 
-		DemoFileOut.write(reinterpret_cast<char*>(&CurrentCompressedMsg.srvMsgSeq), sizeof(CurrentCompressedMsg.srvMsgSeq));
-		DemoFileOut.write(reinterpret_cast<char*>(&CurrentWritingMsg2.cursize), sizeof(CurrentWritingMsg2.cursize));
-		DemoFileOut.write(reinterpret_cast<char*>(&CurrentCompressedMsg.dummy), sizeof(CurrentCompressedMsg.dummy));
-		DemoFileOut.write(reinterpret_cast<char*>(&CurrentWritingMsg2.buffer[0]), CurrentWritingMsg2.cursize - 4); // - 4 because of writing CurrentCompressedMsg.dummy directly to disk instead of including it in the message buffer!
+		DemoFileOut.write(reinterpret_cast<char*>(&CurrentCompressedMsg.SrvMsgSeq), sizeof(CurrentCompressedMsg.SrvMsgSeq));
+		DemoFileOut.write(reinterpret_cast<char*>(&CurrentWritingMsg2.CurSize), sizeof(CurrentWritingMsg2.CurSize));
+		DemoFileOut.write(reinterpret_cast<char*>(&CurrentCompressedMsg.Dummy), sizeof(CurrentCompressedMsg.Dummy));
+		// -4 because of writing CurrentCompressedMsg.dummy directly to disk 
+		// instead of including it in the message buffer!
+		DemoFileOut.write(reinterpret_cast<char*>(&CurrentWritingMsg2.Buffer[0]), 
+			static_cast<std::streamsize>(CurrentWritingMsg2.CurSize) - 4); 
 	}
 
 	void Demo::ReadArchive()
@@ -178,7 +182,7 @@ namespace Iswenzz
 		CurrentCompressedMsg = Msg{ Protocol };
 		CurrentCompressedMsg.Initialize(len, true);
 
-		DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.srvMsgSeq), sizeof(int));
+		DemoFile.read(reinterpret_cast<char*>(&CurrentCompressedMsg.SrvMsgSeq), sizeof(int));
 		DemoFile.read(reinterpret_cast<char*>(&frame.origin[0]), sizeof(float));
 		DemoFile.read(reinterpret_cast<char*>(&frame.origin[1]), sizeof(float));
 		DemoFile.read(reinterpret_cast<char*>(&frame.origin[2]), sizeof(float));
@@ -200,12 +204,12 @@ namespace Iswenzz
 		else if (frame.commandTime > CurrentFrameTime)
 			CurrentFrameTime = frame.commandTime;
 
-		LastFrameSrvMsgSeq = CurrentCompressedMsg.srvMsgSeq;
+		LastFrameSrvMsgSeq = CurrentCompressedMsg.SrvMsgSeq;
 		std::memcpy(&Frames[LastFrameSrvMsgSeq & MAX_FRAMES - 1], &frame, sizeof(archivedFrame_t));
 		
 		char seq = 1;
 		DemoFileOut.write(reinterpret_cast<char*>(&seq), sizeof(seq));
-		DemoFileOut.write(reinterpret_cast<char*>(&CurrentCompressedMsg.srvMsgSeq), sizeof(int));
+		DemoFileOut.write(reinterpret_cast<char*>(&CurrentCompressedMsg.SrvMsgSeq), sizeof(int));
 		DemoFileOut.write(reinterpret_cast<char*>(&frame.origin[0]), sizeof(float));
 		DemoFileOut.write(reinterpret_cast<char*>(&frame.origin[1]), sizeof(float));
 		DemoFileOut.write(reinterpret_cast<char*>(&frame.origin[2]), sizeof(float));
@@ -266,13 +270,10 @@ namespace Iswenzz
 
 					std::string s = msg.ReadString();
 					
-					if (idx == 12) {
-#ifdef _MSC_VER
-						sscanf_s(s.c_str(), "%f %f %f", &mapCenter[0], &mapCenter[1], &mapCenter[2]);
-#else
-						sscanf(s.c_str(), "%f %f %f", &mapCenter[0], &mapCenter[1], &mapCenter[2]);
-#endif
-						VectorCopy(mapCenter, msg.mapCenter);
+					if (idx == 12) 
+					{
+						sscanf_s(s.c_str(), "%f %f %f", &MapCenter[0], &MapCenter[1], &MapCenter[2]);
+						VectorCopy(MapCenter, msg.MapCenter);
 					}
 					
 					if (!(idx < 0 || idx >= MAX_CONFIGSTRINGS))
@@ -301,8 +302,8 @@ namespace Iswenzz
 			currIndex++;
 		}
 
-		int clientNum = msg.ReadInt();
-		if (clientNum >= 64 || clientNum < 0)
+		int ClientNum = msg.ReadInt();
+		if (ClientNum >= 64 || ClientNum < 0)
 			return;
 		int checksumFeed = msg.ReadInt();
 	}
@@ -331,18 +332,13 @@ namespace Iswenzz
 				while (i > 0)
 				{
 					idx = msg.ReadInt();
-
 					std::string s = msg.ReadString();
 					
-					if (idx == 12) {
-#ifdef _MSC_VER
-						sscanf_s(s.c_str(), "%f %f %f", &mapCenter[0], &mapCenter[1], &mapCenter[2]);
-#else
-						sscanf(s.c_str(), "%f %f %f", &mapCenter[0], &mapCenter[1], &mapCenter[2]);
-#endif
-						VectorCopy(mapCenter, msg.mapCenter);
+					if (idx == 12) 
+					{
+						sscanf_s(s.c_str(), "%f %f %f", &MapCenter[0], &MapCenter[1], &MapCenter[2]);
+						VectorCopy(MapCenter, msg.MapCenter);
 					}
-					
 					if (!(idx < 0 || idx >= 2 * MAX_CONFIGSTRINGS))
 					{
 						if (s.size() > 0)
@@ -379,8 +375,8 @@ namespace Iswenzz
 		}
 
 		ServerConfigSequence = msg.ReadInt();
-		clientNum = msg.ReadInt();
-		if (clientNum >= 64 || clientNum < 0)
+		ClientNum = msg.ReadInt();
+		if (ClientNum >= 64 || ClientNum < 0)
 			return;
 		int checksumFeed = msg.ReadInt();
 
@@ -436,7 +432,7 @@ namespace Iswenzz
 		CurrentSnapshot = { 0 };
 		CurrentSnapshot.serverCommandNum = ServCmdSequence;
 		CurrentSnapshot.serverTime = msg.ReadInt();
-		CurrentSnapshot.messageNum = msg.srvMsgSeq;
+		CurrentSnapshot.messageNum = msg.SrvMsgSeq;
 
 		unsigned char deltaNum = msg.ReadByte();
 		CurrentSnapshot.deltaNum = !deltaNum ? -1 : CurrentSnapshot.messageNum - deltaNum;
@@ -482,7 +478,7 @@ namespace Iswenzz
 		// Clients State
 		ParsePacketClients(msg, CurrentSnapshot.serverTime, &old, &CurrentSnapshot);
 
-		if (msg.overflowed)
+		if (msg.Overflowed)
 			return;
 
 		/* Clear the valid flags of any snapshots between the last received and this one,
@@ -547,7 +543,7 @@ namespace Iswenzz
 
 		if (lc > numFields)
 		{
-			msg.overflowed = 1;
+			msg.Overflowed = 1;
 			return;
 		}
 		ReadDeltaField(msg, time, from, to, &stateFields[0], false, false);
@@ -559,7 +555,7 @@ namespace Iswenzz
 			if (entityFieldOffset > NET_FIELDS_COUNT - 1)
 				entityFieldOffset = NET_FIELDS_COUNT - 1;
 
-			netFieldList_t fieldList = netFieldList[entityFieldOffset];
+			netFieldList_t fieldList = NetFields::List[entityFieldOffset];
 			stateFields = fieldList.field;
 			numFields = fieldList.numFields;
 		}
@@ -792,19 +788,19 @@ namespace Iswenzz
 		else
 			oldnum = 99999;
 
-		while (!msg.overflowed)
+		while (!msg.Overflowed)
 		{
 			VerboseLog("entitynum: " << newnum << std::endl);
 			newnum = ReadEntityIndex(msg, GENTITYNUM_BITS);
 			if (newnum == 1023)
 				break;
-			if (msg.readcount > msg.cursize)
+			if (msg.ReadCount > msg.CurSize)
 			{
 				VerboseLog("Error parsing entities");
 				return -1;
 			}
 
-			while (oldnum < newnum && !msg.overflowed && oldstate)
+			while (oldnum < newnum && !msg.Overflowed && oldstate)
 			{
 				std::memcpy(&ParseEntities[ParseEntitiesNum++ & MAX_PARSE_ENTITIES - 1],
 					oldstate, sizeof(entityState_t));
@@ -838,7 +834,7 @@ namespace Iswenzz
 			}
 		}
 
-		while (oldnum != 99999 && !msg.overflowed)
+		while (oldnum != 99999 && !msg.Overflowed)
 		{
 			std::memcpy(&ParseEntities[ParseEntitiesNum++ & MAX_PARSE_ENTITIES - 1],
 				oldstate, sizeof(entityState_t));
@@ -877,11 +873,11 @@ namespace Iswenzz
 		else
 			oldnum = 99999;
 
-		while (!msg.overflowed && msg.ReadBit())
+		while (!msg.Overflowed && msg.ReadBit())
 		{
 			VerboseLog("clientnum: " << newnum << std::endl);
 			newnum = ReadEntityIndex(msg, 6);
-			if (msg.readcount > msg.cursize)
+			if (msg.ReadCount > msg.CurSize)
 			{
 				VerboseLog("Error parsing clients");
 				return;
@@ -919,7 +915,7 @@ namespace Iswenzz
 			}
 		}
 
-		while (oldnum != 99999 && !msg.overflowed)
+		while (oldnum != 99999 && !msg.Overflowed)
 		{
 			DeltaClient(msg, time, to, oldnum, oldstate, true);
 
@@ -936,23 +932,23 @@ namespace Iswenzz
 	int Demo::ReadLastChangedField(Msg& msg, int totalFields)
 	{
 		int idealBits, lastChanged;
-		idealBits = GetMinBitCount(totalFields);
+		idealBits = NetFields::GetMinBitCount(totalFields);
 		lastChanged = msg.ReadBits(idealBits);
 		return lastChanged;
 	}
 
 	bool Demo::ReadDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, int number)
 	{
-		int numFields = sizeof(entityStateFields) / sizeof(entityStateFields[0]);
+		int numFields = sizeof(NetFields::EntityStateFields) / sizeof(NetFields::EntityStateFields[0]);
 		return ReadDeltaStruct(msg, time, (unsigned char*)from, (unsigned char*)to, number,
-			numFields, GetMinBitCount(MAX_GENTITIES - 1), entityStateFields);
+			numFields, NetFields::GetMinBitCount(MAX_GENTITIES - 1), NetFields::EntityStateFields);
 	}
 
 	bool Demo::ReadDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, int number)
 	{
-		int numFields = sizeof(clientStateFields) / sizeof(clientStateFields[0]);
+		int numFields = sizeof(NetFields::ClientStateFields) / sizeof(NetFields::ClientStateFields[0]);
 		return ReadDeltaStruct(msg, time, (unsigned char*)from, (unsigned char*)to, number,
-			numFields, GetMinBitCount(MAX_CLIENTS - 1), clientStateFields);
+			numFields, NetFields::GetMinBitCount(MAX_CLIENTS - 1), NetFields::ClientStateFields);
 	}
 
 	void Demo::ReadDeltaPlayerState(Msg& msg, int time, playerState_t* from, playerState_t* to,
@@ -968,10 +964,10 @@ namespace Iswenzz
 		}
 		std::memcpy(to, from, sizeof(playerState_t));
 
-		bool readOriginAndVel = sendOriginAndVel = msg.ReadBit() > 0;
+		bool readOriginAndVel = SendOriginAndVel = msg.ReadBit() > 0;
 		int lastChangedField = ReadLastChangedField(msg, PLAYER_STATE_FIELDS_COUNT);
 
-		netField_t* stateFields = playerStateFields;
+		netField_t* stateFields = NetFields::PlayerStateFields;
 		for (int i = 0; i < lastChangedField; ++i)
 		{
 			bool noXor = predictedFieldsIgnoreXor && readOriginAndVel && stateFields[i].changeHints == 3;
@@ -1017,7 +1013,7 @@ namespace Iswenzz
 		// Ammo stored
 		if (msg.ReadBit())
 		{
-			// check for any ammo change (0-63)
+			// Check for any ammo change (0-63)
 			for (j = 0; j < 4; j++)
 			{
 				if (msg.ReadBit())
@@ -1077,7 +1073,7 @@ namespace Iswenzz
 		if (msg.ReadBit())
 		{
 			for (int i = 0; i < OBJECTIVE_FIELDS_COUNT; ++i)
-				ReadDeltaField(msg, time, from, to, &objectiveFields[i], false, false);
+				ReadDeltaField(msg, time, from, to, &NetFields::ObjectiveFields[i], false, false);
 		}
 		else
 		{
@@ -1098,14 +1094,14 @@ namespace Iswenzz
 		for (i = 0; i < inuse; ++i)
 		{
 			lc = msg.ReadBits(6);
-			assert(lc <= sizeof(hudElemFields) / sizeof(hudElemFields[0]));
+			assert(lc <= sizeof(NetFields::HudElemFields) / sizeof(NetFields::HudElemFields[0]));
 			
 			for (y = 0; y <= lc; ++y)
-				ReadDeltaField(msg, time, &from[i], &to[i], &hudElemFields[y], false, false);
+				ReadDeltaField(msg, time, &from[i], &to[i], &NetFields::HudElemFields[y], false, false);
 
 			for (; y < HUD_ELEM_FIELDS_COUNT; ++y)
 			{
-				int offset = hudElemFields[y].offset;
+				int offset = NetFields::HudElemFields[y].offset;
 				((unsigned char*)&to[i])[offset] = ((unsigned char*)&from[i])[offset];
 			}
 
@@ -1124,12 +1120,12 @@ namespace Iswenzz
 	int Demo::ReadEntityIndex(Msg &msg, int indexBits)
 	{
 		if (msg.ReadBit())
-			++msg.lastRefEntity;
+			++msg.LastRefEntity;
 		else if (indexBits != 10 || msg.ReadBit())
-			msg.lastRefEntity = msg.ReadBits(indexBits);
+			msg.LastRefEntity = msg.ReadBits(indexBits);
 		else
-			msg.lastRefEntity += msg.ReadBits(4);
-		return msg.lastRefEntity;
+			msg.LastRefEntity += msg.ReadBits(4);
+		return msg.LastRefEntity;
 	}
 
 	void Demo::DeltaEntity(Msg& msg, const int time, clientSnapshot_t* frame, int newnum, entityState_t* old)
@@ -1159,7 +1155,8 @@ namespace Iswenzz
 		++frame->numClients;
 	}
 
-	bool Demo::GetPredictedOriginForServerTime(const int time, float* predictedOrigin, float* predictedVelocity, float* predictedViewangles, int* bobCycle, int* movementDir)
+	bool Demo::GetPredictedOriginForServerTime(const int time, float* predictedOrigin, float* predictedVelocity,
+		float* predictedViewangles, int* bobCycle, int* movementDir)
 	{
 		int index = -1;
 		int counter = 0;
@@ -1203,92 +1200,91 @@ namespace Iswenzz
 			msg.WriteInt(ServerCommandSequence);
 			msg.WriteByte(static_cast<int>(svc_ops_e::svc_configstring));
 
-			// configstrings
-			for (i = 0, numCS = 0; i < MAX_CONFIGSTRINGS; i++) {
-				if (ConfigStrings[i] != "") {
+			// Configstrings
+			for (i = 0, numCS = 0; i < MAX_CONFIGSTRINGS; i++) 
+			{
+				if (ConfigStrings[i] != "")
 					numCS++;
-				}
 			}
-
 			msg.WriteShort(numCS);
 
-			// configstrings
-			for (i = 0; i < MAX_CONFIGSTRINGS; i++) {
-				if (ConfigStrings[i] == "") {
+			// Configstrings
+			for (i = 0; i < MAX_CONFIGSTRINGS; i++) 
+			{
+				if (ConfigStrings[i] == "")
 					continue;
-				}
+
 				s = ConfigStrings[i].c_str();
 				msg.WriteBit0();
 				msg.WriteBits(i, 12);
 				msg.WriteString(s);
 			}
 
-			// baselines
-			for (i = 0; i < MAX_GENTITIES; i++) {
+			// Baselines
+			for (i = 0; i < MAX_GENTITIES; i++) 
+			{
 				ent = &EntityBaselines[i];
 
-				if (!ent->number) {
+				if (!ent->number)
 					continue;
-				}
 
 				msg.WriteByte(static_cast<int>(svc_ops_e::svc_baseline));
 				WriteDeltaEntity(msg, -90000, &nullstate, ent, true);
 			}
 
+			// Finished writing the gamestate stuff
 			msg.WriteByte(static_cast<int>(svc_ops_e::svc_EOF));
-			// finished writing the gamestate stuff
-
-			// write the client num
-			msg.WriteInt(clientNum);
-			// write the checksum feed
+			// Write the client num
+			msg.WriteInt(ClientNum);
+			// Write the checksum feed
 			msg.WriteInt(ChecksumFeed);
-
-			// finished writing the client packet
+			// Finished writing the client packet
 			msg.WriteByte(static_cast<int>(svc_ops_e::svc_EOF));
 		}
-		else {
+		else 
+		{
 			msg.WriteByte(static_cast<int>(svc_ops_e::svc_gamestate));
 			msg.WriteInt(ServerCommandSequence);
 			msg.WriteByte(static_cast<int>(svc_ops_e::svc_configstring));
 
-			// configstrings
-			for (i = 0, numCS = 0; i < MAX_CONFIGSTRINGS; i++) {
-				if (ConfigStrings[i] != "") {
+			// Configstrings
+			for (i = 0, numCS = 0; i < MAX_CONFIGSTRINGS; i++) 
+			{
+				if (ConfigStrings[i] != "")
 					numCS++;
-				}
 			}
-			for (i = 0; i < MAX_CONFIGSTRINGS; i++) {
-				//if (extGameState.stringOffsets[i]) {
-				//	numCS++;
-				//}
+			for (i = 0; i < MAX_CONFIGSTRINGS; i++) 
+			{
+				/*if (extGameState.stringOffsets[i])
+					numCS++;*/
 			}
 			msg.WriteInt(numCS);
 
-			// configstrings
-			for (i = 0; i < MAX_CONFIGSTRINGS; i++) {
-				if (ConfigStrings[i] == "") {
+			// Configstrings
+			for (i = 0; i < MAX_CONFIGSTRINGS; i++) 
+			{
+				if (ConfigStrings[i] == "")
 					continue;
-				}
 				s = ConfigStrings[i].c_str();
 				msg.WriteInt(i);
 				msg.WriteString(s);
 			}
-			for (i = 0; i < MAX_CONFIGSTRINGS; i++) {
-				//if (!extGameState.stringOffsets[i]) {
-				//	continue;
-				//}
-				//s = extGameState.stringData + extGameState.stringOffsets[i];
-				//msg.WriteInt(i + MAX_CONFIGSTRINGS);
-				//msg.WriteString(s);
+			for (i = 0; i < MAX_CONFIGSTRINGS; i++) 
+			{
+				/*if (!extGameState.stringOffsets[i])
+					continue;
+				s = extGameState.stringData + extGameState.stringOffsets[i];
+				msg.WriteInt(i + MAX_CONFIGSTRINGS);
+				msg.WriteString(s);*/
 			}
 
-			// baselines
-			for (i = 0; i < MAX_GENTITIES; i++) {
+			// Baselines
+			for (i = 0; i < MAX_GENTITIES; i++) 
+			{
 				ent = &EntityBaselines[i];
 
-				if (!ent->number) {
+				if (!ent->number)
 					continue;
-				}
 
 				msg.WriteByte(static_cast<int>(svc_ops_e::svc_baseline));
 				WriteDeltaEntity(msg, -90000, &nullstate, ent, true);
@@ -1297,68 +1293,57 @@ namespace Iswenzz
 			for (i = 0; i < 64; ++i)
 			{
 				if (ClientNames[i].netname == "")
-				{
 					continue;
-				}
 
 				msg.WriteByte(static_cast<int>(svc_ops_e::svc_configclient));
 				msg.WriteByte(i);
 				msg.WriteString(ClientNames[i].netname.c_str());
 				msg.WriteString(ClientNames[i].clantag.c_str());
 			}
-
+			// Finished writing the gamestate stuff
 			msg.WriteByte(static_cast<int>(svc_ops_e::svc_EOF));
-			// finished writing the gamestate stuff
-
-			//Writing the sequence for configdata so all configdata is acknowledged
+			// Writing the sequence for configdata so all configdata is acknowledged
 			msg.WriteInt(ServerConfigSequence);
-
-			// write the client num
-			msg.WriteInt(clientNum);
-			// write the checksum feed
+			// Write the client num
+			msg.WriteInt(ClientNum);
+			// Write the checksum feed
 			msg.WriteInt(ChecksumFeed);
 
 			if (Protocol == COD4X_FALLBACK_PROTOCOL + 1)
-			{
 				msg.WriteInt(ChecksumFeed);
-			}
 		}
 	}
 	
 	void Demo::WriteDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, bool force) 
 	{
-		// all fields should be 32 bits to avoid any compiler packing issues
+		// All fields should be 32 bits to avoid any compiler packing issues
 		// the "number" field is not part of the field list
 		// if this assert fails, someone added a field to the entityState_t
-		// struct without updating the message fields
-		//	assert( numFields + 1 == sizeof( *from ) / 4 );
+		// struct without updating the message fields.
+		// assert( numFields + 1 == sizeof( *from ) / 4 );
 
 		netFieldList_t* fieldtype;
-
-		if (!to) {
+		if (!to) 
+		{
 			WriteEntityRemoval(msg, (unsigned char*)from, 10, 0);
 			return;
 		}
-
-		if (to->number < 0 || to->number >= MAX_GENTITIES) {
+		if (to->number < 0 || to->number >= MAX_GENTITIES)
 			VerboseLog("MSG_WriteDeltaEntity: Bad entity number: %i" << to->number);
-		}
 
 		unsigned int index = 17;
-
 		if (to->eType <= 17)
 			index = to->eType;
-		fieldtype = &netFieldList[index];
+		fieldtype = &NetFields::List[index];
 
-		WriteEntityDelta(msg, time, (const unsigned char*)from, (const unsigned char*)to, force, fieldtype->numFields, 10, fieldtype->field);
+		WriteEntityDelta(msg, time, (const unsigned char*)from, (const unsigned char*)to, force, 
+			fieldtype->numFields, 10, fieldtype->field);
 	}
 	
 	void Demo::WriteEntityRemoval(Msg& msg, unsigned char* from, int indexBits, unsigned char changeBit)
 	{
 		if (changeBit)
-		{
 			msg.WriteBit1();
-		}
 
 		WriteEntityIndex(msg, *(uint32_t*)from, indexBits);
 		msg.WriteBit1();
@@ -1366,103 +1351,86 @@ namespace Iswenzz
 	
 	void Demo::WriteEntityIndex(Msg& msg, const int index, const int indexBits)
 	{
-
-		if (index - msg.lastRefEntity == 1)
+		if (index - msg.LastRefEntity == 1)
 		{
 			msg.WriteBit1();
-			msg.lastRefEntity = index;
+			msg.LastRefEntity = index;
 			return;
 		}
-
 		msg.WriteBit0();
 
-		if (indexBits != 10 || index - msg.lastRefEntity > 15)
+		if (indexBits != 10 || index - msg.LastRefEntity > 15)
 		{
 			if (indexBits == 10)
-			{
 				msg.WriteBit1();
-			}
 			msg.WriteBits(index, indexBits);
-			msg.lastRefEntity = index;
+			msg.LastRefEntity = index;
 			return;
 		}
 
 		msg.WriteBit0();
-		msg.WriteBits(index - msg.lastRefEntity, 4);
-		msg.lastRefEntity = index;
+		msg.WriteBits(index - msg.LastRefEntity, 4);
+		msg.LastRefEntity = index;
 	}
 	
-	int Demo::WriteEntityDelta(Msg& msg, const int time, const unsigned char* from, const unsigned char* to, bool force, int numFields, int indexBits, netField_t* stateFields)
+	int Demo::WriteEntityDelta(Msg& msg, const int time, const unsigned char* from, const unsigned char* to, 
+		bool force, int numFields, int indexBits, netField_t* stateFields)
 	{
 		return WriteDeltaStruct(msg, time, from, to, force, numFields, indexBits, stateFields, 0);
 	}
 	
-	int Demo::WriteDeltaStruct(Msg& msg, const int time, const unsigned char* from, const unsigned char* to, bool force, int numFields, int indexBits, netField_t* stateFields, unsigned char bChangeBit)
+	int Demo::WriteDeltaStruct(Msg& msg, const int time, const unsigned char* from, const unsigned char* to, 
+		bool force, int numFields, int indexBits, netField_t* stateFields, unsigned char bChangeBit)
 	{
 		int i, lc;
 		int* fromF, * toF;
 		netField_s* field;
 		int entityNumber = *(uint32_t*)to;
-
 		int oldbitcount = msg.GetUsedBitCount();
 
 		lc = 0;
-
 		for (i = 0, field = stateFields; i < numFields; i++, field++)
 		{
 			fromF = (int*)((unsigned char*)from + field->offset);
 			toF = (int*)((unsigned char*)to + field->offset);
 
-			if (*fromF == *toF) {
+			if (*fromF == *toF)
 				continue;
-			}
-
-			if (!ValuesAreEqual(field->bits, fromF, toF))
-			{
+			if (!DeltaValuesAreEqual(field->bits, fromF, toF))
 				lc = i + 1;
-			}
 		}
 
 		if (lc == 0)
 		{
-			// nothing at all changed
+			// Nothing at all changed
 			if (!force)
-			{
-				return 0; // nothing at all
-			}
+				return 0;
 			if (bChangeBit)
-			{
 				msg.WriteBit1();
-			}
-			// write two bits for no change
+
+			// Write two bits for no change
 			WriteEntityIndex(msg, entityNumber, indexBits);
-			msg.WriteBit0();   // not removed
-			msg.WriteBit0();   // no delta
+			msg.WriteBit0(); // Not removed
+			msg.WriteBit0(); // No delta
 			return msg.GetUsedBitCount() - oldbitcount;
 		}
 
 		if (bChangeBit)
-		{
 			msg.WriteBit1();
-		}
 
 		WriteEntityIndex(msg, entityNumber, indexBits);
 		msg.WriteBit0();
 		msg.WriteBit1();
-		msg.WriteBits(lc, GetMinBitCount(numFields));
+		msg.WriteBits(lc, NetFields::GetMinBitCount(numFields));
 
 		for (i = 0, field = stateFields; i < lc; i++, field++)
-		{
 			WriteDeltaField(msg, time, from, to, field, i, 0);
-		}
-
 		return msg.GetUsedBitCount() - oldbitcount;
 	}
 	
-	bool Demo::ValuesAreEqual(int bits, const int* fromF, const int* toF)
+	bool Demo::DeltaValuesAreEqual(int bits, const int* fromF, const int* toF)
 	{
 		bool result;
-
 		if (*fromF == *toF)
 			return true;
 
@@ -1471,7 +1439,8 @@ namespace Iswenzz
 		case 0:
 		case 13:
 			result = (int16_t)ANGLE2SHORT(*(float*)toF) == (int16_t)ANGLE2SHORT(*(float*)fromF);
-			//			((signed int)(182.044449f * *(float *)toF + 0.5f) == (signed int)(*(float *)fromF * 182.044449f  + 0.5f));
+			/*((signed int)(182.044449f * *(float *)toF + 0.5f) == 
+				(signed int)(*(float *)fromF * 182.044449f  + 0.5f));*/
 			break;
 		case 8:
 		case 9:
@@ -1485,11 +1454,11 @@ namespace Iswenzz
 			result = 0;
 			break;
 		}
-
 		return result;
 	}
 	
-	void Demo::WriteDeltaField(Msg& msg, const int time, const unsigned char* from, const unsigned char* to, netField_s* field, int fieldNum, unsigned char forceSend)
+	void Demo::WriteDeltaField(Msg& msg, const int time, const unsigned char* from, const unsigned char* to, 
+		netField_s* field, int fieldNum, unsigned char forceSend)
 	{
 		int nullfield;
 		int32_t timetodata;
@@ -1510,6 +1479,7 @@ namespace Iswenzz
 
 		fromdata = &from[field->offset];
 		todata = &to[field->offset];
+
 		if (forceSend)
 		{
 			nullfield = 0;
@@ -1517,7 +1487,8 @@ namespace Iswenzz
 		}
 		if (field->changeHints != 2)
 		{
-			if (!forceSend && (*(uint32_t*)fromdata == *(uint32_t*)todata || ValuesAreEqual(field->bits, (const int*)fromdata, (const int*)todata)))
+			if (!forceSend && (*(uint32_t*)fromdata == *(uint32_t*)todata 
+				|| DeltaValuesAreEqual(field->bits, (const int*)fromdata, (const int*)todata)))
 			{
 				msg.WriteBit0();
 				return;
@@ -1548,12 +1519,16 @@ namespace Iswenzz
 				break;
 			}
 			msg.WriteBit1();
-			if (int32todata == 0x80000000 || floattodata != (float)int32todatafromfloat || int32todatafromfloat + 4096 < 0 || int32todatafromfloat + 4096 > 0x1FFF || int32fromdatafromfloat + 4096 < 0 || int32fromdatafromfloat + 4096 > 0x1FFF)
+
+			if (int32todata == 0x80000000 || floattodata != (float)int32todatafromfloat 
+				|| int32todatafromfloat + 4096 < 0 || int32todatafromfloat + 4096 > 0x1FFF 
+				|| int32fromdatafromfloat + 4096 < 0 || int32fromdatafromfloat + 4096 > 0x1FFF)
 			{
 				msg.WriteBit1();
 				msg.WriteInt(uint32todata ^ uint32fromdata);
 				break;
 			}
+
 			msg.WriteBit0();
 			int32data1 = (int32fromdatafromfloat + 4096) ^ (int32todatafromfloat + 4096);
 			msg.WriteBits(int32data1, 5);
@@ -1561,7 +1536,8 @@ namespace Iswenzz
 			break;
 
 		case -89:
-			if (int32todata == 0x80000000 || floattodata != (float)int32todatafromfloat || int32todatafromfloat + 4096 < 0 || int32todatafromfloat + 4096 > 0x1FFF)
+			if (int32todata == 0x80000000 || floattodata != (float)int32todatafromfloat 
+				|| int32todatafromfloat + 4096 < 0 || int32todatafromfloat + 4096 > 0x1FFF)
 			{
 				msg.WriteBit1();
 				msg.WriteInt(uint32todata ^ uint32fromdata);
@@ -1572,7 +1548,6 @@ namespace Iswenzz
 			msg.WriteBits(int32data1, 5);
 			msg.WriteByte(int32data1 >> 5);
 			break;
-			//LABEL_54;
 
 		case -88:
 			msg.WriteInt(uint32todata ^ uint32fromdata);
@@ -1582,7 +1557,8 @@ namespace Iswenzz
 			if (*(float*)todata != 0.0 || int32todata == 0x80000000)
 			{
 				msg.WriteBit1();
-				if (int32todata != 0x80000000 && floattodata == (float)int32todatafromfloat && int32todatafromfloat + 2048 >= 0 && int32todatafromfloat + 2048 <= 4095)
+				if (int32todata != 0x80000000 && floattodata == (float)int32todatafromfloat 
+					&& int32todatafromfloat + 2048 >= 0 && int32todatafromfloat + 2048 <= 4095)
 				{
 					msg.WriteBit0();
 					msg.WriteBits((int32todatafromfloat + 2048) ^ (int32fromdatafromfloat + 2048), 4);
@@ -1595,7 +1571,6 @@ namespace Iswenzz
 				}
 				break;
 			}
-			//LABEL_28
 			msg.WriteBit0();
 			break;
 
@@ -1603,16 +1578,14 @@ namespace Iswenzz
 			if (uint32todata)
 			{
 				msg.WriteBit1();
-				WriteAngle16(msg, floattodata);
+				msg.WriteAngle16(floattodata);
 			}
 			else
-			{
 				msg.WriteBit0();
-			}
 			break;
 
 		case -87:
-			WriteAngle16(msg, floattodata);
+			msg.WriteAngle16(floattodata);
 			break;
 
 		case -86:
@@ -1624,7 +1597,6 @@ namespace Iswenzz
 			{
 				if (!memcmp(fromdata, todata, 3))
 				{
-					//LABEL_47
 					msg.WriteBit1();
 					break;
 				}
@@ -1660,7 +1632,7 @@ namespace Iswenzz
 			break;
 
 		case -98:
-			Write24BitFlag(msg, uint32fromdata, uint32todata);
+			msg.Write24BitFlag(uint32fromdata, uint32todata);
 			break;
 
 		case -96:
@@ -1675,7 +1647,6 @@ namespace Iswenzz
 					break;
 				}
 			}
-			//LABEL_47
 			msg.WriteBit1();
 			break;
 
@@ -1704,6 +1675,7 @@ namespace Iswenzz
 				absbits = abs(field->bits);
 				fromtoxor = uint32todata ^ uint32fromdata;
 				abs3bits = absbits & 7;
+
 				if (abs3bits)
 				{
 					msg.WriteBits(fromtoxor, absbits & 7);
@@ -1718,44 +1690,8 @@ namespace Iswenzz
 				}
 			}
 			else
-			{
 				msg.WriteBit0();
-			}
 			break;
-		}
-	}
-	
-	void Demo::WriteAngle16(Msg& msg, float f) {
-		msg.WriteShort(ANGLE2SHORT(f));
-	}
-
-	void Demo::Write24BitFlag(Msg& msg, const int oldFlags, const int newFlags)
-	{
-		int xorflags;
-		signed int shiftedflags;
-		signed int i;
-
-		xorflags = newFlags ^ oldFlags;
-		if ((xorflags - 1) & xorflags)
-		{
-			msg.WriteBit1();
-			shiftedflags = newFlags;
-
-			for (i = 3; i; --i)
-			{
-				msg.WriteByte(shiftedflags);
-				shiftedflags >>= 8;
-			}
-
-		}
-		else
-		{
-			for (i = 0; !(xorflags & 1); ++i)
-			{
-				xorflags >>= 1;
-			}
-			msg.WriteBit0();
-			msg.WriteBits(i, 5);
 		}
 	}
 
@@ -1786,9 +1722,10 @@ namespace Iswenzz
 		clientSnapshot_t* oldSnap, * newSnap;
 		newSnap = &Snapshots[newSnapIndex];
 
-		if (newSnap->deltaNum == -1) {
+		if (newSnap->deltaNum == -1) 
+		{
 			oldSnap = &CurrentSnapshot;
-			memset(oldSnap, 0, sizeof(*oldSnap));
+			std::memset(oldSnap, 0, sizeof(*oldSnap));
 		}
 		else 
 			oldSnap = &Snapshots[oldSnapIndex];
@@ -1800,11 +1737,11 @@ namespace Iswenzz
 
 		WriteDeltaPlayerState(msg, newSnap->serverTime, &oldSnap->ps, &newSnap->ps);
 
-		msg.lastRefEntity = -1;
+		msg.LastRefEntity = -1;
 
 		WritePacketEntities(msg, newSnap->serverTime, oldSnap, newSnap);
 
-		msg.lastRefEntity = -1;
+		msg.LastRefEntity = -1;
 
 		WritePacketClients(msg, newSnap->serverTime, oldSnap, newSnap);
 	}
@@ -1812,37 +1749,45 @@ namespace Iswenzz
 	void Demo::WriteDeltaPlayerState(Msg& msg, const int time, playerState_t* from, playerState_t* to)
 	{
 		int i, j, lc;
-
-		for (i = 0, lc = 0; i < sizeof(playerStateFields) / sizeof(playerStateFields[0]); ++i) {
-			if (ShouldSendPSField(sendOriginAndVel, to, from, &playerStateFields[i]))
+		for (i = 0, lc = 0; i < sizeof(NetFields::PlayerStateFields) / sizeof(NetFields::PlayerStateFields[0]); ++i) 
+		{
+			if (ShouldSendPSField(SendOriginAndVel, to, from, &NetFields::PlayerStateFields[i]))
 				lc = i + 1;
 		}
 
 		assert(lc >= 0);
 
-		msg.WriteBits(sendOriginAndVel, 1);
-		msg.WriteBits(lc, GetMinBitCount(sizeof(playerStateFields) / sizeof(playerStateFields[0])));
+		msg.WriteBits(SendOriginAndVel, 1);
+		msg.WriteBits(lc, NetFields::GetMinBitCount(
+			sizeof(NetFields::PlayerStateFields) / sizeof(NetFields::PlayerStateFields[0])));
 
-		for (i = 0; i < lc; ++i) {
-			if (playerStateFields[i].changeHints == 2 || ShouldSendPSField(sendOriginAndVel, from, to, &playerStateFields[i])) {
-				bool forceSend = sendOriginAndVel && playerStateFields[i].changeHints == 3;
-				WriteDeltaField(msg, time, (unsigned char*)from, (unsigned char*)to, &playerStateFields[i], i, forceSend);
+		for (i = 0; i < lc; ++i) 
+		{
+			if (NetFields::PlayerStateFields[i].changeHints == 2 || 
+				ShouldSendPSField(SendOriginAndVel, from, to, &NetFields::PlayerStateFields[i])) 
+			{
+				bool forceSend = SendOriginAndVel && NetFields::PlayerStateFields[i].changeHints == 3;
+				WriteDeltaField(msg, time, (unsigned char*)from, (unsigned char*)to, 
+					&NetFields::PlayerStateFields[i], i, forceSend);
 			}
 			else
-				msg.WriteBit0(); // no change
+				msg.WriteBit0();
 		}
 
 		int statsbits = 0;
-		for (i = 0; i < 5; ++i) {
+		for (i = 0; i < 5; ++i) 
+		{
 			if (to->stats[i] != from->stats[i])
 				statsbits |= 1 << i;
 		}
 
-		if (statsbits) {
-			msg.WriteBit1(); // changed
+		if (statsbits) 
+		{
+			msg.WriteBit1();
 			msg.WriteBits(statsbits, 5);
 
-			for (i = 0; i < 3; ++i) {
+			for (i = 0; i < 3; ++i) 
+			{
 				if (statsbits & (1 << i))
 					msg.WriteShort(to->stats[i]);
 			}
@@ -1853,42 +1798,51 @@ namespace Iswenzz
 				msg.WriteByte(to->stats[4]);
 		}
 		else
-			msg.WriteBit0(); // no change to stats
+			msg.WriteBit0();
 
+		// (SA) - Modified for 64 weaps
+		// Hmm only 64? CoD4 has 128 but its still 64
 		int ammobits[8];
-		for (j = 0; j < 4; ++j) {  //----(SA)	modified for 64 weaps
-			ammobits[j] = 0;	  //Hmm only 64? CoD4 has 128 but its still 64
+		for (j = 0; j < 4; ++j) 
+		{ 
+			ammobits[j] = 0;
 
-			for (i = 0; i < 16; ++i) {
+			for (i = 0; i < 16; ++i) 
+			{
 				if (to->ammo[i + (j * 16)] != from->ammo[i + (j * 16)])
 					ammobits[j] |= 1 << i;
 			}
 		}
 
-		//----(SA)	also encapsulated ammo changes into one check.  clip values will change frequently,
-		// but ammo will not.  (only when you get ammo/reload rather than each shot)
-		if (ammobits[0] || ammobits[1] || ammobits[2] || ammobits[3]) {  // if any were set...
-			msg.WriteBit1(); // changed
-			for (j = 0; j < 4; ++j) {
-				if (ammobits[j]) {
+		// (SA) - Also encapsulated ammo changes into one check. Clip values will change frequently,
+		// but ammo will not. (only when you get ammo/reload rather than each shot)
+		if (ammobits[0] || ammobits[1] || ammobits[2] || ammobits[3]) 
+		{
+			msg.WriteBit1();
+			for (j = 0; j < 4; ++j) 
+			{
+				if (ammobits[j]) 
+				{
 
-					msg.WriteBit1(); // changed
+					msg.WriteBit1();
 					msg.WriteShort(ammobits[j]);
 
-					for (i = 0; i < 16; ++i) {
+					for (i = 0; i < 16; ++i) 
+					{
 						if (ammobits[j] & (1 << i))
 							msg.WriteShort(to->ammo[i + (j * 16)]);
 					}
 				}
 				else
-					msg.WriteBit0(); // no change
+					msg.WriteBit0();
 			}
 		}
 		else
-			msg.WriteBit0(); // no change
+			msg.WriteBit0();
 
-		// ammo in clip
-		for (j = 0; j < 8; ++j) {  //----(Ninja)	modified for 128 weaps (CoD4)
+		// Ammo in clip
+		for (j = 0; j < 8; ++j) // (Ninja) - Modified for 128 weaps (CoD4)
+		{
 			int clipbits = 0;
 
 			for (i = 0; i < 16; ++i) {
@@ -1896,31 +1850,36 @@ namespace Iswenzz
 					clipbits |= 1 << i;
 			}
 
-			if (clipbits) {
-				msg.WriteBit1(); // changed
+			if (clipbits) 
+			{
+				msg.WriteBit1();
 				msg.WriteShort(clipbits);
 
-				for (i = 0; i < 16; ++i) {
+				for (i = 0; i < 16; ++i) 
+				{
 					if (clipbits & (1 << i))
 						msg.WriteShort(to->ammoclip[i + (j * 16)]);
 				}
 			}
 			else
-				msg.WriteBit0(); // no change
+				msg.WriteBit0();
 		}
 
 		if (!memcmp(from->objective, to->objective, sizeof(from->objective)))
-			msg.WriteBit0(); // no change
-		else {
-			msg.WriteBit1(); // changed
+			msg.WriteBit0();
+		else 
+		{
+			msg.WriteBit1();
 
-			for (i = 0; i < sizeof(from->objective) / sizeof(from->objective[0]); ++i) {
+			for (i = 0; i < sizeof(from->objective) / sizeof(from->objective[0]); ++i) 
+			{
 				msg.WriteBits(to->objective[i].state, 3);
 				WriteDeltaObjective(msg, time, &from->objective[i], &to->objective[i]);
 			}
 		}
 
-		if (memcmp(&from->hud, &to->hud, sizeof(from->hud))) {
+		if (memcmp(&from->hud, &to->hud, sizeof(from->hud))) 
+		{
 			msg.WriteBit1();
 
 			WriteDeltaHudElems(msg, time, from->hud.archival, to->hud.archival, 31);
@@ -1930,119 +1889,138 @@ namespace Iswenzz
 			msg.WriteBit0();
 
 		if (!memcmp(from->weaponmodels, to->weaponmodels, sizeof(from->weaponmodels)))
-			msg.WriteBit0(); //No weapon viewmodel has changed
-		else {
-			msg.WriteBit1(); //Any weapon viewmodel has changed
-
+			msg.WriteBit0(); // No weapon viewmodel has changed
+		else 
+		{
+			msg.WriteBit1(); // Any weapon viewmodel has changed
 			for (i = 0; i < sizeof(from->weaponmodels); ++i)
 				msg.WriteByte(to->weaponmodels[i]);
 		}
 	}
 	
-	bool Demo::ShouldSendPSField(bool sendOriginAndVel, playerState_t* from, playerState_t* to, netField_t* field)
+	bool Demo::ShouldSendPSField(bool SendOriginAndVel, playerState_t* from, playerState_t* to, netField_t* field)
 	{
-		// if (field->bits == -87 && (to->otherFlags & 2 || (((to->eFlags & 0xFF) ^ (from->eFlags & 0xFF)) & 2) || to->viewlocked_entNum != 1023 || to->pm_type == 5))
-			// return true;
+		/* if (field->bits == -87 && (to->otherFlags & 2 
+			 || (((to->eFlags & 0xFF) ^ (from->eFlags & 0xFF)) & 2) 
+			 || to->viewlocked_entNum != 1023 || to->pm_type == 5))
+			 return true;*/
 
 		if (field->changeHints == 3 || field->bits == -87)
-			return sendOriginAndVel;
+			return SendOriginAndVel;
 
 		int* fromF = (int*)((unsigned char*)from + field->offset);
 		int* toF = (int*)((unsigned char*)to + field->offset);
 
-		bool result = ValuesAreEqual(field->bits, fromF, toF);
+		bool result = DeltaValuesAreEqual(field->bits, fromF, toF);
 		return result ^= true;
 	}
 	
 	void Demo::WriteDeltaObjective(Msg& msg, const int time, objective_t* from, objective_t* to)
 	{
-		int lc = WriteDelta_LastChangedField((unsigned char*)from, (unsigned char*)to, objectiveFields, sizeof(objectiveFields) / sizeof(objectiveFields[0]));
+		int lc = WriteDeltaLastChangedField((unsigned char*)from, (unsigned char*)to, 
+			NetFields::ObjectiveFields, sizeof(NetFields::ObjectiveFields) / sizeof(NetFields::ObjectiveFields[0]));
 
-		if (lc == -1) {
-			msg.WriteBit0(); // no change
+		if (lc == -1)
+		{
+			msg.WriteBit0();
 			return;
 		}
+		msg.WriteBit1(); // Something has changed
 
-		msg.WriteBit1(); //Something has changed
-
-		for (int i = 0; i < sizeof(objectiveFields) / sizeof(objectiveFields[0]); ++i) //Write out all fields in case a single one has changed
-			WriteDeltaField(msg, time, (unsigned char*)from, (unsigned char*)to, &objectiveFields[i], i, false);
+		// Write out all fields in case a single one has changed
+		for (int i = 0; i < sizeof(NetFields::ObjectiveFields) / sizeof(NetFields::ObjectiveFields[0]); ++i)
+			WriteDeltaField(msg, time, (unsigned char*)from, (unsigned char*)to, 
+				&NetFields::ObjectiveFields[i], i, false);
 	}
 	
-	int Demo::WriteDelta_LastChangedField(unsigned char* from, unsigned char* to, netField_t* fields, int numFields)
+	int Demo::WriteDeltaLastChangedField(unsigned char* from, unsigned char* to, netField_t* fields, int numFields)
 	{
 		int lc = -1;
-
-		for (int j = numFields - 1; j >= 0; --j) {
+		for (int j = numFields - 1; j >= 0; --j) 
+		{
 			int* fromF = (int*)((unsigned char*)from + fields[j].offset);
 			int* toF = (int*)((unsigned char*)to + fields[j].offset);
 
-			if (!ValuesAreEqual(fields[j].bits, fromF, toF)) {
+			if (!DeltaValuesAreEqual(fields[j].bits, fromF, toF)) 
+			{
 				lc = j;
 				break;
 			}
 		}
-
 		return lc;
 	}
 	
 	void Demo::WriteDeltaHudElems(Msg& msg, const int time, hudelem_t* from, hudelem_t* to, const int count)
 	{
 		int i = 0;
-		for (; i < count; ++i) {
+		for (; i < count; ++i) 
+		{
 			if (to[i].type == HE_TYPE_FREE)
 				break;
 		}
 
 		int numHE = i;
-		msg.WriteBits(numHE, GetMinBitCount(31)); // 5
+		msg.WriteBits(numHE, NetFields::GetMinBitCount(31)); // 5
 
-		for (int k = 0; k < numHE; ++k) {
-			int lc = WriteDelta_LastChangedField((unsigned char*)(from + k), (unsigned char*)(to + k), hudElemFields, sizeof(hudElemFields) / sizeof(hudElemFields[0]));
+		for (int k = 0; k < numHE; ++k) 
+		{
+			int lc = WriteDeltaLastChangedField((unsigned char*)(from + k), (unsigned char*)(to + k),
+				NetFields::HudElemFields, sizeof(NetFields::HudElemFields) / sizeof(NetFields::HudElemFields[0]));
 
-			int size = sizeof(hudElemFields) / sizeof(hudElemFields[0]);
+			int size = sizeof(NetFields::HudElemFields) / sizeof(NetFields::HudElemFields[0]);
 			assert(lc <= size);
 
+			// First field gets written always in IW3 - bug with no functional effect
 			if (lc == -1)
-				lc = 0; //First field gets written always in IW3 - bug with no functional effect
+				lc = 0;
 
-			msg.WriteBits(lc, GetMinBitCount(sizeof(hudElemFields) / sizeof(hudElemFields[0]))); //Write highest changed field
+			// Write highest changed field
+			msg.WriteBits(lc, NetFields::GetMinBitCount(
+				sizeof(NetFields::HudElemFields) / sizeof(NetFields::HudElemFields[0])));
 
-			for (i = 0; i <= lc; ++i) //Write out the fields unit the last changed one
-				WriteDeltaField(msg, time, (unsigned char*)(from + k), (unsigned char*)(to + k), &hudElemFields[i], i, false);
+			for (i = 0; i <= lc; ++i) // Write out the fields unit the last changed one
+				WriteDeltaField(msg, time, (unsigned char*)(from + k), (unsigned char*)(to + k),
+					&NetFields::HudElemFields[i], i, false);
 		}
 	}
 	
 	void Demo::WritePacketEntities(Msg& msg, const int time, clientSnapshot_t* oldframe, clientSnapshot_t* newframe)
 	{
-		entityState_t r_newent, * newent = &r_newent, r_oldent, * oldent = &r_oldent;
+		entityState_t r_newent{}, * newent = &r_newent, r_oldent{}, * oldent = &r_oldent;
 		int oldindex = 0, newindex = 0, oldnum = 0, newnum = -1;
 
-		while (newindex < newframe->numEntities || oldindex < oldframe->numEntities) {
-			if (newindex >= newframe->numEntities) {
+		while (newindex < newframe->numEntities || oldindex < oldframe->numEntities) 
+		{
+			if (newindex >= newframe->numEntities) 
+			{
 				newent = nullptr;
 				newnum = 99999;
 			}
-			else {
+			else 
+			{
 				newent = &ParseEntities[(newframe->parseEntitiesNum + newindex) & 2047];
 				newnum = newent->number;
 			}
 
-			if (oldindex >= oldframe->numEntities) {
+			if (oldindex >= oldframe->numEntities) 
+			{
 				oldent = nullptr;
 				oldnum = 99999;
 			}
-			else {
+			else 
+			{
 				oldent = &ParseEntities[(oldframe->parseEntitiesNum + oldindex) & 2047];
 				oldnum = oldent->number;
 			}
 
-			if (newnum == oldnum) {
+			if (newnum == oldnum) 
+			{
 				WriteDeltaEntity(msg, time, oldent, newent, false);
 				oldindex++;
 				newindex++;
 			}
-			else if (newnum < oldnum) {
+			else if (newnum < oldnum) 
+			{
 				WriteDeltaEntity(msg, time, &EntityBaselines[newnum], newent, true);
 				newindex++;
 			}
@@ -2057,63 +2035,76 @@ namespace Iswenzz
 	
 	void Demo::WritePacketClients(Msg& msg, const int time, clientSnapshot_t* oldframe, clientSnapshot_t* newframe)
 	{
-		clientState_t r_newcs, * newcs = &r_newcs, r_oldcs, * oldcs = &r_oldcs;
+		clientState_t r_newcs{}, * newcs = &r_newcs, r_oldcs{}, * oldcs = &r_oldcs;
 		int oldindex = 0, newindex = 0, oldnum = 0, newnum = -1;
 
-		while (newindex < newframe->numClients || oldindex < oldframe->numClients) {
-			if (newindex >= newframe->numClients) {
+		while (newindex < newframe->numClients || oldindex < oldframe->numClients) 
+		{
+			if (newindex >= newframe->numClients) 
+			{
 				newcs = nullptr;
 				newnum = 99999;
 			}
-			else {
+			else 
+			{
 				newcs = &ParseClients[(newframe->parseClientsNum + newindex) & 2047];
 				newnum = newcs->clientIndex;
 			}
 
-			if (oldindex >= oldframe->numClients) {
+			if (oldindex >= oldframe->numClients) 
+			{
 				oldcs = nullptr;
 				oldnum = 99999;
 			}
-			else {
+			else 
+			{
 				oldcs = &ParseClients[(oldframe->parseClientsNum + oldindex) & 2047];
 				oldnum = oldcs->clientIndex;
 			}
 
-			if (newnum == oldnum) {
+			if (newnum == oldnum) 
+			{
 				WriteDeltaClient(msg, time, oldcs, newcs, false);
 				oldindex++;
 				newindex++;
 			}
-			else if (newnum < oldnum) {
+			else if (newnum < oldnum) 
+			{
 				WriteDeltaClient(msg, time, nullptr, newcs, true);
 				newindex++;
 			}
-			else {
+			else 
+			{
 				WriteDeltaClient(msg, time, oldcs, nullptr, true);
 				oldindex++;
 			}
 		}
-
 		msg.WriteBit0();
 	}
 	
 	void Demo::WriteDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, bool force)
 	{
-		clientState_t nullstate;
-
-		if (!from) {
+		clientState_t nullstate = { 0 };
+		if (!from)
+		{
 			from = &nullstate;
-			memset(&nullstate, 0, sizeof(nullstate));
+			std::memset(&nullstate, 0, sizeof(nullstate));
 		}
 
 		if (to)
-			WriteClientDelta(msg, time, from, to, force, sizeof(clientStateFields) / sizeof(clientStateFields[0]), GetMinBitCount(64 - 1), clientStateFields);
+		{
+			WriteClientDelta(msg, time, from, to, force,
+				sizeof(NetFields::ClientStateFields) / sizeof(NetFields::ClientStateFields[0]),
+				NetFields::GetMinBitCount(64 - 1), NetFields::ClientStateFields);
+		}
 		else
-			WriteEntityRemoval(msg, (unsigned char*)from, GetMinBitCount(64 - 1), true);
+			WriteEntityRemoval(msg, (unsigned char*)from, NetFields::GetMinBitCount(64 - 1), true);
 	}
 
-	void Demo::WriteClientDelta(Msg& msg, const int time, clientState_t* from, clientState_t* to, bool force, int numFields, int indexBits, netField_t* stateFields)
+	void Demo::WriteClientDelta(Msg& msg, const int time, clientState_t* from, clientState_t* to, 
+		bool force, int numFields, int indexBits, netField_t* stateFields)
 	{
-		WriteDeltaStruct(msg, time, (const unsigned char*)from, (const unsigned char*)to, force, numFields, indexBits, stateFields, true);
+		WriteDeltaStruct(msg, time, (const unsigned char*)from, (const unsigned char*)to, 
+			force, numFields, indexBits, stateFields, true);
 	}
 }

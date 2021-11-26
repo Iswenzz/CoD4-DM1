@@ -60,42 +60,29 @@ namespace Iswenzz
 	class Msg
 	{
 	public:
-		void WriteInt(int c);
-		void WriteByte(int c);
-		void WriteShort(int c);
-		void WriteBit0();
-		void WriteBit1();
-		void WriteBits(int bits, int bitcount);
-		void WriteString(const char* s);
-		void WriteOriginFloat(int bits, float value, float oldValue);
-		void WriteOriginZFloat(float value, float oldValue);
-		int GetUsedBitCount();
-		float mapCenter[3];
-		
-		MSGType type = { };
-		int srvMsgSeq = 0;
-		int dummy = 0;
-		int protocol = 16;
+		MSGType Type = { };
+		int SrvMsgSeq = 0;
+		int Dummy = 0;
+		int Protocol = 16;
+		float MapCenter[3] = { 0, 0, 0 };
 
-		bool overflowed = 0;
-		bool readonly = 0;
+		bool Overflowed = false;
+		bool Readonly = false;
 
-		std::vector<unsigned char> buffer{ };
-		std::vector<unsigned char> splitBuffer{ };
+		std::vector<unsigned char> Buffer{ };
+		std::vector<unsigned char> SplitBuffer{ };
 
-		int	maxsize = 0;
-		int	cursize = 0;
-		int	splitsize = 0;
-		int	readcount = 0;
-		int	bit = 0;
-		int lastRefEntity = 0;
+		int	MaxSize = 0;
+		int	CurSize = 0;
+		int	SplitSize = 0;
+		int	ReadCount = 0;
+		int	Bit = 0;
+		int LastRefEntity = 0;
 
 		/// <summary>
 		/// Initialize a new Msg object.
 		/// </summary>
-		Msg(float center[3]) {
-			VectorCopy(center, mapCenter);
-		}
+		Msg() = default;
 		~Msg() = default;
 
 		/// <summary>
@@ -231,6 +218,81 @@ namespace Iswenzz
 		/// <param name="buffer">The output buffer.</param>
 		/// <param name="len">The size to read.</param>
 		void ReadData(void *buffer, int len);
+
+		/// <summary>
+		/// Write a 16 bit short using the ANGLE2SHORT macro.
+		/// </summary>
+		/// <param name="f">Angle value.</param>
+		void WriteAngle16(float f);
+
+		/// <summary>
+		/// Write a 24 bit flag.
+		/// </summary>
+		/// <param name="oldFlags">Old flags.</param>
+		/// <param name="newFlags">New flags.</param>
+		void Write24BitFlag(const int oldFlags, const int newFlags);
+
+		/// <summary>
+		/// Write and int.
+		/// </summary>
+		/// <param name="value">The int value.</param>
+		void WriteInt(int value);
+
+		/// <summary>
+		/// Write a byte.
+		/// </summary>
+		/// <param name="value">The byte value.</param>
+		void WriteByte(int value);
+
+		/// <summary>
+		/// Write a short.
+		/// </summary>
+		/// <param name="value">The short value.</param>
+		void WriteShort(int value);
+
+		/// <summary>
+		/// Write a 0 bit.
+		/// </summary>
+		void WriteBit0();
+
+		/// <summary>
+		/// Write a 1 bit.
+		/// </summary>
+		void WriteBit1();
+
+		/// <summary>
+		/// Write bits.
+		/// </summary>
+		/// <param name="bits">The bits to write.</param>
+		/// <param name="bitcount">The bit count.</param>
+		void WriteBits(int bits, int bitcount);
+
+		/// <summary>
+		/// Write a string.
+		/// </summary>
+		/// <param name="string">The string value.</param>
+		void WriteString(const char* string);
+
+		/// <summary>
+		/// Write origin.
+		/// </summary>
+		/// <param name="bits">The field bits.</param>
+		/// <param name="value">The origin value.</param>
+		/// <param name="oldValue">The old origin value.</param>
+		void WriteOriginFloat(int bits, float value, float oldValue);
+
+		/// <summary>
+		/// Write a Z origin.
+		/// </summary>
+		/// <param name="value">The origin value.</param>
+		/// <param name="oldValue">The old origin value.</param>
+		void WriteOriginZFloat(float value, float oldValue);
+
+		/// <summary>
+		/// Get the used bit count.
+		/// </summary>
+		/// <returns></returns>
+		int GetUsedBitCount();
 
 		/// <summary>
 		/// Get the number of bits currently read.

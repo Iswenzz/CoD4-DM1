@@ -268,7 +268,7 @@ namespace Iswenzz
 		unsigned int eventParms[4];
 		int	oldEventSequence;
 
-		int	clientNum;					// 220
+		int	ClientNum;					// 220
 		int	offHandIndex;				// 224
 		OffhandSecondaryClass_t	offhandSecondary;  // 228
 		unsigned int weapon;			// 232
@@ -564,7 +564,7 @@ namespace Iswenzz
 		int	surfType;					// 0x84
 
 		clipHandle_t index;				// 0x88
-		int	clientNum;					// 0x8c 0 to (MAX_CLIENTS - 1), for players and corpses
+		int	ClientNum;					// 0x8c 0 to (MAX_CLIENTS - 1), for players and corpses
 		int	iHeadIcon;					// 0x90
 		int	iHeadIconTeam;				// 0x94
 		int	solid;						// 0x98 for client side prediction, trap_linkentity sets this properly	0x98

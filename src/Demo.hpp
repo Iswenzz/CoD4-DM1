@@ -8,41 +8,14 @@
 namespace Iswenzz
 {
 	/// <summary>
-	/// Represent a server demo file .dm_1
+	/// Represent a demo file .DM_1
 	/// </summary>
 	class Demo
 	{
 	public:
-		void WriteGamestate(Msg& msg);
-		void WriteDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, bool force);
-		void WriteEntityRemoval(Msg& msg, unsigned char* from, int indexBits, unsigned char changeBit);
-		void WriteEntityIndex(Msg& msg, const int index, const int indexBits);
-		int WriteEntityDelta(Msg& msg, const int time, const unsigned char* from, const unsigned char* to, bool force, int numFields, int indexBits, netField_t* stateFields);
-		int WriteDeltaStruct(Msg& msg, const int time, const unsigned char* from, const unsigned char* to, bool force, int numFields, int indexBits, netField_t* stateFields, unsigned char bChangeBit);
-		bool ValuesAreEqual(int bits, const int* fromF, const int* toF);
-		void WriteDeltaField(Msg& msg, const int time, const unsigned char* from, const unsigned char* to, netField_s* field, int fieldNum, unsigned char forceSend);
-		void WriteAngle16(Msg& msg, float f);
-		void Write24BitFlag(Msg& msg, const int oldFlags, const int newFlags);
-		void WriteCommandString(Msg& msg, int seq);
-		void WriteConfigClient(Msg& msg, unsigned int clientnum);
-		void WriteSnapshot(Msg& msg, int oldSnapIndex, int newSnapIndex);
-		void WriteDeltaPlayerState(Msg& msg, const int time, playerState_t* from, playerState_t* to);
-		bool ShouldSendPSField(bool sendOriginAndVel, playerState_t* from, playerState_t* to, netField_t* field);
-		void WriteDeltaObjective(Msg& msg, const int time, objective_t* from, objective_t* to);
-		int WriteDelta_LastChangedField(unsigned char* from, unsigned char* to, netField_t* fields, int numFields);
-		void WriteDeltaHudElems(Msg& msg, const int time, hudelem_t* from, hudelem_t* to, const int count);
-		void WritePacketEntities(Msg& msg, const int time, clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
-		void WritePacketClients(Msg& msg, const int time, clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
-		void WriteDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, bool force);
-		void WriteClientDelta(Msg& msg, const int time, clientState_t* from, clientState_t* to, bool force, int numFields, int indexBits, netField_t* stateFields);
-
-		int clientNum = 0;
-		float mapCenter[3] = { 0, 0, 0 };
-		bool sendOriginAndVel = true;
-		std::ofstream DemoFileOut;
-		
 		std::string Filepath;
 		std::ifstream DemoFile;
+		std::ofstream DemoFileOut;
 		bool IsOpen = false;
 		bool Verbose;
 
@@ -68,7 +41,8 @@ namespace Iswenzz
 		int ServerConfigSequence = 0;
 		clientSnapshot_t CurrentSnapshot = { 0 };
 		float LerpPosOffsets[3] = { 0, 0, 0 };
-		int IsNewRound = 0;
+		float MapCenter[3] = { 0, 0, 0 };
+		bool SendOriginAndVel = true;
 
 		bool ModDM = false;
 		std::string TeamNameAllies;
@@ -98,7 +72,6 @@ namespace Iswenzz
 		std::array<unsigned char, MAX_GENTITIES> ActiveBaselines{ };
 		std::array<unsigned char, MAX_GENTITIES> ActiveEntities{ };
 		std::array<clientState_t, MAX_CLIENTS> ActiveClients{ };
-
 
 		/// <summary>
 		/// Initialize a new Demo object, demo file can be opened with the Open() function.
@@ -150,10 +123,10 @@ namespace Iswenzz
 		void Close();
 
 	private:
-		Msg CurrentCompressedMsg = { mapCenter };
-		Msg CurrentUncompressedMsg = { mapCenter };
-		Msg CurrentWritingMsg1 = { mapCenter };
-		Msg CurrentWritingMsg2 = { mapCenter };
+		Msg CurrentCompressedMsg = { };
+		Msg CurrentUncompressedMsg = { };
+		Msg CurrentWritingMsg1 = { };
+		Msg CurrentWritingMsg2 = { };
 
 		playerState_t NullPlayerState = { 0 };
 		entityState_t NullEntityState = { 0 };
@@ -369,5 +342,203 @@ namespace Iswenzz
 		/// <param name="movementDir">Movement direction.</param>
 		bool GetPredictedOriginForServerTime(const int time, float* predictedOrigin, float* predictedVelocity, 
 			float* predictedViewangles, int* bobCycle, int* movementDir);
+
+		/// <summary>
+		/// Write a gamestate.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		void WriteGamestate(Msg& msg);
+
+		/// <summary>
+		/// Write a delta entity.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="time">The server time.</param>
+		/// <param name="from">Pointer to an old entity state.</param>
+		/// <param name="to">Pointer to the new entity state.</param>
+		/// <param name="force">Force updating fields.</param>
+		void WriteDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, bool force);
+
+		/// <summary>
+		/// Write entity removal.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="from">Pointer to an old entity.</param>
+		/// <param name="indexBits">Index bits.</param>
+		/// <param name="changeBit">Change bits.</param>
+		void WriteEntityRemoval(Msg& msg, unsigned char* from, int indexBits, unsigned char changeBit);
+
+		/// <summary>
+		/// Write entity index.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="index">The entity index.</param>
+		/// <param name="indexBits">Index bits.</param>
+		void WriteEntityIndex(Msg& msg, const int index, const int indexBits);
+
+		/// <summary>
+		/// Write entity delta.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="time">The server time.</param>
+		/// <param name="from">Pointer to an old entity.</param>
+		/// <param name="to">Pointer to the new entity.</param>
+		/// <param name="force">Force updating fields.</param>
+		/// <param name="numFields">Number of fields.</param>
+		/// <param name="indexBits">Index bits.</param>
+		/// <param name="stateFields">Net fields to update.</param>
+		/// <returns></returns>
+		int WriteEntityDelta(Msg& msg, const int time, const unsigned char* from, const unsigned char* to,
+			bool force, int numFields, int indexBits, netField_t* stateFields);
+
+		/// <summary>
+		/// Write delta struct.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="time">The server time.</param>
+		/// <param name="from">Pointer to an old entity.</param>
+		/// <param name="to">Pointer to the new entity.</param>
+		/// <param name="force">Force updating fields.</param>
+		/// <param name="numFields">Number of fields.</param>
+		/// <param name="indexBits">Index bits.</param>
+		/// <param name="stateFields">Net fields to update.</param>
+		/// <param name="bChangeBit">Change bits.</param>
+		/// <returns></returns>
+		int WriteDeltaStruct(Msg& msg, const int time, const unsigned char* from, const unsigned char* to,
+			bool force, int numFields, int indexBits, netField_t* stateFields, unsigned char bChangeBit);
+
+		/// <summary>
+		/// Check if delta values are equal.
+		/// </summary>
+		/// <param name="bits">Delta bits.</param>
+		/// <param name="fromF">Pointer to old variable.</param>
+		/// <param name="toF">Pointer to new variable.</param>
+		/// <returns></returns>
+		bool DeltaValuesAreEqual(int bits, const int* fromF, const int* toF);
+
+		/// <summary>
+		/// Write delta field.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="time">The server time.</param>
+		/// <param name="from">Pointer to an old entity.</param>
+		/// <param name="to">Pointer to the new entity.</param>
+		/// <param name="field">The net field.</param>
+		/// <param name="fieldNum">The net field index.</param>
+		/// <param name="forceSend">Should force updating.</param>
+		void WriteDeltaField(Msg& msg, const int time, const unsigned char* from, const unsigned char* to,
+			netField_s* field, int fieldNum, unsigned char forceSend);
+
+		/// <summary>
+		/// Write a command string.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="seq">Message sequence.</param>
+		void WriteCommandString(Msg& msg, int seq);
+
+		/// <summary>
+		/// Write a config client.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="clientnum">The client num.</param>
+		void WriteConfigClient(Msg& msg, unsigned int clientnum);
+
+		/// <summary>
+		/// Write a snapshot.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="oldSnapIndex">Old snapshot index.</param>
+		/// <param name="newSnapIndex">New snapshot index.</param>
+		void WriteSnapshot(Msg& msg, int oldSnapIndex, int newSnapIndex);
+
+		/// <summary>
+		/// Write delta player state.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="time">The server time.</param>
+		/// <param name="from">Pointer to old player state.</param>
+		/// <param name="to">Pointer to new player state.</param>
+		void WriteDeltaPlayerState(Msg& msg, const int time, playerState_t* from, playerState_t* to);
+
+		/// <summary>
+		/// Write delta objective.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="time">The server time.</param>
+		/// <param name="from">Pointer to old objective.</param>
+		/// <param name="to">Pointer to new objective.</param>
+		void WriteDeltaObjective(Msg& msg, const int time, objective_t* from, objective_t* to);
+
+		/// <summary>
+		/// Write delta last changed field.
+		/// </summary>
+		/// <param name="from">Pointer to old struct.</param>
+		/// <param name="to">Pointer to new struct.</param>
+		/// <param name="fields">The net fields.</param>
+		/// <param name="numFields">The net field count.</param>
+		/// <returns></returns>
+		int WriteDeltaLastChangedField(unsigned char* from, unsigned char* to, netField_t* fields, int numFields);
+
+		/// <summary>
+		/// Write delta hud elements.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="time">The server time.</param>
+		/// <param name="from">Pointer to old hudelem.</param>
+		/// <param name="to">Pointer to new hudelem.</param>
+		/// <param name="count">The field count.</param>
+		void WriteDeltaHudElems(Msg& msg, const int time, hudelem_t* from, hudelem_t* to, const int count);
+
+		/// <summary>
+		/// Write packet entities.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="time">The server time.</param>
+		/// <param name="oldframe">Pointer to old client snapshot.</param>
+		/// <param name="newframe">Pointer to new client snapshot.</param>
+		void WritePacketEntities(Msg& msg, const int time, clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
+
+		/// <summary>
+		/// Write packet clients.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="time">The server time.</param>
+		/// <param name="oldframe">Pointer to old client snapshot.</param>
+		/// <param name="newframe">Pointer to new client snapshot.</param>
+		void WritePacketClients(Msg& msg, const int time, clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
+
+		/// <summary>
+		/// Write delta client.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="time">The server time.</param>
+		/// <param name="from">Pointer to old client state.</param>
+		/// <param name="to">Pointer to new client state.</param>
+		/// <param name="force">Should force updating.</param>
+		void WriteDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, bool force);
+
+		/// <summary>
+		/// Write client delta.
+		/// </summary>
+		/// <param name="msg">The current uncompressed message.</param>
+		/// <param name="time">The server time.</param>
+		/// <param name="from">Pointer to old client state.</param>
+		/// <param name="to">Pointer to new client state.</param>
+		/// <param name="force">Should force updating.</param>
+		/// <param name="numFields">The fields count.</param>
+		/// <param name="indexBits">Index bits.</param>
+		/// <param name="stateFields">The net fields.</param>
+		void WriteClientDelta(Msg& msg, const int time, clientState_t* from, clientState_t* to,
+			bool force, int numFields, int indexBits, netField_t* stateFields);
+
+		/// <summary>
+		/// Should send player state field.
+		/// </summary>
+		/// <param name="sendOriginAndVel">Should send origin and velocity.</param>
+		/// <param name="from">Pointer to old player state.</param>
+		/// <param name="to">Pointer to new player state.</param>
+		/// <param name="field">The player state field to check.</param>
+		/// <returns></returns>
+		bool ShouldSendPSField(bool sendOriginAndVel, playerState_t* from, playerState_t* to, netField_t* field);
 	};
 }

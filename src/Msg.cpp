@@ -16,7 +16,7 @@ namespace Iswenzz
 		268435455, 536870911, 1073741823, 2147483647, 4294967295
 	};
 
-	Msg::Msg(int protocol) : protocol(protocol) { }
+	Msg::Msg(int protocol) : Protocol(protocol) { }
 
 	Msg::Msg(unsigned char* buf, int len, MSGCrypt mode, int protocol)
 	{
@@ -25,69 +25,62 @@ namespace Iswenzz
 
 	Msg::Msg(Msg& msg, MSGCrypt mode)
 	{
-		Initialize(msg.buffer.data(), msg.cursize, mode, msg.protocol);
-		srvMsgSeq = msg.srvMsgSeq;
-		dummy = msg.dummy;
+		Initialize(msg.Buffer.data(), msg.CurSize, mode, msg.Protocol);
+		SrvMsgSeq = msg.SrvMsgSeq;
+		Dummy = msg.Dummy;
 	}
 
 	void Msg::Initialize(int len, bool read)
 	{
-		if (read) {
-			cursize = len;
-			maxsize = NETCHAN_UNSENTBUFFER_SIZE;
-			buffer.resize(len);
-		}
-		else {
-			cursize = 0;
-			maxsize = NETCHAN_UNSENTBUFFER_SIZE;
-			buffer.resize(len);
-		}
+		CurSize = read ? len : 0;
+		MaxSize = NETCHAN_UNSENTBUFFER_SIZE;
+		Buffer.resize(len);
 	}
 
 	void Msg::Initialize(unsigned char* buf, int len, MSGCrypt mode, int protocol)
 	{
 		if (mode == MSGCrypt::MSG_CRYPT_NONE)
 		{
-			buffer.resize(len);
-			cursize = buffer.size();
-			maxsize = NETCHAN_MAXBUFFER_SIZE;
-			std::memcpy(buffer.data(), buf, buffer.size());
+			Buffer.resize(len);
+			CurSize = Buffer.size();
+			MaxSize = NETCHAN_MAXBUFFER_SIZE;
+			std::memcpy(Buffer.data(), buf, Buffer.size());
 		}
 		else if (mode == MSGCrypt::MSG_CRYPT_HUFFMAN)
 		{
-			buffer.resize(NETCHAN_MAXBUFFER_SIZE);
-			cursize = Huffman::Decompress(buf, len, buffer.data(), buffer.size());
-			maxsize = NETCHAN_MAXBUFFER_SIZE;
+			Buffer.resize(NETCHAN_MAXBUFFER_SIZE);
+			CurSize = Huffman::Decompress(buf, len, Buffer.data(), Buffer.size());
+			MaxSize = NETCHAN_MAXBUFFER_SIZE;
 		}
-		readcount = 0;
-		this->protocol = protocol;
+		ReadCount = 0;
+		this->Protocol = protocol;
 	}
 
 	int Msg::ReadBit()
 	{
 		int oldbit7, numBytes, bits;
 
-		oldbit7 = bit & 7;
+		oldbit7 = Bit & 7;
 		if (!oldbit7)
 		{
-			if (readcount >= cursize + splitsize)
+			if (ReadCount >= CurSize + SplitSize)
 			{
-				overflowed = 1;
+				Overflowed = 1;
 				return -1;
 			}
-			bit = 8 * readcount;
-			readcount++;
+			Bit = 8 * ReadCount;
+			ReadCount++;
 		}
 
-		numBytes = bit / 8;
-		if (numBytes < cursize)
+		numBytes = Bit / 8;
+		if (numBytes < CurSize)
 		{
-			bits = buffer[numBytes] >> oldbit7;
-			bit++;
+			bits = Buffer[numBytes] >> oldbit7;
+			Bit++;
 			return bits & 1;
 		}
-		bits = splitBuffer[numBytes - cursize] >> oldbit7;
-		bit++;
+		bits = SplitBuffer[numBytes - CurSize] >> oldbit7;
+		Bit++;
 		return bits & 1;
 	}
 
@@ -101,28 +94,28 @@ namespace Iswenzz
 		{
 			for (i = 0; numBits != i; i++)
 			{
-				if (!(bit & 7))
+				if (!(Bit & 7))
 				{
-					if (readcount >= splitsize + cursize)
+					if (ReadCount >= SplitSize + CurSize)
 					{
-						overflowed = 1;
+						Overflowed = 1;
 						return -1;
 					}
-					bit = 8 * readcount;
-					readcount++;
+					Bit = 8 * ReadCount;
+					ReadCount++;
 				}
-				if (((bit / 8)) >= cursize)
+				if (((Bit / 8)) >= CurSize)
 				{
-					if (splitBuffer.empty())
+					if (SplitBuffer.empty())
 						return 0;
 
-					var = splitBuffer[(bit / 8) - cursize];
+					var = SplitBuffer[(Bit / 8) - CurSize];
 				}
 				else
-					var = buffer[bit / 8];
+					var = Buffer[Bit / 8];
 
-				retval |= ((var >> (bit & 7)) & 1) << i;
-				bit++;
+				retval |= ((var >> (Bit & 7)) & 1) << i;
+				Bit++;
 			}
 		}
 		return retval;
@@ -131,28 +124,28 @@ namespace Iswenzz
 	int Msg::ReadByte()
 	{
 		unsigned char* c;
-		if (readcount + sizeof(unsigned char) > cursize)
+		if (ReadCount + sizeof(unsigned char) > CurSize)
 		{
-			overflowed = 1;
+			Overflowed = 1;
 			return -1;
 		}
-		c = &buffer[readcount];
+		c = &Buffer[ReadCount];
 
-		readcount += sizeof(unsigned char);
+		ReadCount += sizeof(unsigned char);
 		return *c;
 	}
 
 	int Msg::ReadShort()
 	{
 		signed short* c;
-		if (readcount + sizeof(short) > cursize) 
+		if (ReadCount + sizeof(short) > CurSize) 
 		{
-			overflowed = 1;
+			Overflowed = 1;
 			return -1;
 		}
-		c = reinterpret_cast<short*>(&buffer[readcount]);
+		c = reinterpret_cast<short*>(&Buffer[ReadCount]);
 
-		readcount += sizeof(short);
+		ReadCount += sizeof(short);
 		return *c;
 	}
 
@@ -160,42 +153,42 @@ namespace Iswenzz
 	{
 		int32_t* c;
 
-		if (readcount + sizeof(int32_t) > cursize) 
+		if (ReadCount + sizeof(int32_t) > CurSize) 
 		{
-			overflowed = 1;
+			Overflowed = 1;
 			return -1;
 		}
-		c = reinterpret_cast<int32_t*>(&buffer[readcount]);
+		c = reinterpret_cast<int32_t*>(&Buffer[ReadCount]);
 
-		readcount += sizeof(int32_t);
+		ReadCount += sizeof(int32_t);
 		return *c;
 	}
 
 	int64_t Msg::ReadInt64()
 	{
 		int64_t* c;
-		if (readcount + sizeof(int64_t) > cursize) 
+		if (ReadCount + sizeof(int64_t) > CurSize) 
 		{
-			overflowed = 1;
+			Overflowed = 1;
 			return -1;
 		}
-		c = reinterpret_cast<int64_t*>(&buffer[readcount]);
+		c = reinterpret_cast<int64_t*>(&Buffer[ReadCount]);
 
-		readcount += sizeof(int64_t);
+		ReadCount += sizeof(int64_t);
 		return *c;
 	}
 
 	float Msg::ReadFloat()
 	{
 		float* c;
-		if (readcount + sizeof(float) > cursize) 
+		if (ReadCount + sizeof(float) > CurSize) 
 		{
-			overflowed = 1;
+			Overflowed = 1;
 			return -1;
 		}
-		c = reinterpret_cast<float*>(&buffer[readcount]);
+		c = reinterpret_cast<float*>(&Buffer[ReadCount]);
 
-		readcount += sizeof(float);
+		ReadCount += sizeof(float);
 		return *c;
 	}
 
@@ -228,7 +221,7 @@ namespace Iswenzz
 	{
 		signed int coord;
 
-		if (protocol > COD4X_FALLBACK_PROTOCOL)
+		if (Protocol > COD4X_FALLBACK_PROTOCOL)
 		{
 			int intf = ReadInt();
 			return *(float*)&intf;
@@ -237,7 +230,7 @@ namespace Iswenzz
 		if (ReadBit())
 		{
 			float center[3]{ 0, 0, 0 };
-			VectorCopy(center, mapCenter);
+			VectorCopy(center, MapCenter);
 			
 			coord = (signed int)(center[bits != -92] + 0.5);
 			return (double)((((signed int)oldValue - coord + 0x8000) ^ ReadBits(16)) + coord - 0x8000);
@@ -249,7 +242,7 @@ namespace Iswenzz
 	{
 		signed int coord;
 
-		if (protocol > COD4X_FALLBACK_PROTOCOL)
+		if (Protocol > COD4X_FALLBACK_PROTOCOL)
 		{
 			int intf = ReadInt();
 			return *(float*)&intf;
@@ -258,7 +251,7 @@ namespace Iswenzz
 		if (ReadBit())
 		{
 			float center[3]{ 0, 0, 0 };
-			VectorCopy(center, mapCenter);
+			VectorCopy(center, MapCenter);
 			
 			coord = (signed int)(center[2] + 0.5);
 			return (double)((((signed int)oldValue - coord + 0x8000) ^ ReadBits(16)) + coord - 0x8000);
@@ -355,137 +348,112 @@ namespace Iswenzz
 		while (databyte != -1 && (i + 4) < len);
 		outbuf[i] = '\0';
 	}
-
-	int Msg::GetNumBitsRead()
-	{
-		return 8 * readcount - ((8 - bit) & 7);
-	}
-
-	void Msg::ClearLastReferencedEntity()
-	{
-		lastRefEntity = -1;
-	}
-
-	void Msg::Discard()
-	{
-		cursize = readcount;
-		splitsize = 0;
-		overflowed = true;
-	}
 	
-	void Msg::WriteInt(int c) 
+	void Msg::WriteInt(int value) 
 	{
 		int32_t* dst;
-
-		if (maxsize - cursize < 4) {
-			overflowed = true;
+		if (MaxSize - CurSize < 4) 
+		{
+			Overflowed = true;
 			return;
 		}
-		dst = (int32_t*)& buffer[cursize];
-		*dst = c;
-		cursize += sizeof(int32_t);
+
+		dst = (int32_t*)&Buffer[CurSize];
+		*dst = value;
+		CurSize += sizeof(int32_t);
 	}
 
-	void Msg::WriteByte(int c) 
+	void Msg::WriteByte(int value)
 	{
 		int8_t* dst;
-
-		if (maxsize - cursize < 1) {
-			overflowed = true;
+		if (MaxSize - CurSize < 1) 
+		{
+			Overflowed = true;
 			return;
 		}
-		dst = (int8_t*)& buffer[cursize];
-		*dst = c;
-		cursize += sizeof(int8_t);
+
+		dst = (int8_t*)&Buffer[CurSize];
+		*dst = value;
+		CurSize += sizeof(int8_t);
 	}
 
-	void Msg::WriteShort(int c) 
+	void Msg::WriteShort(int value)
 	{
 		signed short* dst;
-
-		if (maxsize - cursize < 2) {
-			overflowed = true;
+		if (MaxSize - CurSize < 2) 
+		{
+			Overflowed = true;
 			return;
 		}
-		dst = (int16_t*)& buffer[cursize];
-		*dst = c;
-		cursize += sizeof(short);
+
+		dst = (int16_t*)&Buffer[CurSize];
+		*dst = value;
+		CurSize += sizeof(short);
 	}
 
 	void Msg::WriteBit0()
 	{
-		if (!(bit & 7))
+		if (!(Bit & 7))
 		{
-			if (maxsize <= cursize)
+			if (MaxSize <= CurSize)
 			{
-				overflowed = true;
+				Overflowed = true;
 				return;
 			}
-			bit = cursize * 8;
-			buffer[cursize] = 0;
-			cursize++;
+			Bit = CurSize * 8;
+			Buffer[CurSize] = 0;
+			CurSize++;
 		}
-		bit++;
+		Bit++;
 	}
 
 	void Msg::WriteBit1()
 	{
-		if (!(bit & 7))
+		if (!(Bit & 7))
 		{
-			if (cursize >= maxsize)
+			if (CurSize >= MaxSize)
 			{
-				overflowed = true;
+				Overflowed = true;
 				return;
 			}
-			bit = 8 * cursize;
-			buffer[cursize] = 0;
-			cursize++;
+			Bit = 8 * CurSize;
+			Buffer[CurSize] = 0;
+			CurSize++;
 		}
-		buffer[bit >> 3] |= 1 << (bit & 7);
-		bit++;
+		Buffer[Bit >> 3] |= 1 << (Bit & 7);
+		Bit++;
 	}
 
 	void Msg::WriteBits(int bits, int bitcount)
 	{
 		int i;
-
-		if (maxsize - cursize < 4)
+		if (MaxSize - CurSize < 4)
 		{
-			overflowed = true;
+			Overflowed = true;
 			return;
 		}
 
 		for (i = 0; bitcount != i; i++)
 		{
-
-			if (!(bit & 7))
+			if (!(Bit & 7))
 			{
-				bit = 8 * cursize;
-				buffer[cursize] = 0;
-				cursize++;
+				Bit = 8 * CurSize;
+				Buffer[CurSize] = 0;
+				CurSize++;
 			}
-
 			if (bits & 1)
-				buffer[bit >> 3] |= 1 << (bit & 7);
+				Buffer[Bit >> 3] |= 1 << (Bit & 7);
 
-			bit++;
+			Bit++;
 			bits >>= 1;
 		}
 	}
 
-	void Msg::WriteString(const char* s) 
+	void Msg::WriteString(const char* string) 
 	{
-		for (int i = 0; i < strlen(s); i++) 
-		{
-			WriteByte(s[i]);
-		}
-
+		for (int i = 0; i < strlen(string); i++)
+			WriteByte(string[i]);
 		WriteByte('\0');
-	}
-
-	int Msg::GetUsedBitCount()
-	{
-		return ((cursize + splitsize) * 8) - ((8 - bit) & 7);
 	}
 
 	void Msg::WriteOriginFloat(int bits, float value, float oldValue)
@@ -495,7 +463,7 @@ namespace Iswenzz
 		signed int mcenterbits, delta;
 		float center[3];
 
-		if (protocol > COD4X_FALLBACK_PROTOCOL)
+		if (Protocol > COD4X_FALLBACK_PROTOCOL)
 		{
 			ival = *(int*)& value;
 			WriteInt(ival);
@@ -508,7 +476,7 @@ namespace Iswenzz
 
 		if ((unsigned int)(delta + 64) > 127)
 		{
-			VectorCopy(mapCenter, center);
+			VectorCopy(MapCenter, center);
 
 			WriteBit1();
 			mcenterbits = (signed int)(center[bits != -92] + 0.5);
@@ -528,7 +496,7 @@ namespace Iswenzz
 		signed int mcenterbits;
 		float center[3];
 
-		if (protocol > COD4X_FALLBACK_PROTOCOL)
+		if (Protocol > COD4X_FALLBACK_PROTOCOL)
 		{
 			ival = *(int*)& value;
 			WriteInt(ival);
@@ -540,7 +508,7 @@ namespace Iswenzz
 
 		if ((unsigned int)(ival - ioldval + 64) > 127)
 		{
-			VectorCopy(mapCenter, center);
+			VectorCopy(MapCenter, center);
 
 			WriteBit1();
 			mcenterbits = (signed int)(center[2] + 0.5);
@@ -551,5 +519,59 @@ namespace Iswenzz
 			WriteBit0();
 			WriteBits(ival - ioldval + 64, 7);
 		}
+	}
+
+	void Msg::WriteAngle16(float f)
+	{
+		WriteShort(ANGLE2SHORT(f));
+	}
+
+	void Msg::Write24BitFlag(const int oldFlags, const int newFlags)
+	{
+		int xorflags;
+		signed int shiftedflags;
+		signed int i;
+
+		xorflags = newFlags ^ oldFlags;
+		if ((xorflags - 1) & xorflags)
+		{
+			WriteBit1();
+			shiftedflags = newFlags;
+
+			for (i = 3; i; --i)
+			{
+				WriteByte(shiftedflags);
+				shiftedflags >>= 8;
+			}
+		}
+		else
+		{
+			for (i = 0; !(xorflags & 1); ++i)
+				xorflags >>= 1;
+			WriteBit0();
+			WriteBits(i, 5);
+		}
+	}
+
+	int Msg::GetUsedBitCount()
+	{
+		return ((CurSize + SplitSize) * 8) - ((8 - Bit) & 7);
+	}
+
+	int Msg::GetNumBitsRead()
+	{
+		return 8 * ReadCount - ((8 - Bit) & 7);
+	}
+
+	void Msg::ClearLastReferencedEntity()
+	{
+		LastRefEntity = -1;
+	}
+
+	void Msg::Discard()
+	{
+		CurSize = ReadCount;
+		SplitSize = 0;
+		Overflowed = true;
 	}
 }
