@@ -21,17 +21,17 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#include "src/DemoReader.hpp"
-#include "src/Huffman.hpp"
+#include "DemoReader.hpp"
+#include "Huffman.hpp"
 
 #include <iostream>
 #include <memory>
 
 using namespace Iswenzz;
 
-#define DEMO_PATH R"(C:\Users\Iswenzz\Desktop\1.9.dm_1)"
-//#define DEMO_PATH R"(C:\Users\Iswenzz\Desktop\1.7.dm_1)"
-//#define DEMO_PATH R"(C:\Users\Iswenzz\Desktop\1.6.dm_1)"
+#define DEMO_PATH R"(C:\Users\Iswenzz\Desktop\dev_misc\cod4\1.9.dm_1)"
+//#define DEMO_PATH R"(C:\Users\Iswenzz\Desktop\dev_misc\cod4\1.7.dm_1)"
+//#define DEMO_PATH R"(C:\Users\Iswenzz\Desktop\dev_misc\cod4\1.6.dm_1)"
 
 void TestReader()
 {

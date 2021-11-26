@@ -1,21 +1,25 @@
-cmake_minimum_required(VERSION 3.0.0)
-project(cod4_dm1 VERSION 1.0.0)
+cmake_minimum_required(VERSION 3.16.0)
+project(CoD4DM1 VERSION 0.1.0 LANGUAGES CXX)
 
-include(CTest)
-enable_testing()
-
-add_executable(cod4_dm1
-	main.cpp
-	src/Demo.cpp
-	src/DemoReader.cpp
-	src/Huffman.cpp
-	src/Msg.cpp
-	src/NetFields.cpp
-	src/Utility.hpp)
-
+# CPack
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+set(CPACK_GENERATOR 7Z)
 include(CPack)
 
-set(CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS "-fpermissive -Wno-narrowing")
+# Conan
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
+# Tests
+# include(CTest)
+# add_executable(CoD4DM1Tests src/tests/main.test.cpp)
+# target_link_libraries(CoD4DM1Tests PUBLIC ${CONAN_LIBS} CoD4DM1Lib)
+# add_test(NAME Tests COMMAND CoD4DM1Tests)
+
+# Build
+add_subdirectory(src)
+add_executable(CoD4DM1 src/CLI.cpp)
+target_link_libraries(CoD4DM1 PRIVATE ${CONAN_LIBS} CoD4DM1Lib)
+install(TARGETS CoD4DM1 DESTINATION bin)
+install(TARGETS CoD4DM1Lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION lib/include)
