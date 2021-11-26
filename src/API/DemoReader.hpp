@@ -1,5 +1,5 @@
 #pragma once
-#include "Demo.hpp"
+#include "Demo/Demo.hpp"
 
 namespace Iswenzz
 {

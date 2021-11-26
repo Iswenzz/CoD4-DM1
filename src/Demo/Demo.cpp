@@ -1,5 +1,5 @@
 #include "Demo.hpp"
-#include "Huffman.hpp"
+#include "Crypt/Huffman.hpp"
 
 #include <cassert>
 #include <iostream>

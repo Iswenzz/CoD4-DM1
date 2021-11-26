@@ -17,39 +17,21 @@ GNU General Public License for more details.
 ===========================================================================
 */
 
-#include "DemoReader.hpp"
-#include "Huffman.hpp"
+#include "API/DemoReader.hpp"
+#include "Crypt/Huffman.hpp"
 
 #include <iostream>
 #include <memory>
 
 using namespace Iswenzz;
 
-#define DEMO_PATH R"(C:\Users\Iswenzz\Desktop\dev_misc\cod4\1.9.dm_1)"
-//#define DEMO_PATH R"(C:\Users\Iswenzz\Desktop\dev_misc\cod4\1.7.dm_1)"
-//#define DEMO_PATH R"(C:\Users\Iswenzz\Desktop\dev_misc\cod4\1.6.dm_1)"
-
-void TestReader()
-{
-    std::unique_ptr<DemoReader> demoReader = std::make_unique<DemoReader>(DEMO_PATH);
-    while (demoReader->Next())
-    {
-        //std::cout << demoReader->GetCurrentFrame().commandTime << std::endl;
-    }
-}
-
-void TestDemo()
-{
-    std::unique_ptr<Demo> demo = std::make_unique<Demo>(DEMO_PATH);
-    demo->Parse();
-}
-
+/// <summary>
+/// Command Line Interface.
+/// </summary>
+/// <returns></returns>
 int main()
 {
     Huffman::InitMain(); // Initialize huffman compression
-
-    TestDemo();
-    //TestReader();
 
     return 0;
 }

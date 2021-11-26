@@ -20,8 +20,8 @@ This project builds with [CMake](https://cmake.org/) and [Conan](https://conan.i
 _Build Command:_
 
     mkdir build && cd build
-    conan install ..
-    cmake .. -A Win32
+    conan install .. -s compiler.version=16 -s arch=x86 -s build_type=Debug --build=gtest
+    cmake .. -G "Visual Studio 16 2019" -A Win32
     cmake --build .
 
 ### [Download](https://github.com/Iswenzz/CoD4-DM1/releases)

@@ -1,6 +1,6 @@
 #pragma once
-#include "Msg.hpp"
-#include "NetFields.hpp"
+#include "Crypt/Msg.hpp"
+#include "Crypt/NetFields.hpp"
 
 #include <string>
 #include <fstream>
