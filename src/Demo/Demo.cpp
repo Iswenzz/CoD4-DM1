@@ -1823,7 +1823,6 @@ namespace Iswenzz
 			{
 				if (ammobits[j]) 
 				{
-
 					msg.WriteBit1();
 					msg.WriteShort(ammobits[j]);
 
