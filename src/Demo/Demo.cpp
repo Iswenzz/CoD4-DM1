@@ -76,11 +76,11 @@ namespace Iswenzz
 	void Demo::ReadMessage()
 	{
 		CurrentCompressedMsg = Msg{ Protocol };
-		CurrentWritingMsg1 = Msg{ Protocol };
-		CurrentWritingMsg2 = Msg{ Protocol };
+		CurrentWritingUncompressedMsg = Msg{ Protocol };
+		CurrentWritingCompressedMsg = Msg{ Protocol };
 
-		CurrentWritingMsg1.Initialize(NETCHAN_UNSENTBUFFER_SIZE, false);
-		CurrentWritingMsg2.Initialize(NETCHAN_UNSENTBUFFER_SIZE, false);
+		CurrentWritingUncompressedMsg.Initialize(NETCHAN_UNSENTBUFFER_SIZE, false);
+		CurrentWritingCompressedMsg.Initialize(NETCHAN_UNSENTBUFFER_SIZE, false);
 
 		unsigned char slen = 0;
 		int protocol = 0, messageLength = 0;
@@ -127,15 +127,15 @@ namespace Iswenzz
 				else 
 					ParseGamestateX(CurrentUncompressedMsg);
 				
-				VectorCopy(CurrentUncompressedMsg.MapCenter, CurrentWritingMsg1.MapCenter);
-				WriteGamestate(CurrentWritingMsg1);
+				VectorCopy(CurrentUncompressedMsg.MapCenter, CurrentWritingUncompressedMsg.MapCenter);
+				WriteGamestate(CurrentWritingUncompressedMsg);
 				break;
 			case svc_ops_e::svc_serverCommand: 
 			{
 				int seq = -1;
 				ParseCommandString(CurrentUncompressedMsg, seq);
 
-				WriteCommandString(CurrentWritingMsg1, seq);
+				WriteCommandString(CurrentWritingUncompressedMsg, seq);
 				break;
 			}
 			case svc_ops_e::svc_snapshot:
@@ -143,7 +143,7 @@ namespace Iswenzz
 				int oldSnapIndex = -1, newSnapIndex = -1;
 				ParseSnapshot(CurrentUncompressedMsg, oldSnapIndex, newSnapIndex);
 
-				WriteSnapshot(CurrentWritingMsg1, oldSnapIndex, newSnapIndex);
+				WriteSnapshot(CurrentWritingUncompressedMsg, oldSnapIndex, newSnapIndex);
 				break;
 			}
 			case svc_ops_e::svc_configclient:
@@ -151,27 +151,27 @@ namespace Iswenzz
 				unsigned int clientnum = 0;
 				ParseConfigClient(CurrentUncompressedMsg, clientnum);
 
-				WriteConfigClient(CurrentWritingMsg1, clientnum);
+				WriteConfigClient(CurrentWritingUncompressedMsg, clientnum);
 				break;
 			}
 			default:
 				return;
 			}
 		}
-		CurrentWritingMsg1.WriteByte(static_cast<int>(svc_ops_e::svc_EOF));
-		CurrentWritingMsg2.CurSize = 4 + Huffman::Compress(&CurrentWritingMsg1.Buffer[0], 
-			CurrentWritingMsg1.CurSize, &CurrentWritingMsg2.Buffer[0], 0);
+		CurrentWritingUncompressedMsg.WriteByte(static_cast<int>(svc_ops_e::svc_EOF));
+		CurrentWritingCompressedMsg.CurSize = 4 + Huffman::Compress(&CurrentWritingUncompressedMsg.Buffer[0], 
+			CurrentWritingUncompressedMsg.CurSize, &CurrentWritingCompressedMsg.Buffer[0], 0);
 
 		char seq = 0;
 		DemoFileOut.write(reinterpret_cast<char*>(&seq), sizeof(seq));
 
 		DemoFileOut.write(reinterpret_cast<char*>(&CurrentCompressedMsg.SrvMsgSeq), sizeof(CurrentCompressedMsg.SrvMsgSeq));
-		DemoFileOut.write(reinterpret_cast<char*>(&CurrentWritingMsg2.CurSize), sizeof(CurrentWritingMsg2.CurSize));
+		DemoFileOut.write(reinterpret_cast<char*>(&CurrentWritingCompressedMsg.CurSize), sizeof(CurrentWritingCompressedMsg.CurSize));
 		DemoFileOut.write(reinterpret_cast<char*>(&CurrentCompressedMsg.Dummy), sizeof(CurrentCompressedMsg.Dummy));
 		// -4 because of writing CurrentCompressedMsg.dummy directly to disk 
 		// instead of including it in the message buffer!
-		DemoFileOut.write(reinterpret_cast<char*>(&CurrentWritingMsg2.Buffer[0]), 
-			static_cast<std::streamsize>(CurrentWritingMsg2.CurSize) - 4); 
+		DemoFileOut.write(reinterpret_cast<char*>(&CurrentWritingCompressedMsg.Buffer[0]), 
+			static_cast<std::streamsize>(CurrentWritingCompressedMsg.CurSize) - 4); 
 	}
 
 	void Demo::ReadArchive()

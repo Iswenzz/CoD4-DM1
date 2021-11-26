@@ -125,8 +125,8 @@ namespace Iswenzz
 	private:
 		Msg CurrentCompressedMsg = { };
 		Msg CurrentUncompressedMsg = { };
-		Msg CurrentWritingMsg1 = { };
-		Msg CurrentWritingMsg2 = { };
+		Msg CurrentWritingUncompressedMsg = { };
+		Msg CurrentWritingCompressedMsg = { };
 
 		playerState_t NullPlayerState = { 0 };
 		entityState_t NullEntityState = { 0 };
