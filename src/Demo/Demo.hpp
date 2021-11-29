@@ -165,6 +165,10 @@ namespace Iswenzz
 		/// <param name="msg">The current uncompressed message.</param>
 		void ParseSnapshot(Msg& msg, int& oldSnapIndex, int& newSnapIndex);
 
+		//
+		bool CheckSnapshotValidity(clientSnapshot_t& old);
+		//
+		
 		/// <summary>
 		/// Parse a command string.
 		/// </summary>
