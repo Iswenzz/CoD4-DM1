@@ -436,6 +436,29 @@ namespace Iswenzz
 		ClientNames[clientnum].clantag = clantag;
 	}
 
+	bool Demo::CheckSnapshotValidity(clientSnapshot_t& old)
+	{
+		old = Snapshots[CurrentSnapshot.deltaNum & 31];
+		if (!old.valid)
+		{
+			return true;
+		}
+		if (Snapshots[CurrentSnapshot.deltaNum & 31].messageNum != CurrentSnapshot.deltaNum)
+		{
+			return true;
+		}
+		if (ParseEntitiesNum - Snapshots[CurrentSnapshot.deltaNum & 31].parseEntitiesNum > 1920)
+		{
+			return true;
+		}
+		if (ParseClientsNum - Snapshots[CurrentSnapshot.deltaNum & 31].parseClientsNum > 1920)
+		{
+			return true;
+		}
+
+		return false;
+	}
+	
 	void Demo::ParseSnapshot(Msg& msg, int& oldSnapIndex, int& newSnapIndex)
 	{
 		clientSnapshot_t old = { 0 };
@@ -451,24 +474,7 @@ namespace Iswenzz
 		// Integrity checks
 		if (CurrentSnapshot.deltaNum > 0) 
 		{
-			old = Snapshots[CurrentSnapshot.deltaNum & PACKET_MASK];
-			if (!old.valid) 
-			{
-				msg.Discard();
-				return;
-			}
-			if (Snapshots[CurrentSnapshot.deltaNum & PACKET_MASK].messageNum != CurrentSnapshot.deltaNum) 
-			{
-				msg.Discard();
-				return;
-			}
-			if (ParseEntitiesNum - Snapshots[CurrentSnapshot.deltaNum & PACKET_MASK].parseEntitiesNum > 1920) 
-			{
-				msg.Discard();
-				return;
-			}
-			if (ParseClientsNum - Snapshots[CurrentSnapshot.deltaNum & PACKET_MASK].parseClientsNum > 1920) 
-			{
+			if (CheckSnapshotValidity(old)) {
 				msg.Discard();
 				return;
 			}
@@ -1732,13 +1738,19 @@ namespace Iswenzz
 		clientSnapshot_t* oldSnap, * newSnap;
 		newSnap = &Snapshots[newSnapIndex];
 
-		if (newSnap->deltaNum == -1) 
-		{
+		if (newSnap->deltaNum == -1) {
 			oldSnap = &CurrentSnapshot;
-			std::memset(oldSnap, 0, sizeof(*oldSnap));
+			memset(oldSnap, 0, sizeof(*oldSnap));
 		}
-		else 
+		else {
 			oldSnap = &Snapshots[oldSnapIndex];
+
+			if (CheckSnapshotValidity(*oldSnap)) {
+				oldSnap = &CurrentSnapshot;
+				memset(oldSnap, 0, sizeof(*oldSnap));
+				newSnap->deltaNum = -1;
+			}
+		}
 
 		msg.WriteByte(static_cast<int>(svc_ops_e::svc_snapshot));
 		msg.WriteInt(newSnap->serverTime);
