@@ -122,6 +122,16 @@ namespace Iswenzz
 			switch (command)
 			{
 			case svc_ops_e::svc_gamestate:
+				static uint32_t count = 0;
+				count++;
+
+				if (count > 1) {
+					ParseEntitiesNum = 0;
+					ParseClientsNum = 0;
+					ConfigStrings = std::array<std::string, MAX_CONFIGSTRINGS>{};
+					EntityBaselines = std::array<entityState_t, MAX_GENTITIES>{};
+				}
+					
 				if (Protocol == COD4_PROTOCOL) 
 					ParseGamestate(CurrentUncompressedMsg);
 				else 
