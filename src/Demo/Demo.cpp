@@ -1225,14 +1225,23 @@ namespace Iswenzz
 			msg.WriteShort(numCS);
 
 			// Configstrings
+			int previousIndex = -1;
 			for (i = 0; i < MAX_CONFIGSTRINGS; i++) 
 			{
 				if (ConfigStrings[i] == "")
 					continue;
 
 				s = ConfigStrings[i].c_str();
-				msg.WriteBit0();
-				msg.WriteBits(i, 12);
+				
+				// legacy config string reading supports incrementing config string index by one, this only costs 1 bit instead of 13!
+				if (previousIndex + 1 == i) 
+					msg.WriteBit1();
+				else {
+					msg.WriteBit0();
+					msg.WriteBits(i, 12);
+				}
+				
+				previousIndex = i;
 				msg.WriteString(s);
 			}
 
