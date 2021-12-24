@@ -990,11 +990,13 @@ namespace Iswenzz
 			ReadDeltaField(msg, time, from, to, &stateFields[i], noXor, false);
 		}
 
+		/*
 		for (i = lastChangedField; i < PLAYER_STATE_FIELDS_COUNT; ++i)
 		{
 			int offset = stateFields[i].offset;
 			*(uint32_t*)&((unsigned char*)to)[offset] = *(uint32_t*)&((unsigned char*)from)[offset];
 		}
+		*/
 
 		if (!readOriginAndVel) 
 		{
