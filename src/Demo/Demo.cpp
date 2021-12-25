@@ -1116,13 +1116,15 @@ namespace Iswenzz
 			
 			for (y = 0; y <= lc; ++y)
 				ReadDeltaField(msg, time, &from[i], &to[i], &NetFields::HudElemFields[y], false, false);
-
+			
+			/*
 			for (; y < HUD_ELEM_FIELDS_COUNT; ++y)
 			{
 				int offset = NetFields::HudElemFields[y].offset;
 				((unsigned char*)&to[i])[offset] = ((unsigned char*)&from[i])[offset];
 			}
-
+			*/
+			
 			alignX = (from[i].alignOrg >> 2) & 3;
 			alignY = from[i].alignOrg & 3;
 			alignX = (to[i].alignOrg >> 2) & 3;
