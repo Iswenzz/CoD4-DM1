@@ -7,16 +7,25 @@
 
 namespace Iswenzz
 {
-	DemoReader::DemoReader(std::string filePath)
-		: DemoFile(std::make_unique<Demo>(filePath)), FilePath(filePath) { }
+	DemoReader::DemoReader(std::string filePath) : FilePath(filePath) 
+	{
+		DemoFile = std::make_shared<Demo>(filePath);
+
+		Entities = std::make_shared<std::array<entityState_t, MAX_PARSE_ENTITIES>>();
+		PreviousEntities = std::make_shared<std::array<entityState_t, MAX_PARSE_ENTITIES>>();
+		Clients = std::make_shared<std::array<clientState_t, MAX_PARSE_CLIENTS>>();
+		PreviousClients = std::make_shared<std::array<clientState_t, MAX_PARSE_CLIENTS>>();
+		Frames = std::make_shared<std::array<archivedFrame_t, MAX_FRAMES>>();
+		PreviousFrames = std::make_shared<std::array<archivedFrame_t, MAX_FRAMES>>();
+	}
 
 	bool DemoReader::Next()
 	{
 		// Update previous data for comparisons
 		PreviousSnapshot = DemoFile->CurrentSnapshot;
-		PreviousClients = DemoFile->ParseClients;
-		PreviousEntities = DemoFile->ParseEntities;
-		PreviousFrames = DemoFile->Frames;
+		std::copy(DemoFile->ParseClients->cbegin(), DemoFile->ParseClients->cend(), PreviousClients->data());
+		std::copy(DemoFile->ParseEntities->cbegin(), DemoFile->ParseEntities->cend(), PreviousEntities->data());
+		std::copy(DemoFile->Frames->cbegin(), DemoFile->Frames->cend(), PreviousFrames->data());
 
 		// Parse demo and update reader fields
 		if (DemoFile->Next())
@@ -54,32 +63,32 @@ namespace Iswenzz
 	archivedFrame_t DemoReader::GetCurrentFrame()
 	{
 		std::vector<archivedFrame_t> orderedFrames = Utility::GetArrayDifference<archivedFrame_t>(
-			DemoFile->Frames, PreviousFrames,
+			*DemoFile->Frames, *PreviousFrames,
 			[](const archivedFrame_t& a, const archivedFrame_t& b) { return a.commandTime == b.commandTime; });
 		return orderedFrames.size() > 0 ? orderedFrames.back() : archivedFrame_t();
 	}
 
 	std::vector<clientState_t> DemoReader::GetLastUpdatedClients()
 	{
-		return Utility::GetArrayDifference<clientState_t>(DemoFile->ParseClients, PreviousClients,
+		return Utility::GetArrayDifference<clientState_t>(*DemoFile->ParseClients, *PreviousClients,
 			[](const clientState_t& a, const clientState_t& b) { return a.clientIndex == b.clientIndex; });
 	}
 
 	std::vector<entityState_t> DemoReader::GetLastUpdatedEntities()
 	{
-		return Utility::GetArrayDifference<entityState_t>(DemoFile->ParseEntities, PreviousEntities,
+		return Utility::GetArrayDifference<entityState_t>(*DemoFile->ParseEntities, *PreviousEntities,
 			[](const entityState_t& a, const entityState_t& b) { return a.number == b.number; });
 	}
 
 	void DemoReader::UpdateClients()
 	{
 		for (const clientState_t& client : GetLastUpdatedClients())
-			Clients[client.clientIndex] = client;
+			(*Clients)[client.clientIndex] = client;
 	}
 
 	void DemoReader::UpdateEntities()
 	{
 		for (const entityState_t& entity : GetLastUpdatedEntities())
-			Entities[entity.number] = entity;
+			(*Entities)[entity.number] = entity;
 	}
 }

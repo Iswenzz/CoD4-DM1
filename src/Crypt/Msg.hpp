@@ -1,6 +1,9 @@
 #pragma once
 #include "Demo/DemoData.hpp"
+
 #include <vector>
+#include <memory>
+#include <cstring>
 
 namespace Iswenzz
 {
@@ -106,7 +109,7 @@ namespace Iswenzz
 		/// </summary>
 		/// <param name="msg">The message to copy.</param>
 		/// <param name="mode">The crypto mode.</param>
-		Msg(Msg& msg, MSGCrypt mode);
+		Msg(std::shared_ptr<Msg>& msg, MSGCrypt mode);
 
 		/// <summary>
 		/// Initialize the msg buffer with the specified buffer length.

@@ -1,6 +1,5 @@
 #include "NetFields.hpp"
 #include "Demo/DemoData.hpp"
-#include <intrin.h>
 
 namespace Iswenzz
 {

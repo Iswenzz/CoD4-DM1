@@ -3,12 +3,13 @@
 #include "NetFields.hpp"
 
 #include <cstring>
+#include <cmath>
 #include <stdint.h>
 #include <iostream>
 
 namespace Iswenzz
 {
-	int kbitmask[33] =
+	long long kbitmask[33] =
 	{
 		0, 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191,
 		16383, 32767, 65535, 131071, 262143, 524287, 1048575, 2097151,
@@ -23,11 +24,11 @@ namespace Iswenzz
 		Initialize(buf, len, mode, protocol);
 	}
 
-	Msg::Msg(Msg& msg, MSGCrypt mode)
+	Msg::Msg(std::shared_ptr<Msg>& msg, MSGCrypt mode)
 	{
-		Initialize(msg.Buffer.data(), msg.CurSize, mode, msg.Protocol);
-		SrvMsgSeq = msg.SrvMsgSeq;
-		Dummy = msg.Dummy;
+		Initialize(msg->Buffer.data(), msg->CurSize, mode, msg->Protocol);
+		SrvMsgSeq = msg->SrvMsgSeq;
+		Dummy = msg->Dummy;
 	}
 
 	void Msg::Initialize(int len, bool read)
@@ -44,7 +45,7 @@ namespace Iswenzz
 			Buffer.resize(len);
 			CurSize = Buffer.size();
 			MaxSize = NETCHAN_MAXBUFFER_SIZE;
-			std::memcpy(Buffer.data(), buf, Buffer.size());
+			memcpy(Buffer.data(), buf, Buffer.size());
 		}
 		else if (mode == MSGCrypt::MSG_CRYPT_HUFFMAN)
 		{
@@ -53,7 +54,7 @@ namespace Iswenzz
 			MaxSize = NETCHAN_MAXBUFFER_SIZE;
 		}
 		ReadCount = 0;
-		this->Protocol = protocol;
+		Protocol = protocol;
 	}
 
 	int Msg::ReadBit()

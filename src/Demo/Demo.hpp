@@ -59,19 +59,19 @@ namespace Iswenzz
 		int WriteClientsNum = 0;
 		int SnapMessageNum = 0;
 
-		std::array<std::string, MAX_CMDSTRINGS> CommandStrings{ };
-		std::array<std::string, MAX_CONFIGSTRINGS> ValidConfigStrings{ };
-		std::array<std::string, MAX_CONFIGSTRINGS> ConfigStrings{ };
-		std::array<entityState_t, MAX_GENTITIES> EntityBaselines{ };
-		std::array<entityState_t, MAX_PARSE_ENTITIES> ParseEntities{ };
-		std::array<clientState_t, MAX_PARSE_CLIENTS> ParseClients{ };
-		std::array<clientNames_t, MAX_CLIENTS> ClientNames{ };
-		std::array<clientSnapshot_t, PACKET_BACKUP> Snapshots{ };
-		std::array<archivedFrame_t, MAX_FRAMES> Frames{ };
+		std::shared_ptr<std::array<std::string, MAX_CMDSTRINGS>> CommandStrings;
+		std::shared_ptr<std::array<std::string, MAX_CONFIGSTRINGS>> ValidConfigStrings;
+		std::shared_ptr<std::array<std::string, MAX_CONFIGSTRINGS>> ConfigStrings;
+		std::shared_ptr<std::array<entityState_t, MAX_GENTITIES>> EntityBaselines;
+		std::shared_ptr<std::array<entityState_t, MAX_PARSE_ENTITIES>> ParseEntities;
+		std::shared_ptr<std::array<clientState_t, MAX_PARSE_CLIENTS>> ParseClients;
+		std::shared_ptr<std::array<clientNames_t, MAX_CLIENTS>> ClientNames;
+		std::shared_ptr<std::array<clientSnapshot_t, PACKET_BACKUP>> Snapshots;
+		std::shared_ptr<std::array<archivedFrame_t, MAX_FRAMES>> Frames;
 
-		std::array<unsigned char, MAX_GENTITIES> ActiveBaselines{ };
-		std::array<unsigned char, MAX_GENTITIES> ActiveEntities{ };
-		std::array<clientState_t, MAX_CLIENTS> ActiveClients{ };
+		std::shared_ptr<std::array<unsigned char, MAX_GENTITIES>> ActiveBaselines;
+		std::shared_ptr<std::array<unsigned char, MAX_GENTITIES>> ActiveEntities;
+		std::shared_ptr<std::array<clientState_t, MAX_CLIENTS>> ActiveClients;
 
 		/// <summary>
 		/// Initialize a new Demo object, demo file can be opened with the Open() function.
@@ -98,7 +98,7 @@ namespace Iswenzz
 		/// <summary>
 		/// Dispose all resources.
 		/// </summary>
-		~Demo();
+		virtual ~Demo();
 
 		/// <summary>
 		/// Open a demo file from specified path.
@@ -123,10 +123,10 @@ namespace Iswenzz
 		void Close();
 
 	private:
-		Msg CurrentCompressedMsg = { };
-		Msg CurrentUncompressedMsg = { };
-		Msg CurrentWritingUncompressedMsg = { };
-		Msg CurrentWritingCompressedMsg = { };
+		std::shared_ptr<Msg> CurrentCompressedMsg;
+		std::shared_ptr<Msg> CurrentUncompressedMsg;
+		std::shared_ptr<Msg> CurrentWritingCompressedMsg;
+		std::shared_ptr<Msg> CurrentWritingUncompressedMsg;
 
 		playerState_t NullPlayerState = { 0 };
 		entityState_t NullEntityState = { 0 };
@@ -151,38 +151,38 @@ namespace Iswenzz
 		/// Parse a gamestate.
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
-		void ParseGamestate(Msg& msg);
+		void ParseGamestate(std::shared_ptr<Msg>& msg);
 
 		/// <summary>
 		/// Parse a CoD4X gamestate.
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
-		void ParseGamestateX(Msg& msg);
+		void ParseGamestateX(std::shared_ptr<Msg>& msg);
 
 		/// <summary>
 		/// Parse a server snapshot.
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
-		void ParseSnapshot(Msg& msg, int& oldSnapIndex, int& newSnapIndex);
+		void ParseSnapshot(std::shared_ptr<Msg>& msg, int& oldSnapIndex, int& newSnapIndex);
 
 		/// <summary>
 		/// Parse a command string.
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
-		void ParseCommandString(Msg& msg, int& seq);
+		void ParseCommandString(std::shared_ptr<Msg>& msg, int& seq);
 
 		/// <summary>
 		/// Parse a config client.
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
-		void ParseConfigClient(Msg& msg, unsigned int clientnum);
+		void ParseConfigClient(std::shared_ptr<Msg>& msg, unsigned int clientnum);
 
 		/// <summary>
 		/// Read a delta compressed ground entity.
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
 		/// <returns></returns>
-		int ReadDeltaGroundEntity(Msg& msg);
+		int ReadDeltaGroundEntity(std::shared_ptr<Msg>& msg);
 
 		/// <summary>
 		/// Read a delta compressed struct.
@@ -195,7 +195,7 @@ namespace Iswenzz
 		/// <param name="numFields">Struct field count.</param>
 		/// <param name="indexBits">Min bit count.</param>
 		/// <param name="stateFields">Netfield fields.</param>
-		bool ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to,
+		bool ReadDeltaStruct(std::shared_ptr<Msg>& msg, const int time, const void* from, void* to,
 			unsigned int number, int numFields, int indexBits, netField_t* stateFields);
 
 		/// <summary>
@@ -207,7 +207,7 @@ namespace Iswenzz
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="numFields">Struct field count.</param>
 		/// <param name="stateFields">Netfield fields.</param>
-		void ReadDeltaFields(Msg& msg, const int time, const unsigned char* from, unsigned char* to,
+		void ReadDeltaFields(std::shared_ptr<Msg>& msg, const int time, const unsigned char* from, unsigned char* to,
 			int numFields, netField_t* stateFields);
 
 		/// <summary>
@@ -220,8 +220,8 @@ namespace Iswenzz
 		/// <param name="field">Current netfield to read.</param>
 		/// <param name="noXor">Should start with a value of 0.</param>
 		/// <param name="print">Should print debug information.</param>
-		void ReadDeltaField(Msg& msg, int time, const void* from, const void* to, const netField_t* field,
-			bool noXor, bool print);
+		void ReadDeltaField(std::shared_ptr<Msg>& msg, int time, const void* from, const void* to, 
+			const netField_t* field, bool noXor, bool print);
 
 		/// <summary>
 		/// Read a delta compressed entity state.
@@ -232,7 +232,8 @@ namespace Iswenzz
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="number">Entity number.</param>
 		/// <param name="isBaseLine">Is it a baseline entity.</param>
-		bool ReadDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, int number);
+		bool ReadDeltaEntity(std::shared_ptr<Msg>& msg, const int time, 
+			entityState_t* from, entityState_t* to, int number);
 
 		/// <summary>
 		/// Read a delta compressed client state.
@@ -242,7 +243,8 @@ namespace Iswenzz
 		/// <param name="from">Pointer to the old struct state.</param>
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="number">Entity number.</param>
-		bool ReadDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, int number);
+		bool ReadDeltaClient(std::shared_ptr<Msg>& msg, const int time, 
+			clientState_t* from, clientState_t* to, int number);
 
 		/// <summary>
 		/// Read a delta compressed objective struct.
@@ -251,7 +253,7 @@ namespace Iswenzz
 		/// <param name="time">Server time.</param>
 		/// <param name="from">Pointer to the old struct state.</param>
 		/// <param name="to">Pointer to the new struct state.</param>
-		void ReadDeltaObjectiveFields(Msg& msg, const int time, objective_t* from, objective_t* to);
+		void ReadDeltaObjectiveFields(std::shared_ptr<Msg>& msg, const int time, objective_t* from, objective_t* to);
 
 		/// <summary>
 		/// Read all delta compressed hud element struct.
@@ -261,7 +263,7 @@ namespace Iswenzz
 		/// <param name="from">Pointer to the old struct state.</param>
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="count">HUD Count.</param>
-		void ReadDeltaHudElems(Msg& msg, const int time, hudelem_t* from, hudelem_t* to, int count);
+		void ReadDeltaHudElems(std::shared_ptr<Msg>& msg, const int time, hudelem_t* from, hudelem_t* to, int count);
 
 		/// <summary>
 		/// Read a delta compressed player state.
@@ -271,7 +273,8 @@ namespace Iswenzz
 		/// <param name="from">Pointer to the old struct state.</param>
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="predictedFieldsIgnoreXor">Should start with a value of 0.</param>
-		void ReadDeltaPlayerState(Msg& msg, int time, playerState_t* from, playerState_t* to,
+		void ReadDeltaPlayerState(std::shared_ptr<Msg>& msg, int time, 
+			playerState_t* from, playerState_t* to,
 			bool predictedFieldsIgnoreXor);
 
 		/// <summary>
@@ -282,7 +285,8 @@ namespace Iswenzz
 		/// <param name="from">Pointer to the old snapshot state.</param>
 		/// <param name="to">Pointer to the new snapshot state.</param>
 		/// <returns></returns>
-		int ParsePacketEntities(Msg& msg, const int time, clientSnapshot_t* from, clientSnapshot_t* to);
+		int ParsePacketEntities(std::shared_ptr<Msg>& msg, const int time, 
+			clientSnapshot_t* from, clientSnapshot_t* to);
 
 		/// <summary>
 		/// Parse all clients.
@@ -291,7 +295,8 @@ namespace Iswenzz
 		/// <param name="time">Server time.</param>
 		/// <param name="from">Pointer to the old snapshot state.</param>
 		/// <param name="to">Pointer to the new snapshot state.</param>
-		void ParsePacketClients(Msg& msg, const int time, clientSnapshot_t* from, clientSnapshot_t* to);
+		void ParsePacketClients(std::shared_ptr<Msg>& msg, const int time, 
+			clientSnapshot_t* from, clientSnapshot_t* to);
 
 		/// <summary>
 		/// Read last changed net field.
@@ -299,7 +304,7 @@ namespace Iswenzz
 		/// <param name="msg">The current uncompressed message.</param>
 		/// <param name="totalFields">Net field count.</param>
 		/// <returns>The last changed field index.</returns>
-		int ReadLastChangedField(Msg& msg, int totalFields);
+		int ReadLastChangedField(std::shared_ptr<Msg>& msg, int totalFields);
 
 		/// <summary>
 		/// Read the entity bits.
@@ -307,7 +312,7 @@ namespace Iswenzz
 		/// <param name="msg">The current uncompressed message.</param>
 		/// <param name="bits">Entity bits to read.</param>
 		/// <returns></returns>
-		int ReadEntityIndex(Msg &msg, int indexBits);
+		int ReadEntityIndex(std::shared_ptr<Msg>& msg, int indexBits);
 
 		/// <summary>
 		/// Parse a delta entity.
@@ -317,7 +322,8 @@ namespace Iswenzz
 		/// <param name="frame">The old snapshot frame.</param>
 		/// <param name="newnum">The entity num.</param>
 		/// <param name="old">The old entity state.</param>
-		void DeltaEntity(Msg& msg, const int time, clientSnapshot_t* frame, int newnum, entityState_t* old);
+		void DeltaEntity(std::shared_ptr<Msg>& msg, const int time, clientSnapshot_t* frame, 
+			int newnum, entityState_t* old);
 
 		/// <summary>
 		/// Parse a delta client.
@@ -328,7 +334,7 @@ namespace Iswenzz
 		/// <param name="newnum">The entity num.</param>
 		/// <param name="old">The old client state.</param>
 		/// <param name="unchanged">Should not update.</param>
-		void DeltaClient(Msg& msg, const int time, clientSnapshot_t* frame, int newnum,
+		void DeltaClient(std::shared_ptr<Msg>& msg, const int time, clientSnapshot_t* frame, int newnum,
 			clientState_t* old, bool unchanged);
 
 		/// <summary>
@@ -347,7 +353,7 @@ namespace Iswenzz
 		/// Write a gamestate.
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
-		void WriteGamestate(Msg& msg);
+		void WriteGamestate(std::shared_ptr<Msg>& msg);
 
 		/// <summary>
 		/// Write a delta entity.
@@ -357,7 +363,8 @@ namespace Iswenzz
 		/// <param name="from">Pointer to an old entity state.</param>
 		/// <param name="to">Pointer to the new entity state.</param>
 		/// <param name="force">Force updating fields.</param>
-		void WriteDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, bool force);
+		void WriteDeltaEntity(std::shared_ptr<Msg>& msg, const int time, 
+			entityState_t* from, entityState_t* to, bool force);
 
 		/// <summary>
 		/// Write entity removal.
@@ -366,7 +373,7 @@ namespace Iswenzz
 		/// <param name="from">Pointer to an old entity.</param>
 		/// <param name="indexBits">Index bits.</param>
 		/// <param name="changeBit">Change bits.</param>
-		void WriteEntityRemoval(Msg& msg, unsigned char* from, int indexBits, unsigned char changeBit);
+		void WriteEntityRemoval(std::shared_ptr<Msg>& msg, unsigned char* from, int indexBits, unsigned char changeBit);
 
 		/// <summary>
 		/// Write entity index.
@@ -374,7 +381,7 @@ namespace Iswenzz
 		/// <param name="msg">The current uncompressed message.</param>
 		/// <param name="index">The entity index.</param>
 		/// <param name="indexBits">Index bits.</param>
-		void WriteEntityIndex(Msg& msg, const int index, const int indexBits);
+		void WriteEntityIndex(std::shared_ptr<Msg>& msg, const int index, const int indexBits);
 
 		/// <summary>
 		/// Write entity delta.
@@ -388,7 +395,7 @@ namespace Iswenzz
 		/// <param name="indexBits">Index bits.</param>
 		/// <param name="stateFields">Net fields to update.</param>
 		/// <returns></returns>
-		int WriteEntityDelta(Msg& msg, const int time, const unsigned char* from, const unsigned char* to,
+		int WriteEntityDelta(std::shared_ptr<Msg>& msg, const int time, const unsigned char* from, const unsigned char* to,
 			bool force, int numFields, int indexBits, netField_t* stateFields);
 
 		/// <summary>
@@ -404,7 +411,8 @@ namespace Iswenzz
 		/// <param name="stateFields">Net fields to update.</param>
 		/// <param name="bChangeBit">Change bits.</param>
 		/// <returns></returns>
-		int WriteDeltaStruct(Msg& msg, const int time, const unsigned char* from, const unsigned char* to,
+		int WriteDeltaStruct(std::shared_ptr<Msg>& msg, const int time, 
+			const unsigned char* from, const unsigned char* to,
 			bool force, int numFields, int indexBits, netField_t* stateFields, unsigned char bChangeBit);
 
 		/// <summary>
@@ -426,7 +434,8 @@ namespace Iswenzz
 		/// <param name="field">The net field.</param>
 		/// <param name="fieldNum">The net field index.</param>
 		/// <param name="forceSend">Should force updating.</param>
-		void WriteDeltaField(Msg& msg, const int time, const unsigned char* from, const unsigned char* to,
+		void WriteDeltaField(std::shared_ptr<Msg>& msg, const int time, 
+			const unsigned char* from, const unsigned char* to,
 			netField_s* field, int fieldNum, unsigned char forceSend);
 
 		/// <summary>
@@ -434,14 +443,14 @@ namespace Iswenzz
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
 		/// <param name="seq">Message sequence.</param>
-		void WriteCommandString(Msg& msg, int seq);
+		void WriteCommandString(std::shared_ptr<Msg>& msg, int seq);
 
 		/// <summary>
 		/// Write a config client.
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
 		/// <param name="clientnum">The client num.</param>
-		void WriteConfigClient(Msg& msg, unsigned int clientnum);
+		void WriteConfigClient(std::shared_ptr<Msg>& msg, unsigned int clientnum);
 
 		/// <summary>
 		/// Write a snapshot.
@@ -449,7 +458,7 @@ namespace Iswenzz
 		/// <param name="msg">The current uncompressed message.</param>
 		/// <param name="oldSnapIndex">Old snapshot index.</param>
 		/// <param name="newSnapIndex">New snapshot index.</param>
-		void WriteSnapshot(Msg& msg, int oldSnapIndex, int newSnapIndex);
+		void WriteSnapshot(std::shared_ptr<Msg>& msg, int oldSnapIndex, int newSnapIndex);
 
 		/// <summary>
 		/// Write delta player state.
@@ -458,7 +467,7 @@ namespace Iswenzz
 		/// <param name="time">The server time.</param>
 		/// <param name="from">Pointer to old player state.</param>
 		/// <param name="to">Pointer to new player state.</param>
-		void WriteDeltaPlayerState(Msg& msg, const int time, playerState_t* from, playerState_t* to);
+		void WriteDeltaPlayerState(std::shared_ptr<Msg>& msg, const int time, playerState_t* from, playerState_t* to);
 
 		/// <summary>
 		/// Write delta objective.
@@ -467,7 +476,7 @@ namespace Iswenzz
 		/// <param name="time">The server time.</param>
 		/// <param name="from">Pointer to old objective.</param>
 		/// <param name="to">Pointer to new objective.</param>
-		void WriteDeltaObjective(Msg& msg, const int time, objective_t* from, objective_t* to);
+		void WriteDeltaObjective(std::shared_ptr<Msg>& msg, const int time, objective_t* from, objective_t* to);
 
 		/// <summary>
 		/// Write delta last changed field.
@@ -487,7 +496,8 @@ namespace Iswenzz
 		/// <param name="from">Pointer to old hudelem.</param>
 		/// <param name="to">Pointer to new hudelem.</param>
 		/// <param name="count">The field count.</param>
-		void WriteDeltaHudElems(Msg& msg, const int time, hudelem_t* from, hudelem_t* to, const int count);
+		void WriteDeltaHudElems(std::shared_ptr<Msg>& msg, const int time, 
+			hudelem_t* from, hudelem_t* to, const int count);
 
 		/// <summary>
 		/// Write packet entities.
@@ -496,7 +506,8 @@ namespace Iswenzz
 		/// <param name="time">The server time.</param>
 		/// <param name="oldframe">Pointer to old client snapshot.</param>
 		/// <param name="newframe">Pointer to new client snapshot.</param>
-		void WritePacketEntities(Msg& msg, const int time, clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
+		void WritePacketEntities(std::shared_ptr<Msg>& msg, const int time, 
+			clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
 
 		/// <summary>
 		/// Write packet clients.
@@ -505,7 +516,8 @@ namespace Iswenzz
 		/// <param name="time">The server time.</param>
 		/// <param name="oldframe">Pointer to old client snapshot.</param>
 		/// <param name="newframe">Pointer to new client snapshot.</param>
-		void WritePacketClients(Msg& msg, const int time, clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
+		void WritePacketClients(std::shared_ptr<Msg>& msg, const int time, 
+			clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
 
 		/// <summary>
 		/// Write delta client.
@@ -515,7 +527,8 @@ namespace Iswenzz
 		/// <param name="from">Pointer to old client state.</param>
 		/// <param name="to">Pointer to new client state.</param>
 		/// <param name="force">Should force updating.</param>
-		void WriteDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, bool force);
+		void WriteDeltaClient(std::shared_ptr<Msg>& msg, const int time, 
+			clientState_t* from, clientState_t* to, bool force);
 
 		/// <summary>
 		/// Write client delta.
@@ -528,7 +541,7 @@ namespace Iswenzz
 		/// <param name="numFields">The fields count.</param>
 		/// <param name="indexBits">Index bits.</param>
 		/// <param name="stateFields">The net fields.</param>
-		void WriteClientDelta(Msg& msg, const int time, clientState_t* from, clientState_t* to,
+		void WriteClientDelta(std::shared_ptr<Msg>& msg, const int time, clientState_t* from, clientState_t* to,
 			bool force, int numFields, int indexBits, netField_t* stateFields);
 
 		/// <summary>
