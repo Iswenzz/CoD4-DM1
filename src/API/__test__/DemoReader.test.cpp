@@ -10,6 +10,6 @@ TEST_F(DemoFixture, DemoReader)
         float x = frame.velocity[0];
         float y = frame.velocity[1];
 
-        std::cout << frame.commandTime << " " << std::sqrtf((x * x) + (y * y)) << std::endl;
+        std::cout << frame.commandTime << " " << std::sqrt((x * x) + (y * y)) << std::endl;
     }
 }

@@ -1,9 +1,10 @@
 #pragma once
 #include "Demo/DemoData.hpp"
 
+#include <cstring>
+#include <cmath>
 #include <vector>
 #include <memory>
-#include <cstring>
 
 namespace Iswenzz
 {
