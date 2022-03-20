@@ -22,9 +22,9 @@ jobs:
     - name: Build
       run: |
         mkdir build && cd build
-        conan install .. -s build_type=${{env.BUILD_TYPE}} -s arch=x86 --build=gtest
-        cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -A Win32
-        cmake --build . --config ${{env.BUILD_TYPE}}
+        conan install .. --build --profile ../.conan/windows.conf
+        cmake .. -G "Visual Studio 16 2019" -A Win32
+        cmake --build .
 
     - name: Artifact
       uses: actions/upload-artifact@v2

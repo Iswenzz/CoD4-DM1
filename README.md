@@ -20,7 +20,7 @@ This project builds with [CMake](https://cmake.org/) and [Conan](https://conan.i
 _Build Command:_
 
     mkdir build && cd build
-    conan install .. -s compiler.version=16 -s arch=x86 -s build_type=Debug --build=gtest
+    conan install .. --build --profile ../.conan/windows.conf
     cmake .. -G "Visual Studio 16 2019" -A Win32
     cmake --build .
 
@@ -28,7 +28,7 @@ _Build Command:_
 
 ## Contributors
 
-***Note:*** If you would like to contribute to this repository, feel free to send a pull request, and I will review your code. 
+***Note:*** If you would like to contribute to this repository, feel free to send a pull request, and I will review your code.
 Also feel free to post about any problems that may arise in the issues section of the repository.
 
 <a href="https://github.com/Caball009"><img src="https://avatars.githubusercontent.com/u/82909616?v=4" height=64 style="border-radius: 50%"></a>
