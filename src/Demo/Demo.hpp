@@ -2,6 +2,8 @@
 #include "Crypt/Msg.hpp"
 #include "Crypt/NetFields.hpp"
 
+#include <cstring>
+#include <cmath>
 #include <string>
 #include <fstream>
 
@@ -43,6 +45,7 @@ namespace Iswenzz
 		float LerpPosOffsets[3] = { 0, 0, 0 };
 		float MapCenter[3] = { 0, 0, 0 };
 		bool SendOriginAndVel = true;
+		int GamestateCount = 0;
 
 		bool ModDM = false;
 		std::string TeamNameAllies;
@@ -553,5 +556,12 @@ namespace Iswenzz
 		/// <param name="field">The player state field to check.</param>
 		/// <returns></returns>
 		bool ShouldSendPSField(bool sendOriginAndVel, playerState_t* from, playerState_t* to, netField_t* field);
+
+		/// <summary>
+		/// Check the snapshot validity.
+		/// </summary>
+		/// <param name="snapshot">The snapshot.</param>
+		/// <returns></returns>
+		bool CheckSnapshotValidity(clientSnapshot_t& snapshot);
 	};
 }

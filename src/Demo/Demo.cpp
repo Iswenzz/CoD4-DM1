@@ -1,7 +1,6 @@
 #include "Demo.hpp"
 #include "Crypt/Huffman.hpp"
 
-#include <cmath>
 #include <cassert>
 #include <iostream>
 #include <iterator>
@@ -141,16 +140,13 @@ namespace Iswenzz
 			{
 			case svc_ops_e::svc_gamestate:
 			{
-				/*static uint32_t count = 0;
-				count++;
-
-				if (count > 1) 
+				if (++GamestateCount > 1)
 				{
 					ParseEntitiesNum = 0;
 					ParseClientsNum = 0;
 					ConfigStrings = std::make_shared<std::array<std::string, MAX_CONFIGSTRINGS>>();
 					EntityBaselines = std::make_shared< std::array<entityState_t, MAX_GENTITIES>>();
-				}*/
+				}
 
 				if (Protocol == COD4_PROTOCOL)
 					ParseGamestate(CurrentUncompressedMsg);
@@ -475,22 +471,7 @@ namespace Iswenzz
 		if (CurrentSnapshot.deltaNum > 0) 
 		{
 			old = (*Snapshots)[CurrentSnapshot.deltaNum & PACKET_MASK];
-			if (!old.valid) 
-			{
-				msg->Discard();
-				return;
-			}
-			if ((*Snapshots)[CurrentSnapshot.deltaNum & PACKET_MASK].messageNum != CurrentSnapshot.deltaNum)
-			{
-				msg->Discard();
-				return;
-			}
-			if (ParseEntitiesNum - (*Snapshots)[CurrentSnapshot.deltaNum & PACKET_MASK].parseEntitiesNum > 1920)
-			{
-				msg->Discard();
-				return;
-			}
-			if (ParseClientsNum - (*Snapshots)[CurrentSnapshot.deltaNum & PACKET_MASK].parseClientsNum > 1920)
+			if (!CheckSnapshotValidity(old))
 			{
 				msg->Discard();
 				return;
@@ -1011,11 +992,11 @@ namespace Iswenzz
 			ReadDeltaField(msg, time, from, to, &stateFields[i], noXor, false);
 		}
 
-		for (i = lastChangedField; i < PLAYER_STATE_FIELDS_COUNT; ++i)
+		/*for (i = lastChangedField; i < PLAYER_STATE_FIELDS_COUNT; ++i)
 		{
 			int offset = stateFields[i].offset;
 			*(uint32_t*)&((unsigned char*)to)[offset] = *(uint32_t*)&((unsigned char*)from)[offset];
-		}
+		}*/
 
 		if (!readOriginAndVel) 
 		{
@@ -1136,11 +1117,11 @@ namespace Iswenzz
 			for (y = 0; y <= lc; ++y)
 				ReadDeltaField(msg, time, &from[i], &to[i], &NetFields::HudElemFields[y], false, false);
 
-			for (; y < HUD_ELEM_FIELDS_COUNT; ++y)
+			/*for (; y < HUD_ELEM_FIELDS_COUNT; ++y)
 			{
 				int offset = NetFields::HudElemFields[y].offset;
 				((unsigned char*)&to[i])[offset] = ((unsigned char*)&from[i])[offset];
-			}
+			}*/
 
 			alignX = (from[i].alignOrg >> 2) & 3;
 			alignY = from[i].alignOrg & 3;
@@ -1758,7 +1739,7 @@ namespace Iswenzz
 		if (oldSnapIndex == -1 || newSnapIndex == -1)
 			return;
 
-		clientSnapshot_t* oldSnap, * newSnap;
+		clientSnapshot_t *oldSnap, *newSnap;
 		newSnap = &(*Snapshots)[newSnapIndex];
 
 		if (newSnap->deltaNum == -1) 
@@ -1766,21 +1747,27 @@ namespace Iswenzz
 			oldSnap = &CurrentSnapshot;
 			memset(oldSnap, 0, sizeof(*oldSnap));
 		}
-		else 
+		else
+		{
 			oldSnap = &(*Snapshots)[oldSnapIndex];
-
+			if (!CheckSnapshotValidity(*oldSnap)) 
+			{
+				oldSnap = &CurrentSnapshot;
+				memset(oldSnap, 0, sizeof(*oldSnap));
+				newSnap->deltaNum = -1;
+			}
+		}
+		
 		msg->WriteByte(static_cast<int>(svc_ops_e::svc_snapshot));
 		msg->WriteInt(newSnap->serverTime);
 		msg->WriteByte((newSnap->deltaNum == -1) ? 0 : newSnap->messageNum - newSnap->deltaNum);
 		msg->WriteByte(newSnap->snapFlags);
 
 		WriteDeltaPlayerState(msg, newSnap->serverTime, &oldSnap->ps, &newSnap->ps);
-
-		msg->LastRefEntity = -1;
+		msg->ClearLastReferencedEntity();
 
 		WritePacketEntities(msg, newSnap->serverTime, oldSnap, newSnap);
-
-		msg->LastRefEntity = -1;
+		msg->ClearLastReferencedEntity();
 
 		WritePacketClients(msg, newSnap->serverTime, oldSnap, newSnap);
 	}
@@ -2145,5 +2132,18 @@ namespace Iswenzz
 	{
 		WriteDeltaStruct(msg, time, (const unsigned char*)from, (const unsigned char*)to, 
 			force, numFields, indexBits, stateFields, true);
+	}
+
+	bool Demo::CheckSnapshotValidity(clientSnapshot_t& snapshot)
+	{
+		if (!snapshot.valid)
+			return false;
+		if ((*Snapshots)[CurrentSnapshot.deltaNum & PACKET_MASK].messageNum != CurrentSnapshot.deltaNum)
+			return false;
+		if (ParseEntitiesNum - (*Snapshots)[CurrentSnapshot.deltaNum & PACKET_MASK].parseEntitiesNum > 1920)
+			return false;
+		if (ParseClientsNum - (*Snapshots)[CurrentSnapshot.deltaNum & PACKET_MASK].parseClientsNum > 1920)
+			return false;
+		return true;
 	}
 }
