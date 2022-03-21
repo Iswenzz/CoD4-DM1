@@ -24,11 +24,11 @@ namespace Iswenzz
 		Initialize(buf, len, mode, protocol);
 	}
 
-	Msg::Msg(std::shared_ptr<Msg>& msg, MSGCrypt mode)
+	Msg::Msg(Msg& msg, MSGCrypt mode)
 	{
-		Initialize(msg->Buffer.data(), msg->CurSize, mode, msg->Protocol);
-		SrvMsgSeq = msg->SrvMsgSeq;
-		Dummy = msg->Dummy;
+		Initialize(msg.Buffer.data(), msg.CurSize, mode, msg.Protocol);
+		SrvMsgSeq = msg.SrvMsgSeq;
+		Dummy = msg.Dummy;
 	}
 
 	void Msg::Initialize(int len, bool read)

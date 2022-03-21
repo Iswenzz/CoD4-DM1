@@ -15,14 +15,12 @@ namespace Iswenzz
 		clientSnapshot_t Snapshot = { 0 };
 		clientSnapshot_t PreviousSnapshot = { 0 };
 
-		std::shared_ptr<std::array<entityState_t, MAX_PARSE_ENTITIES>> Entities;
-		std::shared_ptr<std::array<entityState_t, MAX_PARSE_ENTITIES>> PreviousEntities;
-
-		std::shared_ptr<std::array<clientState_t, MAX_PARSE_CLIENTS>> Clients;
-		std::shared_ptr<std::array<clientState_t, MAX_PARSE_CLIENTS>> PreviousClients;
-
-		std::shared_ptr<std::array<archivedFrame_t, MAX_FRAMES>> Frames;
-		std::shared_ptr<std::array<archivedFrame_t, MAX_FRAMES>> PreviousFrames;
+		std::array<entityState_t, MAX_PARSE_ENTITIES> Entities{ };
+		std::array<entityState_t, MAX_PARSE_ENTITIES> PreviousEntities{ };
+		std::array<clientState_t, MAX_PARSE_CLIENTS> Clients{ };
+		std::array<clientState_t, MAX_PARSE_CLIENTS> PreviousClients{ };
+		std::array<archivedFrame_t, MAX_FRAMES> Frames{ };
+		std::array<archivedFrame_t, MAX_FRAMES> PreviousFrames{ };
 
 		/// <summary>
 		/// Initialize a new DemoReader instance.
