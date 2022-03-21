@@ -54,7 +54,7 @@
 #define VerboseLog(ostream) \
 	if (Verbose) std::cout << ostream
 
-namespace Iswenzz
+namespace Iswenzz::CoD4::DM1
 {
 	typedef unsigned int clipHandle_t;
 

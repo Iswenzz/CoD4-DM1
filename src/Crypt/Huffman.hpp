@@ -5,7 +5,7 @@
 #define NYT HMAX                    /* NYT = Not Yet Transmitted */
 #define INTERNAL_NODE (HMAX + 1)
 
-namespace Iswenzz
+namespace Iswenzz::CoD4::DM1
 {
 	/// <summary>
 	/// Huffman tree node.

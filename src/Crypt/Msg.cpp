@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <iostream>
 
-namespace Iswenzz
+namespace Iswenzz::CoD4::DM1
 {
 	long long kbitmask[33] =
 	{

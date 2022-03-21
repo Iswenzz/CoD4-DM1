@@ -1,7 +1,7 @@
 #pragma once
 #include "Demo/Demo.hpp"
 
-namespace Iswenzz
+namespace Iswenzz::CoD4::DM1
 {
 	/// <summary>
 	/// Reader API for demo files. (.DM_1)

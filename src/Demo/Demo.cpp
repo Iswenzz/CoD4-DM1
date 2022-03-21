@@ -5,7 +5,7 @@
 #include <iostream>
 #include <iterator>
 
-namespace Iswenzz
+namespace Iswenzz::CoD4::DM1
 {
 	Demo::Demo(std::string filepath) : Demo(filepath, false) { }
 

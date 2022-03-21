@@ -23,7 +23,7 @@ GNU General Public License for more details.
 #include <iostream>
 #include <memory>
 
-using namespace Iswenzz;
+using namespace Iswenzz::CoD4::DM1;
 
 /// <summary>
 /// Command Line Interface.
