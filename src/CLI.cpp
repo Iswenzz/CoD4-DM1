@@ -1,7 +1,7 @@
 /*
 ===========================================================================
 Copyright (C) 1999-2005 Id Software, Inc.
-Copyright (C) 2020-2021 Iswenzz, Anomaly
+Copyright (C) 2020-2022 Iswenzz, Anomaly
 
 The files are parts of Quake III Arena and Call of Duty 4 source code.
 

@@ -13,15 +13,27 @@ Reverse of CoD4 & CoD4X ``.DM_1`` demo files with features such as parsing snaps
 * CoD4 & Q3 huffman code
 * Demo reader API
 
-## Building (Any Platform)
+## Building (Windows)
 
-This project builds with [CMake](https://cmake.org/) and [Conan](https://conan.io/).
+1. [CMake](https://cmake.org/) and [Conan](https://conan.io/).
+2. [Visual Studio](https://visualstudio.microsoft.com/)
 
 _Build Command:_
 
     mkdir build && cd build
     conan install .. --build --profile ../.conan/windows.conf
     cmake .. -G "Visual Studio 16 2019" -A Win32
+    cmake --build .
+
+## Building (Linux)
+
+1. [CMake](https://cmake.org/) and [Conan](https://conan.io/).
+
+_Build Command:_
+
+    mkdir build && cd build
+    conan install .. --build --profile ../.conan/linux.conf
+    cmake ..
     cmake --build .
 
 ### [Download](https://github.com/Iswenzz/CoD4-DM1/releases)
