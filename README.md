@@ -21,7 +21,7 @@ Reverse of CoD4 & CoD4X ``.DM_1`` demo files with features such as parsing snaps
 _Build Command:_
 
     mkdir build && cd build
-    conan install .. --build --profile ../.conan/windows.conf
+    conan install .. --build missing --profile ../.conan/windows.conf
     cmake .. -G "Visual Studio 16 2019" -A Win32
     cmake --build .
 
@@ -32,7 +32,7 @@ _Build Command:_
 _Build Command:_
 
     mkdir build && cd build
-    conan install .. --build --profile ../.conan/linux.conf
+    conan install .. --build missing --profile ../.conan/linux.conf
     cmake ..
     cmake --build .
 
