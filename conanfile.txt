@@ -1,5 +1,7 @@
 [requires]
 cxxopts/3.0.0
+
+[build_requires]
 gtest/cci.20210126
 
 [generators]
