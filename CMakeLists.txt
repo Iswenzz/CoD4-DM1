@@ -3,7 +3,7 @@ project(CoD4DM1 VERSION 1.0.0 LANGUAGES CXX)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "-m32 -fpermissive")
+set(CMAKE_CXX_FLAGS "-fpermissive")
 
 # CPack
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
@@ -16,10 +16,12 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 # Tests
-include(CTest)
-add_executable(CoD4DM1.Tests)
-target_link_libraries(CoD4DM1.Tests PUBLIC ${CONAN_LIBS} CoD4DM1.Lib)
-add_test(NAME Tests COMMAND CoD4DM1.Tests)
+if(ENABLE_TESTING)
+	include(CTest)
+	add_executable(CoD4DM1.Tests)
+	target_link_libraries(CoD4DM1.Tests PUBLIC ${CONAN_LIBS} CoD4DM1.Lib)
+	add_test(NAME Tests COMMAND CoD4DM1.Tests)
+endif()
 
 # Build
 add_subdirectory(fixtures)
