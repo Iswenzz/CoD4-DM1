@@ -67,7 +67,7 @@ namespace Iswenzz::CoD4::DM1
 	}
 
 	void Demo::Close()
-	{ 
+	{
 		if (DemoFile.is_open())
 			DemoFile.close();
 		IsOpen = false;
@@ -174,13 +174,13 @@ namespace Iswenzz::CoD4::DM1
 
 		char seq = 0;
 		DemoFileOut.write(reinterpret_cast<char*>(&seq), sizeof(seq));
-		DemoFileOut.write(reinterpret_cast<char*>(&CurrentCompressedMsg.SrvMsgSeq), 
+		DemoFileOut.write(reinterpret_cast<char*>(&CurrentCompressedMsg.SrvMsgSeq),
 			sizeof(CurrentCompressedMsg.SrvMsgSeq));
 		DemoFileOut.write(reinterpret_cast<char*>(&CurrentWritingCompressedMsg.CurSize),
 			sizeof(CurrentWritingCompressedMsg.CurSize));
 		DemoFileOut.write(reinterpret_cast<char*>(&CurrentCompressedMsg.Dummy),
 			sizeof(CurrentCompressedMsg.Dummy));
-		// -4 because of writing CurrentCompressedMsg.dummy directly to disk 
+		// -4 because of writing CurrentCompressedMsg.dummy directly to disk
 		// instead of including it in the message buffer!
 		DemoFileOut.write(reinterpret_cast<char*>(&CurrentWritingCompressedMsg.Buffer[0]),
 			static_cast<std::streamsize>(CurrentWritingCompressedMsg.CurSize) - 4);
@@ -218,7 +218,7 @@ namespace Iswenzz::CoD4::DM1
 
 		LastFrameSrvMsgSeq = CurrentCompressedMsg.SrvMsgSeq;
 		memcpy(&Frames[LastFrameSrvMsgSeq & MAX_FRAMES - 1], &frame, sizeof(archivedFrame_t));
-		
+
 		char seq = 1;
 		DemoFileOut.write(reinterpret_cast<char*>(&seq), sizeof(seq));
 		DemoFileOut.write(reinterpret_cast<char*>(&CurrentCompressedMsg.SrvMsgSeq), sizeof(int));
@@ -246,7 +246,7 @@ namespace Iswenzz::CoD4::DM1
 		DemoFile.read(reinterpret_cast<char*>(&reserved), sizeof(uint64_t));
 
 		std::cout << "Protocol: " << Protocol << std::endl;
-		
+
 		char seq = 2;
 		DemoFileOut.write(reinterpret_cast<char*>(&seq), sizeof(seq));
 		DemoFileOut.write(reinterpret_cast<char*>(&Protocol), sizeof(Protocol));
@@ -281,10 +281,10 @@ namespace Iswenzz::CoD4::DM1
 					else idx = msg.ReadBits(12);
 
 					std::string s = msg.ReadString();
-					
-					if (idx == 12) 
+
+					if (idx == 12)
 					{
-						sscanf(s.c_str(), "%f %f %f", MapCenter[0], MapCenter[1], MapCenter[2]);
+						sscanf(s.c_str(), "%f %f %f", &MapCenter[0], &MapCenter[1], &MapCenter[2]);
 						VectorCopy(MapCenter, msg.MapCenter);
 					}
 					if (!(idx < 0 || idx >= MAX_CONFIGSTRINGS))
@@ -344,10 +344,10 @@ namespace Iswenzz::CoD4::DM1
 				{
 					idx = msg.ReadInt();
 					std::string s = msg.ReadString();
-					
-					if (idx == 12) 
+
+					if (idx == 12)
 					{
-						sscanf(s.c_str(), "%f %f %f", MapCenter[0], MapCenter[1], MapCenter[2]);
+						sscanf(s.c_str(), "%f %f %f", &MapCenter[0], &MapCenter[1], &MapCenter[2]);
 						VectorCopy(MapCenter, msg.MapCenter);
 					}
 					if (!(idx < 0 || idx >= 2 * MAX_CONFIGSTRINGS))
@@ -376,7 +376,7 @@ namespace Iswenzz::CoD4::DM1
 				clientnum = msg.ReadByte();
 				if (clientnum >= MAX_CLIENTS)
 					break;
-	
+
 				ClientNames[clientnum].netname = msg.ReadString();
 				ClientNames[clientnum].clantag = msg.ReadString();
 			}
@@ -417,7 +417,7 @@ namespace Iswenzz::CoD4::DM1
 		uint32_t sequence;
 
 		sequence = msg.ReadInt();
-		if (sequence != ServerConfigSequence + 1) 
+		if (sequence != ServerConfigSequence + 1)
 		{
 			msg.ReadByte();
 			name = msg.ReadString();
@@ -450,7 +450,7 @@ namespace Iswenzz::CoD4::DM1
 		CurrentSnapshot.snapFlags = msg.ReadByte();
 
 		// Integrity checks
-		if (CurrentSnapshot.deltaNum > 0) 
+		if (CurrentSnapshot.deltaNum > 0)
 		{
 			old = Snapshots[CurrentSnapshot.deltaNum & PACKET_MASK];
 			if (!CheckSnapshotValidity(old))
@@ -493,7 +493,7 @@ namespace Iswenzz::CoD4::DM1
 
 		// Save the snapshot in the backup array for later delta comparisons
 		memcpy(&Snapshots[SnapMessageNum & PACKET_MASK], &CurrentSnapshot, sizeof(clientSnapshot_t));
-		
+
 		oldSnapIndex = CurrentSnapshot.deltaNum & PACKET_MASK;
 		newSnapIndex = SnapMessageNum & PACKET_MASK;
 	}
@@ -510,7 +510,7 @@ namespace Iswenzz::CoD4::DM1
 		return value;
 	}
 
-	bool Demo::ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to, 
+	bool Demo::ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to,
 		uint32_t number, int numFields, int indexBits, netField_t* stateFields)
 	{
 		if (msg.ReadBit() == 1)
@@ -521,7 +521,7 @@ namespace Iswenzz::CoD4::DM1
 		return false;
 	}
 
-	void Demo::ReadDeltaFields(Msg& msg, const int time, const uint8_t* from, 
+	void Demo::ReadDeltaFields(Msg& msg, const int time, const uint8_t* from,
 		uint8_t* to, int numFields, netField_t* stateFields)
 	{
 		int lc, i;
@@ -543,7 +543,7 @@ namespace Iswenzz::CoD4::DM1
 			return;
 		}
 		ReadDeltaField(msg, time, from, to, &stateFields[0], false, false);
-		
+
 		// Get the right field list from the eType value
 		if (std::string{ stateFields[0].name } == "eType")
 		{
@@ -565,7 +565,7 @@ namespace Iswenzz::CoD4::DM1
 		}
 	}
 
-	void Demo::ReadDeltaField(Msg& msg, int time, const void* from, const void* to, 
+	void Demo::ReadDeltaField(Msg& msg, int time, const void* from, const void* to,
 		const netField_t* field, bool noXor, bool print)
 	{
 		uint8_t* fromF;
@@ -761,13 +761,13 @@ namespace Iswenzz::CoD4::DM1
 			if (field->bits < 0 && (t >> (bits - 1)) & 1)
 				t |= ~bit_vect;
 
-			LogIf(print, field->name << "{" << field->bits << "} = " 
+			LogIf(print, field->name << "{" << field->bits << "} = "
 				<< *reinterpret_cast<uint32_t*>(toF) << std::endl);
 			*reinterpret_cast<uint32_t*>(toF) = t;
 		}
 	}
 
-	int Demo::ParsePacketEntities(Msg& msg, const int time, 
+	int Demo::ParsePacketEntities(Msg& msg, const int time,
 		clientSnapshot_t* from, clientSnapshot_t* to)
 	{
 		entityState_s* oldstate = nullptr;
@@ -853,7 +853,7 @@ namespace Iswenzz::CoD4::DM1
 		return numChanged;
 	}
 
-	void Demo::ParsePacketClients(Msg& msg, const int time, 
+	void Demo::ParsePacketClients(Msg& msg, const int time,
 		clientSnapshot_t* from, clientSnapshot_t* to)
 	{
 		clientState_s* oldstate = nullptr;
@@ -939,23 +939,23 @@ namespace Iswenzz::CoD4::DM1
 		return lastChanged;
 	}
 
-	bool Demo::ReadDeltaEntity(Msg& msg, const int time, 
+	bool Demo::ReadDeltaEntity(Msg& msg, const int time,
 		entityState_t* from, entityState_t* to, int number)
 	{
 		int numFields = sizeof(NetFields::EntityStateFields) / sizeof(NetFields::EntityStateFields[0]);
-		return ReadDeltaStruct(msg, time, reinterpret_cast<uint8_t*>(from), reinterpret_cast<uint8_t*>(to), 
+		return ReadDeltaStruct(msg, time, reinterpret_cast<uint8_t*>(from), reinterpret_cast<uint8_t*>(to),
 			number, numFields, NetFields::GetMinBitCount(MAX_GENTITIES - 1), NetFields::EntityStateFields);
 	}
 
-	bool Demo::ReadDeltaClient(Msg& msg, const int time, 
+	bool Demo::ReadDeltaClient(Msg& msg, const int time,
 		clientState_t* from, clientState_t* to, int number)
 	{
 		int numFields = sizeof(NetFields::ClientStateFields) / sizeof(NetFields::ClientStateFields[0]);
-		return ReadDeltaStruct(msg, time, reinterpret_cast<uint8_t*>(from), reinterpret_cast<uint8_t*>(to), 
+		return ReadDeltaStruct(msg, time, reinterpret_cast<uint8_t*>(from), reinterpret_cast<uint8_t*>(to),
 			number, numFields, NetFields::GetMinBitCount(MAX_CLIENTS - 1), NetFields::ClientStateFields);
 	}
 
-	void Demo::ReadDeltaPlayerState(Msg& msg, int time, 
+	void Demo::ReadDeltaPlayerState(Msg& msg, int time,
 		playerState_t* from, playerState_t* to, bool predictedFieldsIgnoreXor)
 	{
 		int i, j;
@@ -981,14 +981,14 @@ namespace Iswenzz::CoD4::DM1
 		/*for (i = lastChangedField; i < PLAYER_STATE_FIELDS_COUNT; ++i)
 		{
 			int offset = stateFields[i].offset;
-			*reinterpret_cast<uint32_t*>(&(reinterpret_cast<uint8_t*>(to))[offset]) = 
+			*reinterpret_cast<uint32_t*>(&(reinterpret_cast<uint8_t*>(to))[offset]) =
 				*reinterpret_cast<uint32_t*>(&(reinterpret_cast<uint8_t*>(from))[offset]);
 		}*/
 
-		if (!readOriginAndVel) 
+		if (!readOriginAndVel)
 		{
-			if (!GetPredictedOriginForServerTime(to->commandTime, to->origin, 
-				to->velocity, to->viewangles, &to->bobCycle, &to->movementDir)) 
+			if (!GetPredictedOriginForServerTime(to->commandTime, to->origin,
+				to->velocity, to->viewangles, &to->bobCycle, &to->movementDir))
 			{
 				VectorCopy(from->origin, to->origin);
 				VectorCopy(from->velocity, to->velocity);
@@ -1100,7 +1100,7 @@ namespace Iswenzz::CoD4::DM1
 		{
 			lc = msg.ReadBits(6);
 			assert(lc <= sizeof(NetFields::HudElemFields) / sizeof(NetFields::HudElemFields[0]));
-			
+
 			for (y = 0; y <= lc; ++y)
 				ReadDeltaField(msg, time, &from[i], &to[i], &NetFields::HudElemFields[y], false, false);
 
@@ -1142,7 +1142,7 @@ namespace Iswenzz::CoD4::DM1
 		}
 	}
 
-	void Demo::DeltaClient(Msg& msg, const int time, clientSnapshot_t* frame, int newnum, 
+	void Demo::DeltaClient(Msg& msg, const int time, clientSnapshot_t* frame, int newnum,
 		clientState_t* old, bool unchanged)
 	{
 		clientState_t* state = nullptr;
@@ -1166,7 +1166,7 @@ namespace Iswenzz::CoD4::DM1
 		int index = -1;
 		int counter = 0;
 
-		for (int i = LastFrameSrvMsgSeq; counter <= 256; --i, ++counter) 
+		for (int i = LastFrameSrvMsgSeq; counter <= 256; --i, ++counter)
 		{
 			i &= 255;
 
@@ -1179,7 +1179,7 @@ namespace Iswenzz::CoD4::DM1
 
 		if (index < 0)
 			return false;
-		else 
+		else
 		{
 			VectorCopy(Frames[index].origin, predictedOrigin);
 			VectorCopy(Frames[index].velocity, predictedVelocity);
@@ -1190,7 +1190,7 @@ namespace Iswenzz::CoD4::DM1
 			return true;
 		}
 	}
-	
+
 	void Demo::WriteGamestate(Msg& msg)
 	{
 		entityState_t* ent;
@@ -1206,7 +1206,7 @@ namespace Iswenzz::CoD4::DM1
 			msg.WriteByte(static_cast<int>(svc_ops_e::svc_configstring));
 
 			// Configstrings
-			for (i = 0, numCS = 0; i < MAX_CONFIGSTRINGS; i++) 
+			for (i = 0, numCS = 0; i < MAX_CONFIGSTRINGS; i++)
 			{
 				if (ConfigStrings[i] != "")
 					numCS++;
@@ -1214,7 +1214,7 @@ namespace Iswenzz::CoD4::DM1
 			msg.WriteShort(numCS);
 
 			// Configstrings
-			for (i = 0; i < MAX_CONFIGSTRINGS; i++) 
+			for (i = 0; i < MAX_CONFIGSTRINGS; i++)
 			{
 				if (ConfigStrings[i] == "")
 					continue;
@@ -1226,7 +1226,7 @@ namespace Iswenzz::CoD4::DM1
 			}
 
 			// Baselines
-			for (i = 0; i < MAX_GENTITIES; i++) 
+			for (i = 0; i < MAX_GENTITIES; i++)
 			{
 				ent = &EntityBaselines[i];
 
@@ -1246,19 +1246,19 @@ namespace Iswenzz::CoD4::DM1
 			// Finished writing the client packet
 			msg.WriteByte(static_cast<int>(svc_ops_e::svc_EOF));
 		}
-		else 
+		else
 		{
 			msg.WriteByte(static_cast<int>(svc_ops_e::svc_gamestate));
 			msg.WriteInt(ServerCommandSequence);
 			msg.WriteByte(static_cast<int>(svc_ops_e::svc_configstring));
 
 			// Configstrings
-			for (i = 0, numCS = 0; i < MAX_CONFIGSTRINGS; i++) 
+			for (i = 0, numCS = 0; i < MAX_CONFIGSTRINGS; i++)
 			{
 				if (ConfigStrings[i] != "")
 					numCS++;
 			}
-			for (i = 0; i < MAX_CONFIGSTRINGS; i++) 
+			for (i = 0; i < MAX_CONFIGSTRINGS; i++)
 			{
 				/*if (extGameState.stringOffsets[i])
 					numCS++;*/
@@ -1266,7 +1266,7 @@ namespace Iswenzz::CoD4::DM1
 			msg.WriteInt(numCS);
 
 			// Configstrings
-			for (i = 0; i < MAX_CONFIGSTRINGS; i++) 
+			for (i = 0; i < MAX_CONFIGSTRINGS; i++)
 			{
 				if (ConfigStrings[i] == "")
 					continue;
@@ -1274,7 +1274,7 @@ namespace Iswenzz::CoD4::DM1
 				msg.WriteInt(i);
 				msg.WriteString(s);
 			}
-			for (i = 0; i < MAX_CONFIGSTRINGS; i++) 
+			for (i = 0; i < MAX_CONFIGSTRINGS; i++)
 			{
 				/*if (!extGameState.stringOffsets[i])
 					continue;
@@ -1284,7 +1284,7 @@ namespace Iswenzz::CoD4::DM1
 			}
 
 			// Baselines
-			for (i = 0; i < MAX_GENTITIES; i++) 
+			for (i = 0; i < MAX_GENTITIES; i++)
 			{
 				ent = &EntityBaselines[i];
 
@@ -1318,8 +1318,8 @@ namespace Iswenzz::CoD4::DM1
 				msg.WriteInt(ChecksumFeed);
 		}
 	}
-	
-	void Demo::WriteDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, bool force) 
+
+	void Demo::WriteDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, bool force)
 	{
 		// All fields should be 32 bits to avoid any compiler packing issues
 		// the "number" field is not part of the field list
@@ -1328,7 +1328,7 @@ namespace Iswenzz::CoD4::DM1
 		// assert( numFields + 1 == sizeof( *from ) / 4 );
 
 		netFieldList_t* fieldtype;
-		if (!to) 
+		if (!to)
 		{
 			WriteEntityRemoval(msg, reinterpret_cast<uint8_t*>(from), 10, 0);
 			return;
@@ -1341,11 +1341,11 @@ namespace Iswenzz::CoD4::DM1
 			index = to->eType;
 		fieldtype = &NetFields::List[index];
 
-		WriteEntityDelta(msg, time, reinterpret_cast<const uint8_t*>(from), 
-			reinterpret_cast<const uint8_t*>(to), force, 
+		WriteEntityDelta(msg, time, reinterpret_cast<const uint8_t*>(from),
+			reinterpret_cast<const uint8_t*>(to), force,
 			fieldtype->numFields, 10, fieldtype->field);
 	}
-	
+
 	void Demo::WriteEntityRemoval(Msg& msg, uint8_t* from, int indexBits, uint8_t changeBit)
 	{
 		if (changeBit)
@@ -1354,7 +1354,7 @@ namespace Iswenzz::CoD4::DM1
 		WriteEntityIndex(msg, *reinterpret_cast<uint32_t*>(from), indexBits);
 		msg.WriteBit1();
 	}
-	
+
 	void Demo::WriteEntityIndex(Msg& msg, const int index, const int indexBits)
 	{
 		if (index - msg.LastRefEntity == 1)
@@ -1378,16 +1378,16 @@ namespace Iswenzz::CoD4::DM1
 		msg.WriteBits(index - msg.LastRefEntity, 4);
 		msg.LastRefEntity = index;
 	}
-	
-	int Demo::WriteEntityDelta(Msg& msg, const int time, 
-		const uint8_t* from, const uint8_t* to, 
+
+	int Demo::WriteEntityDelta(Msg& msg, const int time,
+		const uint8_t* from, const uint8_t* to,
 		bool force, int numFields, int indexBits, netField_t* stateFields)
 	{
 		return WriteDeltaStruct(msg, time, from, to, force, numFields, indexBits, stateFields, 0);
 	}
-	
-	int Demo::WriteDeltaStruct(Msg& msg, const int time, 
-		const uint8_t* from, const uint8_t* to, 
+
+	int Demo::WriteDeltaStruct(Msg& msg, const int time,
+		const uint8_t* from, const uint8_t* to,
 		bool force, int numFields, int indexBits, netField_t* stateFields, uint8_t bChangeBit)
 	{
 		int i, lc;
@@ -1435,7 +1435,7 @@ namespace Iswenzz::CoD4::DM1
 			WriteDeltaField(msg, time, from, to, field, i, 0);
 		return msg.GetUsedBitCount() - oldbitcount;
 	}
-	
+
 	bool Demo::DeltaValuesAreEqual(int bits, const int* fromF, const int* toF)
 	{
 		bool result;
@@ -1448,13 +1448,13 @@ namespace Iswenzz::CoD4::DM1
 		case 13:
 			result = static_cast<short>(ANGLE2SHORT(*reinterpret_cast<const float*>(toF))) ==
 				static_cast<short>(ANGLE2SHORT(*reinterpret_cast<const float*>(fromF)));
-			/*((signed int)(182.044449f * *reinterpret_cast<const float*>(toF) + 0.5f) == 
+			/*((signed int)(182.044449f * *reinterpret_cast<const float*>(toF) + 0.5f) ==
 				(signed int)(*(float *)fromF * 182.044449f  + 0.5f));*/
 			break;
 		case 8:
 		case 9:
 		case 10:
-			result = static_cast<signed int>(floorf(*reinterpret_cast<const float*>(fromF) + 0.5f) == 
+			result = static_cast<signed int>(floorf(*reinterpret_cast<const float*>(fromF) + 0.5f) ==
 				static_cast<signed int>(floorf(*reinterpret_cast<const float*>(toF) + 0.5f)));
 			break;
 		case 5:
@@ -1466,8 +1466,8 @@ namespace Iswenzz::CoD4::DM1
 		}
 		return result;
 	}
-	
-	void Demo::WriteDeltaField(Msg& msg, const int time, const uint8_t* from, const uint8_t* to, 
+
+	void Demo::WriteDeltaField(Msg& msg, const int time, const uint8_t* from, const uint8_t* to,
 		netField_s* field, int fieldNum, uint8_t forceSend)
 	{
 		int nullfield;
@@ -1497,9 +1497,9 @@ namespace Iswenzz::CoD4::DM1
 		}
 		if (field->changeHints != 2)
 		{
-			if (!forceSend && (*reinterpret_cast<const uint32_t*>(fromdata) == 
-				*reinterpret_cast<const uint32_t*>(todata) || 
-				DeltaValuesAreEqual(field->bits, reinterpret_cast<const int*>(fromdata), 
+			if (!forceSend && (*reinterpret_cast<const uint32_t*>(fromdata) ==
+				*reinterpret_cast<const uint32_t*>(todata) ||
+				DeltaValuesAreEqual(field->bits, reinterpret_cast<const int*>(fromdata),
 					reinterpret_cast<const int* >(todata))))
 			{
 				msg.WriteBit0();
@@ -1532,8 +1532,8 @@ namespace Iswenzz::CoD4::DM1
 			}
 			msg.WriteBit1();
 
-			if (int32todata == 0x80000000 || floattodata != static_cast<float>(int32todatafromfloat) 
-				|| int32todatafromfloat + 4096 < 0 || int32todatafromfloat + 4096 > 0x1FFF 
+			if (int32todata == 0x80000000 || floattodata != static_cast<float>(int32todatafromfloat)
+				|| int32todatafromfloat + 4096 < 0 || int32todatafromfloat + 4096 > 0x1FFF
 				|| int32fromdatafromfloat + 4096 < 0 || int32fromdatafromfloat + 4096 > 0x1FFF)
 			{
 				msg.WriteBit1();
@@ -1725,7 +1725,7 @@ namespace Iswenzz::CoD4::DM1
 		msg.WriteString(ClientNames[clientnum].netname.c_str());
 		msg.WriteString(ClientNames[clientnum].clantag.c_str());
 	}
-	
+
 	void Demo::WriteSnapshot(Msg& msg, int oldSnapIndex, int newSnapIndex)
 	{
 		if (oldSnapIndex == -1 || newSnapIndex == -1)
@@ -1734,7 +1734,7 @@ namespace Iswenzz::CoD4::DM1
 		clientSnapshot_t *oldSnap, *newSnap;
 		newSnap = &Snapshots[newSnapIndex];
 
-		if (newSnap->deltaNum == -1) 
+		if (newSnap->deltaNum == -1)
 		{
 			oldSnap = &CurrentSnapshot;
 			memset(oldSnap, 0, sizeof(*oldSnap));
@@ -1742,14 +1742,14 @@ namespace Iswenzz::CoD4::DM1
 		else
 		{
 			oldSnap = &Snapshots[oldSnapIndex];
-			if (!CheckSnapshotValidity(*oldSnap)) 
+			if (!CheckSnapshotValidity(*oldSnap))
 			{
 				oldSnap = &CurrentSnapshot;
 				memset(oldSnap, 0, sizeof(*oldSnap));
 				newSnap->deltaNum = -1;
 			}
 		}
-		
+
 		msg.WriteByte(static_cast<int>(svc_ops_e::svc_snapshot));
 		msg.WriteInt(newSnap->serverTime);
 		msg.WriteByte((newSnap->deltaNum == -1) ? 0 : newSnap->messageNum - newSnap->deltaNum);
@@ -1763,11 +1763,11 @@ namespace Iswenzz::CoD4::DM1
 
 		WritePacketClients(msg, newSnap->serverTime, oldSnap, newSnap);
 	}
-	
+
 	void Demo::WriteDeltaPlayerState(Msg& msg, const int time, playerState_t* from, playerState_t* to)
 	{
 		int i, j, lc;
-		for (i = 0, lc = 0; i < sizeof(NetFields::PlayerStateFields) / sizeof(NetFields::PlayerStateFields[0]); ++i) 
+		for (i = 0, lc = 0; i < sizeof(NetFields::PlayerStateFields) / sizeof(NetFields::PlayerStateFields[0]); ++i)
 		{
 			if (ShouldSendPSField(SendOriginAndVel, to, from, &NetFields::PlayerStateFields[i]))
 				lc = i + 1;
@@ -1779,13 +1779,13 @@ namespace Iswenzz::CoD4::DM1
 		msg.WriteBits(lc, NetFields::GetMinBitCount(
 			sizeof(NetFields::PlayerStateFields) / sizeof(NetFields::PlayerStateFields[0])));
 
-		for (i = 0; i < lc; ++i) 
+		for (i = 0; i < lc; ++i)
 		{
-			if (NetFields::PlayerStateFields[i].changeHints == 2 || 
-				ShouldSendPSField(SendOriginAndVel, from, to, &NetFields::PlayerStateFields[i])) 
+			if (NetFields::PlayerStateFields[i].changeHints == 2 ||
+				ShouldSendPSField(SendOriginAndVel, from, to, &NetFields::PlayerStateFields[i]))
 			{
 				bool forceSend = SendOriginAndVel && NetFields::PlayerStateFields[i].changeHints == 3;
-				WriteDeltaField(msg, time, reinterpret_cast<uint8_t*>(from), reinterpret_cast<uint8_t*>(to), 
+				WriteDeltaField(msg, time, reinterpret_cast<uint8_t*>(from), reinterpret_cast<uint8_t*>(to),
 					&NetFields::PlayerStateFields[i], i, forceSend);
 			}
 			else
@@ -1793,18 +1793,18 @@ namespace Iswenzz::CoD4::DM1
 		}
 
 		int statsbits = 0;
-		for (i = 0; i < 5; ++i) 
+		for (i = 0; i < 5; ++i)
 		{
 			if (to->stats[i] != from->stats[i])
 				statsbits |= 1 << i;
 		}
 
-		if (statsbits) 
+		if (statsbits)
 		{
 			msg.WriteBit1();
 			msg.WriteBits(statsbits, 5);
 
-			for (i = 0; i < 3; ++i) 
+			for (i = 0; i < 3; ++i)
 			{
 				if (statsbits & (1 << i))
 					msg.WriteShort(to->stats[i]);
@@ -1821,11 +1821,11 @@ namespace Iswenzz::CoD4::DM1
 		// (SA) - Modified for 64 weaps
 		// Hmm only 64? CoD4 has 128 but its still 64
 		int ammobits[8] = { };
-		for (j = 0; j < 4; ++j) 
-		{ 
+		for (j = 0; j < 4; ++j)
+		{
 			ammobits[j] = 0;
 
-			for (i = 0; i < 16; ++i) 
+			for (i = 0; i < 16; ++i)
 			{
 				if (to->ammo[i + (j * 16)] != from->ammo[i + (j * 16)])
 					ammobits[j] |= 1 << i;
@@ -1834,17 +1834,17 @@ namespace Iswenzz::CoD4::DM1
 
 		// (SA) - Also encapsulated ammo changes into one check. Clip values will change frequently,
 		// but ammo will not. (only when you get ammo/reload rather than each shot)
-		if (ammobits[0] || ammobits[1] || ammobits[2] || ammobits[3]) 
+		if (ammobits[0] || ammobits[1] || ammobits[2] || ammobits[3])
 		{
 			msg.WriteBit1();
-			for (j = 0; j < 4; ++j) 
+			for (j = 0; j < 4; ++j)
 			{
-				if (ammobits[j]) 
+				if (ammobits[j])
 				{
 					msg.WriteBit1();
 					msg.WriteShort(ammobits[j]);
 
-					for (i = 0; i < 16; ++i) 
+					for (i = 0; i < 16; ++i)
 					{
 						if (ammobits[j] & (1 << i))
 							msg.WriteShort(to->ammo[i + (j * 16)]);
@@ -1867,12 +1867,12 @@ namespace Iswenzz::CoD4::DM1
 					clipbits |= 1 << i;
 			}
 
-			if (clipbits) 
+			if (clipbits)
 			{
 				msg.WriteBit1();
 				msg.WriteShort(clipbits);
 
-				for (i = 0; i < 16; ++i) 
+				for (i = 0; i < 16; ++i)
 				{
 					if (clipbits & (1 << i))
 						msg.WriteShort(to->ammoclip[i + (j * 16)]);
@@ -1884,18 +1884,18 @@ namespace Iswenzz::CoD4::DM1
 
 		if (!memcmp(from->objective, to->objective, sizeof(from->objective)))
 			msg.WriteBit0();
-		else 
+		else
 		{
 			msg.WriteBit1();
 
-			for (i = 0; i < sizeof(from->objective) / sizeof(from->objective[0]); ++i) 
+			for (i = 0; i < sizeof(from->objective) / sizeof(from->objective[0]); ++i)
 			{
 				msg.WriteBits(to->objective[i].state, 3);
 				WriteDeltaObjective(msg, time, &from->objective[i], &to->objective[i]);
 			}
 		}
 
-		if (memcmp(&from->hud, &to->hud, sizeof(from->hud))) 
+		if (memcmp(&from->hud, &to->hud, sizeof(from->hud)))
 		{
 			msg.WriteBit1();
 
@@ -1907,18 +1907,18 @@ namespace Iswenzz::CoD4::DM1
 
 		if (!memcmp(from->weaponmodels, to->weaponmodels, sizeof(from->weaponmodels)))
 			msg.WriteBit0(); // No weapon viewmodel has changed
-		else 
+		else
 		{
 			msg.WriteBit1(); // Any weapon viewmodel has changed
 			for (i = 0; i < sizeof(from->weaponmodels); ++i)
 				msg.WriteByte(to->weaponmodels[i]);
 		}
 	}
-	
+
 	bool Demo::ShouldSendPSField(bool SendOriginAndVel, playerState_t* from, playerState_t* to, netField_t* field)
 	{
-		/* if (field->bits == -87 && (to->otherFlags & 2 
-			 || (((to->eFlags & 0xFF) ^ (from->eFlags & 0xFF)) & 2) 
+		/* if (field->bits == -87 && (to->otherFlags & 2
+			 || (((to->eFlags & 0xFF) ^ (from->eFlags & 0xFF)) & 2)
 			 || to->viewlocked_entNum != 1023 || to->pm_type == 5))
 			 return true;*/
 
@@ -1931,10 +1931,10 @@ namespace Iswenzz::CoD4::DM1
 		bool result = DeltaValuesAreEqual(field->bits, fromF, toF);
 		return result ^= true;
 	}
-	
+
 	void Demo::WriteDeltaObjective(Msg& msg, const int time, objective_t* from, objective_t* to)
 	{
-		int lc = WriteDeltaLastChangedField(reinterpret_cast<uint8_t*>(from), reinterpret_cast<uint8_t*>(to), 
+		int lc = WriteDeltaLastChangedField(reinterpret_cast<uint8_t*>(from), reinterpret_cast<uint8_t*>(to),
 			NetFields::ObjectiveFields, sizeof(NetFields::ObjectiveFields) / sizeof(NetFields::ObjectiveFields[0]));
 
 		if (lc == -1)
@@ -1951,16 +1951,16 @@ namespace Iswenzz::CoD4::DM1
 				&NetFields::ObjectiveFields[i], i, false);
 		}
 	}
-	
+
 	int Demo::WriteDeltaLastChangedField(uint8_t* from, uint8_t* to, netField_t* fields, int numFields)
 	{
 		int lc = -1;
-		for (int j = numFields - 1; j >= 0; --j) 
+		for (int j = numFields - 1; j >= 0; --j)
 		{
 			int* fromF = reinterpret_cast<int *>(reinterpret_cast<uint8_t*>(from) + fields[j].offset);
 			int* toF = reinterpret_cast<int *>(reinterpret_cast<uint8_t*>(to) + fields[j].offset);
 
-			if (!DeltaValuesAreEqual(fields[j].bits, fromF, toF)) 
+			if (!DeltaValuesAreEqual(fields[j].bits, fromF, toF))
 			{
 				lc = j;
 				break;
@@ -1968,11 +1968,11 @@ namespace Iswenzz::CoD4::DM1
 		}
 		return lc;
 	}
-	
+
 	void Demo::WriteDeltaHudElems(Msg& msg, const int time, hudelem_t* from, hudelem_t* to, const int count)
 	{
 		int i = 0;
-		for (; i < count; ++i) 
+		for (; i < count; ++i)
 		{
 			if (to[i].type == HE_TYPE_FREE)
 				break;
@@ -1981,10 +1981,10 @@ namespace Iswenzz::CoD4::DM1
 		int numHE = i;
 		msg.WriteBits(numHE, NetFields::GetMinBitCount(31)); // 5
 
-		for (int k = 0; k < numHE; ++k) 
+		for (int k = 0; k < numHE; ++k)
 		{
-			int lc = WriteDeltaLastChangedField(reinterpret_cast<uint8_t*>(from + k), 
-				reinterpret_cast<uint8_t*>(to + k), NetFields::HudElemFields, 
+			int lc = WriteDeltaLastChangedField(reinterpret_cast<uint8_t*>(from + k),
+				reinterpret_cast<uint8_t*>(to + k), NetFields::HudElemFields,
 				sizeof(NetFields::HudElemFields) / sizeof(NetFields::HudElemFields[0]));
 
 			int size = sizeof(NetFields::HudElemFields) / sizeof(NetFields::HudElemFields[0]);
@@ -2005,43 +2005,43 @@ namespace Iswenzz::CoD4::DM1
 			}
 		}
 	}
-	
+
 	void Demo::WritePacketEntities(Msg& msg, const int time, clientSnapshot_t* oldframe, clientSnapshot_t* newframe)
 	{
 		entityState_t r_newent{}, *newent = &r_newent, r_oldent{}, *oldent = &r_oldent;
 		int oldindex = 0, newindex = 0, oldnum = 0, newnum = -1;
 
-		while (newindex < newframe->numEntities || oldindex < oldframe->numEntities) 
+		while (newindex < newframe->numEntities || oldindex < oldframe->numEntities)
 		{
-			if (newindex >= newframe->numEntities) 
+			if (newindex >= newframe->numEntities)
 			{
 				newent = nullptr;
 				newnum = 99999;
 			}
-			else 
+			else
 			{
 				newent = &ParseEntities[(newframe->parseEntitiesNum + newindex) & 2047];
 				newnum = newent->number;
 			}
 
-			if (oldindex >= oldframe->numEntities) 
+			if (oldindex >= oldframe->numEntities)
 			{
 				oldent = nullptr;
 				oldnum = 99999;
 			}
-			else 
+			else
 			{
 				oldent = &ParseEntities[(oldframe->parseEntitiesNum + oldindex) & 2047];
 				oldnum = oldent->number;
 			}
 
-			if (newnum == oldnum) 
+			if (newnum == oldnum)
 			{
 				WriteDeltaEntity(msg, time, oldent, newent, false);
 				oldindex++;
 				newindex++;
 			}
-			else if (newnum < oldnum) 
+			else if (newnum < oldnum)
 			{
 				WriteDeltaEntity(msg, time, &EntityBaselines[newnum], newent, true);
 				newindex++;
@@ -2054,48 +2054,48 @@ namespace Iswenzz::CoD4::DM1
 
 		WriteEntityIndex(msg, 1023, 10);
 	}
-	
+
 	void Demo::WritePacketClients(Msg& msg, const int time, clientSnapshot_t* oldframe, clientSnapshot_t* newframe)
 	{
 		clientState_t r_newcs{}, * newcs = &r_newcs, r_oldcs{}, * oldcs = &r_oldcs;
 		int oldindex = 0, newindex = 0, oldnum = 0, newnum = -1;
 
-		while (newindex < newframe->numClients || oldindex < oldframe->numClients) 
+		while (newindex < newframe->numClients || oldindex < oldframe->numClients)
 		{
-			if (newindex >= newframe->numClients) 
+			if (newindex >= newframe->numClients)
 			{
 				newcs = nullptr;
 				newnum = 99999;
 			}
-			else 
+			else
 			{
 				newcs = &ParseClients[(newframe->parseClientsNum + newindex) & 2047];
 				newnum = newcs->clientIndex;
 			}
 
-			if (oldindex >= oldframe->numClients) 
+			if (oldindex >= oldframe->numClients)
 			{
 				oldcs = nullptr;
 				oldnum = 99999;
 			}
-			else 
+			else
 			{
 				oldcs = &ParseClients[(oldframe->parseClientsNum + oldindex) & 2047];
 				oldnum = oldcs->clientIndex;
 			}
 
-			if (newnum == oldnum) 
+			if (newnum == oldnum)
 			{
 				WriteDeltaClient(msg, time, oldcs, newcs, false);
 				oldindex++;
 				newindex++;
 			}
-			else if (newnum < oldnum) 
+			else if (newnum < oldnum)
 			{
 				WriteDeltaClient(msg, time, nullptr, newcs, true);
 				newindex++;
 			}
-			else 
+			else
 			{
 				WriteDeltaClient(msg, time, oldcs, nullptr, true);
 				oldindex++;
@@ -2103,8 +2103,8 @@ namespace Iswenzz::CoD4::DM1
 		}
 		msg.WriteBit0();
 	}
-	
-	void Demo::WriteDeltaClient(Msg& msg, const int time, 
+
+	void Demo::WriteDeltaClient(Msg& msg, const int time,
 		clientState_t* from, clientState_t* to, bool force)
 	{
 		clientState_t nullstate = { 0 };
@@ -2124,10 +2124,10 @@ namespace Iswenzz::CoD4::DM1
 			WriteEntityRemoval(msg, reinterpret_cast<uint8_t*>(from), NetFields::GetMinBitCount(64 - 1), true);
 	}
 
-	void Demo::WriteClientDelta(Msg& msg, const int time, clientState_t* from, clientState_t* to, 
+	void Demo::WriteClientDelta(Msg& msg, const int time, clientState_t* from, clientState_t* to,
 		bool force, int numFields, int indexBits, netField_t* stateFields)
 	{
-		WriteDeltaStruct(msg, time, reinterpret_cast<const uint8_t*>(from), reinterpret_cast<const uint8_t*>(to), 
+		WriteDeltaStruct(msg, time, reinterpret_cast<const uint8_t*>(from), reinterpret_cast<const uint8_t*>(to),
 			force, numFields, indexBits, stateFields, true);
 	}
 
