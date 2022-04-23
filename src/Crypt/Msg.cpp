@@ -19,7 +19,7 @@ namespace Iswenzz::CoD4::DM1
 
 	Msg::Msg(int protocol) : Protocol(protocol) { }
 
-	Msg::Msg(unsigned char* buf, int len, MSGCrypt mode, int protocol)
+	Msg::Msg(uint8_t* buf, int len, MSGCrypt mode, int protocol)
 	{
 		Initialize(buf, len, mode, protocol);
 	}
@@ -38,7 +38,7 @@ namespace Iswenzz::CoD4::DM1
 		Buffer.resize(len);
 	}
 
-	void Msg::Initialize(unsigned char* buf, int len, MSGCrypt mode, int protocol)
+	void Msg::Initialize(uint8_t* buf, int len, MSGCrypt mode, int protocol)
 	{
 		if (mode == MSGCrypt::MSG_CRYPT_NONE)
 		{
@@ -124,15 +124,15 @@ namespace Iswenzz::CoD4::DM1
 
 	int Msg::ReadByte()
 	{
-		unsigned char* c;
-		if (ReadCount + sizeof(unsigned char) > CurSize)
+		uint8_t* c;
+		if (ReadCount + sizeof(uint8_t) > CurSize)
 		{
 			Overflowed = 1;
 			return -1;
 		}
 		c = &Buffer[ReadCount];
 
-		ReadCount += sizeof(unsigned char);
+		ReadCount += sizeof(uint8_t);
 		return *c;
 	}
 
@@ -233,10 +233,11 @@ namespace Iswenzz::CoD4::DM1
 			float center[3]{ 0, 0, 0 };
 			VectorCopy(center, MapCenter);
 			
-			coord = (signed int)(center[bits != -92] + 0.5);
-			return (double)((((signed int)oldValue - coord + 0x8000) ^ ReadBits(16)) + coord - 0x8000);
+			coord = static_cast<signed int>(center[bits != -92] + 0.5);
+			return static_cast<double>(((static_cast<signed int>(oldValue) - coord + 0x8000) 
+				^ ReadBits(16)) + coord - 0x8000);
 		}
-		return (double)(ReadBits(7) - 64) + oldValue;
+		return static_cast<double>(ReadBits(7) - 64) + oldValue;
 	}
 
 	float Msg::ReadOriginZFloat(float oldValue)
@@ -246,7 +247,7 @@ namespace Iswenzz::CoD4::DM1
 		if (Protocol > COD4X_FALLBACK_PROTOCOL)
 		{
 			int intf = ReadInt();
-			return *(float*)&intf;
+			return *reinterpret_cast<float*>(&intf);
 		}
 
 		if (ReadBit())
@@ -254,10 +255,11 @@ namespace Iswenzz::CoD4::DM1
 			float center[3]{ 0, 0, 0 };
 			VectorCopy(center, MapCenter);
 			
-			coord = (signed int)(center[2] + 0.5);
-			return (double)((((signed int)oldValue - coord + 0x8000) ^ ReadBits(16)) + coord - 0x8000);
+			coord = static_cast<signed int>(center[2] + 0.5);
+			return static_cast<double>(((static_cast<signed int>(oldValue) - coord + 0x8000)
+				^ ReadBits(16)) + coord - 0x8000);
 		}
-		return (double)(ReadBits(7) - 64) + oldValue;
+		return static_cast<double>(ReadBits(7) - 64) + oldValue;
 	}
 
 	std::string Msg::ReadString()
@@ -274,7 +276,7 @@ namespace Iswenzz::CoD4::DM1
 			// translate all fmt spec to avoid crash bugs
 			//if (c == '%') c = '.';
 
-			str += static_cast<unsigned char>(c);
+			str += static_cast<uint8_t>(c);
 			l++;
 		} 
 		return str;
@@ -303,10 +305,10 @@ namespace Iswenzz::CoD4::DM1
 	void Msg::ReadData(void* buffer, int len)
 	{
 		for (int i = 0; i < len; i++)
-			reinterpret_cast<unsigned char*>(buffer)[i] = ReadByte();
+			reinterpret_cast<uint8_t*>(buffer)[i] = ReadByte();
 	}
 
-	void Msg::ReadBase64(unsigned char* outbuf, int len)
+	void Msg::ReadBase64(uint8_t* outbuf, int len)
 	{
 		int b64data;
 		int k, shift;
@@ -341,9 +343,9 @@ namespace Iswenzz::CoD4::DM1
 				}
 				b64data |= (databyte << shift);
 			}
-			outbuf[i + 0] = (reinterpret_cast<char*>(&b64data))[2];
-			outbuf[i + 1] = (reinterpret_cast<char*>(&b64data))[1];
-			outbuf[i + 2] = (reinterpret_cast<char*>(&b64data))[0];
+			outbuf[i + 0] = reinterpret_cast<char*>(&b64data)[2];
+			outbuf[i + 1] = reinterpret_cast<char*>(&b64data)[1];
+			outbuf[i + 2] = reinterpret_cast<char*>(&b64data)[0];
 			i += 3;
 		} 
 		while (databyte != -1 && (i + 4) < len);
@@ -359,7 +361,7 @@ namespace Iswenzz::CoD4::DM1
 			return;
 		}
 
-		dst = (int32_t*)&Buffer[CurSize];
+		dst = reinterpret_cast<int32_t*>(&Buffer[CurSize]);
 		*dst = value;
 		CurSize += sizeof(int32_t);
 	}
@@ -373,7 +375,7 @@ namespace Iswenzz::CoD4::DM1
 			return;
 		}
 
-		dst = (int8_t*)&Buffer[CurSize];
+		dst = reinterpret_cast<int8_t*>(&Buffer[CurSize]);
 		*dst = value;
 		CurSize += sizeof(int8_t);
 	}
@@ -387,7 +389,7 @@ namespace Iswenzz::CoD4::DM1
 			return;
 		}
 
-		dst = (int16_t*)&Buffer[CurSize];
+		dst = reinterpret_cast<int16_t*>(&Buffer[CurSize]);
 		*dst = value;
 		CurSize += sizeof(short);
 	}
@@ -466,21 +468,21 @@ namespace Iswenzz::CoD4::DM1
 
 		if (Protocol > COD4X_FALLBACK_PROTOCOL)
 		{
-			ival = *(int*)& value;
+			ival = *reinterpret_cast<int*>(&value);
 			WriteInt(ival);
 			return;
 		}
 
-		ival = (signed int)floorf(value + 0.5f);
-		ioldval = (signed int)floorf(oldValue + 0.5f);
+		ival = static_cast<signed int>(floorf(value + 0.5f));
+		ioldval = static_cast<signed int>(floorf(oldValue + 0.5f));
 		delta = ival - ioldval;
 
-		if ((unsigned int)(delta + 64) > 127)
+		if (static_cast<uint32_t>(delta + 64) > 127)
 		{
 			VectorCopy(MapCenter, center);
 
 			WriteBit1();
-			mcenterbits = (signed int)(center[bits != -92] + 0.5);
+			mcenterbits = static_cast<signed int>(center[bits != -92] + 0.5);
 			WriteBits((ival - mcenterbits + 0x8000) ^ (ioldval - mcenterbits + 0x8000), 16);
 		}
 		else
@@ -499,20 +501,20 @@ namespace Iswenzz::CoD4::DM1
 
 		if (Protocol > COD4X_FALLBACK_PROTOCOL)
 		{
-			ival = *(int*)& value;
+			ival = *reinterpret_cast<int*>(&value);
 			WriteInt(ival);
 			return;
 		}
 
-		ival = (signed int)floorf(value + 0.5f);
-		ioldval = (signed int)floorf(oldValue + 0.5f);
+		ival = static_cast<signed int>(floorf(value + 0.5f));
+		ioldval = static_cast<signed int>(floorf(oldValue + 0.5f));
 
-		if ((unsigned int)(ival - ioldval + 64) > 127)
+		if (static_cast<uint32_t>(ival - ioldval + 64) > 127)
 		{
 			VectorCopy(MapCenter, center);
 
 			WriteBit1();
-			mcenterbits = (signed int)(center[2] + 0.5);
+			mcenterbits = static_cast<signed int>(center[2] + 0.5);
 			WriteBits((ival - mcenterbits + 0x8000) ^ (ioldval - mcenterbits + 0x8000), 16);
 		}
 		else

@@ -45,10 +45,10 @@ namespace Iswenzz::CoD4::DM1
 		1355, 768, 1040, 745, 952, 805, 1073, 740, 1013, 805, 1008, 796, 996, 1057, 11457, 13504
 	};
 
-	int Huffman::Decompress(unsigned char* bufIn, int lenIn, unsigned char* bufOut, int lenOut)
+	int Huffman::Decompress(uint8_t* bufIn, int lenIn, uint8_t* bufOut, int lenOut)
 	{
 		lenIn *= 8;
-		unsigned char* outptr = bufOut;
+		uint8_t* outptr = bufOut;
 
 		int get;
 		int offset;
@@ -60,13 +60,13 @@ namespace Iswenzz::CoD4::DM1
 		for (offset = 0, i = 0; offset < lenIn && i < lenOut; i++) 
 		{
 			Huff_OffsetReceive(msgHuff.decompressor.tree, &get, bufIn, &offset);
-			*outptr = (unsigned char)get;
+			*outptr = static_cast<uint8_t>(get);
 			outptr++;
 		}
 		return i;
 	}
 
-	int Huffman::Compress(unsigned char* bufIn, int lenIn, unsigned char* bufOut, int lenOut)
+	int Huffman::Compress(uint8_t* bufIn, int lenIn, uint8_t* bufOut, int lenOut)
 	{
 		int offset;
 		int i;
@@ -75,11 +75,11 @@ namespace Iswenzz::CoD4::DM1
 			return 0;
 
 		for (offset = 0, i = 0; i < lenIn; i++)
-			Huff_OffsetTransmit(&msgHuff.compressor, (int)bufIn[i], bufOut, &offset);
+			Huff_OffsetTransmit(&msgHuff.compressor, static_cast<int>(bufIn[i]), bufOut, &offset);
 		return (offset + 7) / 8;
 	}
 
-	void Huffman::Huff_PutBit(int bit, unsigned char* fout, int* offset) 
+	void Huffman::Huff_PutBit(int bit, uint8_t* fout, int* offset) 
 	{
 		bloc = *offset;
 		if ((bloc & 7) == 0)
@@ -90,7 +90,7 @@ namespace Iswenzz::CoD4::DM1
 		*offset = bloc;
 	}
 
-	int	Huffman::Huff_GetBit(unsigned char* fin, int* offset) 
+	int	Huffman::Huff_GetBit(uint8_t* fin, int* offset) 
 	{
 		int t;
 		bloc = *offset;
@@ -101,7 +101,7 @@ namespace Iswenzz::CoD4::DM1
 		return t;
 	}
 
-	void Huffman::AddBit(char bit, unsigned char* fout) 
+	void Huffman::AddBit(char bit, uint8_t* fout) 
 	{
 		if ((bloc & 7) == 0)
 			fout[(bloc >> 3)] = 0;
@@ -110,7 +110,7 @@ namespace Iswenzz::CoD4::DM1
 		bloc++;
 	}
 
-	int Huffman::GetBit(unsigned char* fin) 
+	int Huffman::GetBit(uint8_t* fin) 
 	{
 		int t = (fin[(bloc >> 3)] >> (bloc & 7)) & 0x1;
 		bloc++;
@@ -125,14 +125,14 @@ namespace Iswenzz::CoD4::DM1
 		else 
 		{
 			tppnode = huff->freelist;
-			huff->freelist = (node_t**)*tppnode;
+			huff->freelist = reinterpret_cast<node_t**>(*tppnode);
 			return tppnode;
 		}
 	}
 
 	void Huffman::FreePPNode(huff_t* huff, node_t** ppnode) 
 	{
-		*ppnode = (node_t*)huff->freelist;
+		*ppnode = reinterpret_cast<node_t*>(huff->freelist);
 		huff->freelist = ppnode;
 	}
 
@@ -235,7 +235,7 @@ namespace Iswenzz::CoD4::DM1
 		}
 	}
 
-	void Huffman::Huff_AddRef(huff_t* huff, unsigned char ch) 
+	void Huffman::Huff_AddRef(huff_t* huff, uint8_t ch) 
 	{
 		node_t* tnode, *tnode2;
 
@@ -319,7 +319,7 @@ namespace Iswenzz::CoD4::DM1
 			Increment(huff, huff->loc[ch]);
 	}
 
-	int Huffman::Huff_Receive(node_t* node, int* ch, unsigned char* fin) 
+	int Huffman::Huff_Receive(node_t* node, int* ch, uint8_t* fin) 
 	{
 		while (node && node->symbol == INTERNAL_NODE) 
 		{
@@ -333,7 +333,7 @@ namespace Iswenzz::CoD4::DM1
 		return (*ch = node->symbol);
 	}
 
-	void Huffman::Huff_OffsetReceive(node_t* node, int* ch, unsigned char* fin, int* offset) 
+	void Huffman::Huff_OffsetReceive(node_t* node, int* ch, uint8_t* fin, int* offset) 
 	{
 		bloc = *offset;
 		while (node && node->symbol == INTERNAL_NODE) 
@@ -352,7 +352,7 @@ namespace Iswenzz::CoD4::DM1
 		*offset = bloc;
 	}
 
-	void Huffman::Send(node_t* node, node_t* child, unsigned char* fout) 
+	void Huffman::Send(node_t* node, node_t* child, uint8_t* fout) 
 	{
 		if (node->parent)
 			Send(node->parent, node, fout);
@@ -365,20 +365,20 @@ namespace Iswenzz::CoD4::DM1
 		}
 	}
 
-	void Huffman::Huff_Transmit(huff_t* huff, int ch, unsigned char* fout) 
+	void Huffman::Huff_Transmit(huff_t* huff, int ch, uint8_t* fout) 
 	{
 		// node_t hasn't been transmitted, Send a NYT, then the symbol
 		if (huff->loc[ch] == nullptr) 
 		{
 			Huff_Transmit(huff, NYT, fout);
 			for (int i = 7; i >= 0; i--)
-				AddBit((char)((ch >> i) & 0x1), fout);
+				AddBit(static_cast<char>(((ch >> i) & 0x1)), fout);
 		}
 		else
 			Send(huff->loc[ch], nullptr, fout);
 	}
 
-	void Huffman::Huff_OffsetTransmit(huff_t* huff, int ch, unsigned char* fout, int* offset) 
+	void Huffman::Huff_OffsetTransmit(huff_t* huff, int ch, uint8_t* fout, int* offset) 
 	{
 		bloc = *offset;
 		Send(huff->loc[ch], nullptr, fout);
@@ -432,8 +432,8 @@ namespace Iswenzz::CoD4::DM1
 		{
 			for (int j = 0; j < msg_hData_COD4[i]; j++)
 			{
-				Huff_AddRef(&msgHuff.compressor, (unsigned char)i);
-				Huff_AddRef(&msgHuff.decompressor, (unsigned char)i);
+				Huff_AddRef(&msgHuff.compressor, static_cast<uint8_t>(i));
+				Huff_AddRef(&msgHuff.decompressor, static_cast<uint8_t>(i));
 			}
 			msg_hDataDone[i] = 1;
 			i = FindLowest(msg_hDataDone, msg_hData_COD4);
@@ -446,8 +446,8 @@ namespace Iswenzz::CoD4::DM1
 		{
 			for (int j = 0; j < msg_hData_Q3[i]; j++)
 			{
-				Huff_AddRef(&msgHuff.compressor, (unsigned char)i);
-				Huff_AddRef(&msgHuff.decompressor, (unsigned char)i);
+				Huff_AddRef(&msgHuff.compressor, static_cast<uint8_t>(i));
+				Huff_AddRef(&msgHuff.decompressor, static_cast<uint8_t>(i));
 			}
 		}
 	}

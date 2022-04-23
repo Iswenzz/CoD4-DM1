@@ -67,7 +67,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="bufOut">The output buffer.</param>
 		/// <param name="lenOut">The output buffer length.</param>
 		/// <returns></returns>
-		static int Decompress(unsigned char* bufIn, int lenIn, unsigned char* bufOut, int lenOut);
+		static int Decompress(uint8_t* bufIn, int lenIn, uint8_t* bufOut, int lenOut);
 		
 		/// <summary>
 		/// Compress a message.
@@ -77,7 +77,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="bufOut">The output buffer.</param>
 		/// <param name="lenOut">The output buffer length.</param>
 		/// <returns></returns>
-		static int Compress(unsigned char* bufIn, int lenIn, unsigned char* bufOut, int lenOut);
+		static int Compress(uint8_t* bufIn, int lenIn, uint8_t* bufOut, int lenOut);
 
 		/// <summary>
 		/// Put bit at offset.
@@ -85,7 +85,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="bit">Bit value.</param>
 		/// <param name="fout">Output buffer.</param>
 		/// <param name="offset">The offset to add the bit to.</param>
-		static void Huff_PutBit(int bit, unsigned char* fout, int* offset);
+		static void Huff_PutBit(int bit, uint8_t* fout, int* offset);
 
 		/// <summary>
 		/// Receive one bit from the input file (buffered).
@@ -93,14 +93,14 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="fin">The input buffer.</param>
 		/// <param name="offset">The offset to get the bit to.</param>
 		/// <returns></returns>
-		static int Huff_GetBit(unsigned char* fin, int* offset);
+		static int Huff_GetBit(uint8_t* fin, int* offset);
 
 		/// <summary>
 		/// Add new nodes to the huffman tree.
 		/// </summary>
 		/// <param name="huff">The huffman tree.</param>
 		/// <param name="ch">Unique key.</param>
-		static void Huff_AddRef(huff_t* huff, unsigned char ch);
+		static void Huff_AddRef(huff_t* huff, uint8_t ch);
 
 		/// <summary>
 		/// Get a symbol.
@@ -109,7 +109,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="ch"></param>
 		/// <param name="fin">The input buffer.</param>
 		/// <returns></returns>
-		static int Huff_Receive(node_t* node, int* ch, unsigned char* fin);
+		static int Huff_Receive(node_t* node, int* ch, uint8_t* fin);
 
 		/// <summary>
 		/// Get a symbol with a specific offset.
@@ -118,7 +118,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="ch"></param>
 		/// <param name="fin">The input buffer.</param>
 		/// <param name="offset">The offset to use to receive.</param>
-		static void Huff_OffsetReceive(node_t* node, int* ch, unsigned char* fin, int* offset);
+		static void Huff_OffsetReceive(node_t* node, int* ch, uint8_t* fin, int* offset);
 
 		/// <summary>
 		/// Send a symbol.
@@ -126,7 +126,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="huff">The huffman tree.</param>
 		/// <param name="ch"></param>
 		/// <param name="fout">The output buffer.</param>
-		static void Huff_Transmit(huff_t* huff, int ch, unsigned char* fout);
+		static void Huff_Transmit(huff_t* huff, int ch, uint8_t* fout);
 
 		/// <summary>
 		/// Send a symbol to a specific offset.
@@ -135,21 +135,21 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="ch"></param>
 		/// <param name="fout">The output buffer.</param>
 		/// <param name="offset">The offset to transmit to.</param>
-		static void Huff_OffsetTransmit(huff_t* huff, int ch, unsigned char* fout, int* offset);
+		static void Huff_OffsetTransmit(huff_t* huff, int ch, uint8_t* fout, int* offset);
 
 		/// <summary>
 		/// Add a bit to the output file (buffered).
 		/// </summary>
 		/// <param name="bit">The bit to add.</param>
 		/// <param name="fout">The output buffer.</param>
-		static void AddBit(char bit, unsigned char* fout);
+		static void AddBit(char bit, uint8_t* fout);
 
 		/// <summary>
 		/// Get a bit.
 		/// </summary>
 		/// <param name="fin">The input buffer.</param>
 		/// <returns></returns>
-		static int GetBit(unsigned char* fin);
+		static int GetBit(uint8_t* fin);
 
 		/// <summary>
 		/// Get a pp node.
@@ -193,7 +193,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="node"></param>
 		/// <param name="child"></param>
 		/// <param name="fout"></param>
-		static void Send(node_t* node, node_t* child, unsigned char* fout);
+		static void Send(node_t* node, node_t* child, uint8_t* fout);
 
 		/// <summary>
 		/// Find the lowest key in a specific key array.

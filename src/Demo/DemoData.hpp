@@ -80,7 +80,7 @@ namespace Iswenzz::CoD4::DM1
 		PLAYER_OFFHAND_SECONDARY_SMOKE = 0x0,
 		PLAYER_OFFHAND_SECONDARY_FLASH = 0x1,
 		PLAYER_OFFHAND_SECONDARIES_TOTAL = 0x2,
-	}OffhandSecondaryClass_t;
+	} OffhandSecondaryClass_t;
 
 	typedef enum
 	{
@@ -177,14 +177,14 @@ namespace Iswenzz::CoD4::DM1
 		int alignOrg;
 		int alignScreen;
 		hudelem_color_t color;
-		hudelem_color_t fromColor; //0x28
-		int fadeStartTime; //0x2c
+		hudelem_color_t fromColor; // 0x28
+		int fadeStartTime; // 0x2c
 		int fadeTime;
 		int label;
 		int width;
-		int height; //0x3C
+		int height; // 0x3C
 		int materialIndex;
-		int offscreenMaterialIdx; //0x44
+		int offscreenMaterialIdx; // 0x44
 		int fromWidth;
 		int fromHeight;
 		int scaleStartTime;
@@ -198,9 +198,9 @@ namespace Iswenzz::CoD4::DM1
 		int time;
 		int duration;
 		float value;
-		int text; //Configstring index
+		int text; // Configstring index
 		float sort;
-		hudelem_color_t glowColor; //0x84
+		hudelem_color_t glowColor; // 0x84
 		int fxBirthTime;
 		int fxLetterTime;
 		int fxDecayStartTime;
@@ -368,7 +368,7 @@ namespace Iswenzz::CoD4::DM1
 		int	killCamEntity;				// 2208
 
 		hudElemState_t hud;				// 2212
-	} playerState_t;					//Size: 0x2f64
+	} playerState_t;					// Size: 0x2f64
 
 	typedef struct 
 	{
@@ -408,7 +408,7 @@ namespace Iswenzz::CoD4::DM1
 		ET_VEHICLE_COLLMAP = 0xF,
 		ET_VEHICLE_CORPSE = 0x10,
 		ET_EVENTS = 0x11,
-		ET_MOVER = 0x99					//Dummy for botlib
+		ET_MOVER = 0x99					// Dummy for botlib
 	};
 
 	struct LerpEntityStatePhysicsJitter

@@ -72,8 +72,8 @@ namespace Iswenzz::CoD4::DM1
 		std::array<clientSnapshot_t, PACKET_BACKUP> Snapshots{ };
 		std::array<archivedFrame_t, MAX_FRAMES> Frames{ };
 
-		std::array<unsigned char, MAX_GENTITIES> ActiveBaselines{ };
-		std::array<unsigned char, MAX_GENTITIES> ActiveEntities{ };
+		std::array<uint8_t, MAX_GENTITIES> ActiveBaselines{ };
+		std::array<uint8_t, MAX_GENTITIES> ActiveEntities{ };
 		std::array<clientState_t, MAX_CLIENTS> ActiveClients{ };
 
 		/// <summary>
@@ -178,7 +178,7 @@ namespace Iswenzz::CoD4::DM1
 		/// Parse a config client.
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
-		void ParseConfigClient(Msg& msg, unsigned int clientnum);
+		void ParseConfigClient(Msg& msg, uint32_t clientnum);
 
 		/// <summary>
 		/// Read a delta compressed ground entity.
@@ -199,7 +199,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="indexBits">Min bit count.</param>
 		/// <param name="stateFields">Netfield fields.</param>
 		bool ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to,
-			unsigned int number, int numFields, int indexBits, netField_t* stateFields);
+			uint32_t number, int numFields, int indexBits, netField_t* stateFields);
 
 		/// <summary>
 		/// Read all delta compressed net fields.
@@ -210,7 +210,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="numFields">Struct field count.</param>
 		/// <param name="stateFields">Netfield fields.</param>
-		void ReadDeltaFields(Msg& msg, const int time, const unsigned char* from, unsigned char* to,
+		void ReadDeltaFields(Msg& msg, const int time, const uint8_t* from, uint8_t* to,
 			int numFields, netField_t* stateFields);
 
 		/// <summary>
@@ -376,7 +376,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="from">Pointer to an old entity.</param>
 		/// <param name="indexBits">Index bits.</param>
 		/// <param name="changeBit">Change bits.</param>
-		void WriteEntityRemoval(Msg& msg, unsigned char* from, int indexBits, unsigned char changeBit);
+		void WriteEntityRemoval(Msg& msg, uint8_t* from, int indexBits, uint8_t changeBit);
 
 		/// <summary>
 		/// Write entity index.
@@ -398,7 +398,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="indexBits">Index bits.</param>
 		/// <param name="stateFields">Net fields to update.</param>
 		/// <returns></returns>
-		int WriteEntityDelta(Msg& msg, const int time, const unsigned char* from, const unsigned char* to,
+		int WriteEntityDelta(Msg& msg, const int time, const uint8_t* from, const uint8_t* to,
 			bool force, int numFields, int indexBits, netField_t* stateFields);
 
 		/// <summary>
@@ -415,8 +415,8 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="bChangeBit">Change bits.</param>
 		/// <returns></returns>
 		int WriteDeltaStruct(Msg& msg, const int time, 
-			const unsigned char* from, const unsigned char* to,
-			bool force, int numFields, int indexBits, netField_t* stateFields, unsigned char bChangeBit);
+			const uint8_t* from, const uint8_t* to,
+			bool force, int numFields, int indexBits, netField_t* stateFields, uint8_t bChangeBit);
 
 		/// <summary>
 		/// Check if delta values are equal.
@@ -438,8 +438,8 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="fieldNum">The net field index.</param>
 		/// <param name="forceSend">Should force updating.</param>
 		void WriteDeltaField(Msg& msg, const int time, 
-			const unsigned char* from, const unsigned char* to,
-			netField_s* field, int fieldNum, unsigned char forceSend);
+			const uint8_t* from, const uint8_t* to,
+			netField_s* field, int fieldNum, uint8_t forceSend);
 
 		/// <summary>
 		/// Write a command string.
@@ -453,7 +453,7 @@ namespace Iswenzz::CoD4::DM1
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
 		/// <param name="clientnum">The client num.</param>
-		void WriteConfigClient(Msg& msg, unsigned int clientnum);
+		void WriteConfigClient(Msg& msg, uint32_t clientnum);
 
 		/// <summary>
 		/// Write a snapshot.
@@ -489,7 +489,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="fields">The net fields.</param>
 		/// <param name="numFields">The net field count.</param>
 		/// <returns></returns>
-		int WriteDeltaLastChangedField(unsigned char* from, unsigned char* to, netField_t* fields, int numFields);
+		int WriteDeltaLastChangedField(uint8_t* from, uint8_t* to, netField_t* fields, int numFields);
 
 		/// <summary>
 		/// Write delta hud elements.

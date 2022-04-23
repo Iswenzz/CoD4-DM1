@@ -73,8 +73,8 @@ namespace Iswenzz::CoD4::DM1
 		bool Overflowed = false;
 		bool Readonly = false;
 
-		std::vector<unsigned char> Buffer{ };
-		std::vector<unsigned char> SplitBuffer{ };
+		std::vector<uint8_t> Buffer{ };
+		std::vector<uint8_t> SplitBuffer{ };
 
 		int	MaxSize = 0;
 		int	CurSize = 0;
@@ -103,7 +103,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="mode">The crypt mode.</param>
 		/// <param name="protocol">The game protocol.</param>
 		/// <returns></returns>
-		Msg(unsigned char *buffer, int len, MSGCrypt mode, int protocol);
+		Msg(uint8_t *buffer, int len, MSGCrypt mode, int protocol);
 
 		/// <summary>
 		/// Initialize a new Msg object from an existing msg.
@@ -126,7 +126,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="mode">Crypt mode.</param>
 		/// <param name="protocol">The game protocol.</param>
 		/// <returns></returns>
-		void Initialize(unsigned char* buf, int len, MSGCrypt mode, int protocol);
+		void Initialize(uint8_t* buf, int len, MSGCrypt mode, int protocol);
 
 		/// <summary>
 		/// Read one bit.
@@ -214,7 +214,7 @@ namespace Iswenzz::CoD4::DM1
 		/// </summary>
 		/// <param name="outbuf">The output buffer.</param>
 		/// <param name="len">Length of the buffer.</param>
-		void ReadBase64(unsigned char* outbuf, int len);
+		void ReadBase64(uint8_t* outbuf, int len);
 
 		/// <summary>
 		/// Read the specified length to an output buffer.
