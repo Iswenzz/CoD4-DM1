@@ -1,2 +1,4 @@
-target_sources(CoD4DM1.Tests PRIVATE
-   DemoReader.test.cpp)
+if(ENABLE_TESTING)
+	target_sources(CoD4DM1.Tests PRIVATE
+		DemoReader.test.cpp)
+endif()

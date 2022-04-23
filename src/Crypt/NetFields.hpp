@@ -9,13 +9,13 @@
 #define ENTITY_STATE_FIELDS_COUNT				59
 #define OBJECTIVE_FIELDS_COUNT					6
 
-#define NETF(x) const_cast<char *>(#x), (int)&((entityState_t*)0)->x
 #define NETFE(x) x, sizeof(x) / sizeof(netField_t)
-#define OBJF(x) const_cast<char*>(#x), (int)&((objective_t*)0)->x
-#define AEF(x) const_cast<char*>(#x), (int)&((archivedEntity_t*)0)->x
-#define CSF(x) const_cast<char*>(#x), (int)&((clientState_t*)0)->x
-#define HEF(x) const_cast<char*>(#x), (int)&((hudelem_t*)0)->x
-#define PSF(x) const_cast<char*>(#x), (int)&((playerState_t*)0)->x
+#define NETF(x) const_cast<char *>(#x), reinterpret_cast<uintptr_t>(&((entityState_t*)0)->x)
+#define OBJF(x) const_cast<char*>(#x), reinterpret_cast<uintptr_t>(&((objective_t*)0)->x)
+#define AEF(x) const_cast<char*>(#x), reinterpret_cast<uintptr_t>(&((archivedEntity_t*)0)->x)
+#define CSF(x) const_cast<char*>(#x), reinterpret_cast<uintptr_t>(&((clientState_t*)0)->x)
+#define HEF(x) const_cast<char*>(#x), reinterpret_cast<uintptr_t>(&((hudelem_t*)0)->x)
+#define PSF(x) const_cast<char*>(#x), reinterpret_cast<uintptr_t>(&((playerState_t*)0)->x)
 
 #ifdef _MSC_VER
 #define __clz __lzcnt
@@ -23,7 +23,7 @@
 #define __clz __builtin_clz
 #endif
 
-namespace Iswenzz
+namespace Iswenzz::CoD4::DM1
 {
 	typedef struct
 	{

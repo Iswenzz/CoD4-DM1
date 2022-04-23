@@ -5,18 +5,20 @@
 #include <iostream>
 #include <iterator>
 
-namespace Iswenzz
+namespace Iswenzz::CoD4::DM1
 {
-	DemoReader::DemoReader(std::string filePath)
-		: DemoFile(std::make_unique<Demo>(filePath)), FilePath(filePath) { }
+	DemoReader::DemoReader(std::string filePath) : FilePath(filePath) 
+	{
+		DemoFile = std::make_shared<Demo>(filePath);
+	}
 
 	bool DemoReader::Next()
 	{
 		// Update previous data for comparisons
 		PreviousSnapshot = DemoFile->CurrentSnapshot;
-		PreviousClients = DemoFile->ParseClients;
-		PreviousEntities = DemoFile->ParseEntities;
-		PreviousFrames = DemoFile->Frames;
+		std::copy(DemoFile->ParseClients.cbegin(), DemoFile->ParseClients.cend(), PreviousClients.data());
+		std::copy(DemoFile->ParseEntities.cbegin(), DemoFile->ParseEntities.cend(), PreviousEntities.data());
+		std::copy(DemoFile->Frames.cbegin(), DemoFile->Frames.cend(), PreviousFrames.data());
 
 		// Parse demo and update reader fields
 		if (DemoFile->Next())

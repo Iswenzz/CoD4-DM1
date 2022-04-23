@@ -1,8 +1,7 @@
 #include "NetFields.hpp"
 #include "Demo/DemoData.hpp"
-#include <intrin.h>
 
-namespace Iswenzz
+namespace Iswenzz::CoD4::DM1
 {
 	netField_t NetFields::EntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
 	{

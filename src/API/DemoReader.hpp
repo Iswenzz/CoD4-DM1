@@ -1,7 +1,7 @@
 #pragma once
 #include "Demo/Demo.hpp"
 
-namespace Iswenzz
+namespace Iswenzz::CoD4::DM1
 {
 	/// <summary>
 	/// Reader API for demo files. (.DM_1)
@@ -9,7 +9,7 @@ namespace Iswenzz
 	class DemoReader
 	{
 	public:
-		std::unique_ptr<Demo> DemoFile;
+		std::shared_ptr<Demo> DemoFile;
 		std::string FilePath;
 
 		clientSnapshot_t Snapshot = { 0 };
@@ -17,10 +17,8 @@ namespace Iswenzz
 
 		std::array<entityState_t, MAX_PARSE_ENTITIES> Entities{ };
 		std::array<entityState_t, MAX_PARSE_ENTITIES> PreviousEntities{ };
-
 		std::array<clientState_t, MAX_PARSE_CLIENTS> Clients{ };
 		std::array<clientState_t, MAX_PARSE_CLIENTS> PreviousClients{ };
-
 		std::array<archivedFrame_t, MAX_FRAMES> Frames{ };
 		std::array<archivedFrame_t, MAX_FRAMES> PreviousFrames{ };
 
@@ -33,7 +31,7 @@ namespace Iswenzz
 		/// <summary>
 		/// Dispose all resources.
 		/// </summary>
-		~DemoReader() = default;
+		virtual ~DemoReader() = default;
 
 		/// <summary>
 		/// Reads the next demo message.

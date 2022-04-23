@@ -2,10 +2,12 @@
 #include "Crypt/Msg.hpp"
 #include "Crypt/NetFields.hpp"
 
+#include <cstring>
+#include <cmath>
 #include <string>
 #include <fstream>
 
-namespace Iswenzz
+namespace Iswenzz::CoD4::DM1
 {
 	/// <summary>
 	/// Represent a demo file .DM_1
@@ -43,6 +45,7 @@ namespace Iswenzz
 		float LerpPosOffsets[3] = { 0, 0, 0 };
 		float MapCenter[3] = { 0, 0, 0 };
 		bool SendOriginAndVel = true;
+		int GamestateCount = 0;
 
 		bool ModDM = false;
 		std::string TeamNameAllies;
@@ -69,8 +72,8 @@ namespace Iswenzz
 		std::array<clientSnapshot_t, PACKET_BACKUP> Snapshots{ };
 		std::array<archivedFrame_t, MAX_FRAMES> Frames{ };
 
-		std::array<unsigned char, MAX_GENTITIES> ActiveBaselines{ };
-		std::array<unsigned char, MAX_GENTITIES> ActiveEntities{ };
+		std::array<uint8_t, MAX_GENTITIES> ActiveBaselines{ };
+		std::array<uint8_t, MAX_GENTITIES> ActiveEntities{ };
 		std::array<clientState_t, MAX_CLIENTS> ActiveClients{ };
 
 		/// <summary>
@@ -98,7 +101,7 @@ namespace Iswenzz
 		/// <summary>
 		/// Dispose all resources.
 		/// </summary>
-		~Demo();
+		virtual ~Demo();
 
 		/// <summary>
 		/// Open a demo file from specified path.
@@ -123,10 +126,10 @@ namespace Iswenzz
 		void Close();
 
 	private:
-		Msg CurrentCompressedMsg = { };
-		Msg CurrentUncompressedMsg = { };
-		Msg CurrentWritingUncompressedMsg = { };
-		Msg CurrentWritingCompressedMsg = { };
+		Msg CurrentCompressedMsg{ };
+		Msg CurrentUncompressedMsg{ };
+		Msg CurrentWritingCompressedMsg{ };
+		Msg CurrentWritingUncompressedMsg{ };
 
 		playerState_t NullPlayerState = { 0 };
 		entityState_t NullEntityState = { 0 };
@@ -175,7 +178,7 @@ namespace Iswenzz
 		/// Parse a config client.
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
-		void ParseConfigClient(Msg& msg, unsigned int clientnum);
+		void ParseConfigClient(Msg& msg, uint32_t clientnum);
 
 		/// <summary>
 		/// Read a delta compressed ground entity.
@@ -196,7 +199,7 @@ namespace Iswenzz
 		/// <param name="indexBits">Min bit count.</param>
 		/// <param name="stateFields">Netfield fields.</param>
 		bool ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to,
-			unsigned int number, int numFields, int indexBits, netField_t* stateFields);
+			uint32_t number, int numFields, int indexBits, netField_t* stateFields);
 
 		/// <summary>
 		/// Read all delta compressed net fields.
@@ -207,7 +210,7 @@ namespace Iswenzz
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="numFields">Struct field count.</param>
 		/// <param name="stateFields">Netfield fields.</param>
-		void ReadDeltaFields(Msg& msg, const int time, const unsigned char* from, unsigned char* to,
+		void ReadDeltaFields(Msg& msg, const int time, const uint8_t* from, uint8_t* to,
 			int numFields, netField_t* stateFields);
 
 		/// <summary>
@@ -220,8 +223,8 @@ namespace Iswenzz
 		/// <param name="field">Current netfield to read.</param>
 		/// <param name="noXor">Should start with a value of 0.</param>
 		/// <param name="print">Should print debug information.</param>
-		void ReadDeltaField(Msg& msg, int time, const void* from, const void* to, const netField_t* field,
-			bool noXor, bool print);
+		void ReadDeltaField(Msg& msg, int time, const void* from, const void* to, 
+			const netField_t* field, bool noXor, bool print);
 
 		/// <summary>
 		/// Read a delta compressed entity state.
@@ -232,7 +235,8 @@ namespace Iswenzz
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="number">Entity number.</param>
 		/// <param name="isBaseLine">Is it a baseline entity.</param>
-		bool ReadDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, int number);
+		bool ReadDeltaEntity(Msg& msg, const int time, 
+			entityState_t* from, entityState_t* to, int number);
 
 		/// <summary>
 		/// Read a delta compressed client state.
@@ -242,7 +246,8 @@ namespace Iswenzz
 		/// <param name="from">Pointer to the old struct state.</param>
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="number">Entity number.</param>
-		bool ReadDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, int number);
+		bool ReadDeltaClient(Msg& msg, const int time, 
+			clientState_t* from, clientState_t* to, int number);
 
 		/// <summary>
 		/// Read a delta compressed objective struct.
@@ -271,7 +276,8 @@ namespace Iswenzz
 		/// <param name="from">Pointer to the old struct state.</param>
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="predictedFieldsIgnoreXor">Should start with a value of 0.</param>
-		void ReadDeltaPlayerState(Msg& msg, int time, playerState_t* from, playerState_t* to,
+		void ReadDeltaPlayerState(Msg& msg, int time, 
+			playerState_t* from, playerState_t* to,
 			bool predictedFieldsIgnoreXor);
 
 		/// <summary>
@@ -282,7 +288,8 @@ namespace Iswenzz
 		/// <param name="from">Pointer to the old snapshot state.</param>
 		/// <param name="to">Pointer to the new snapshot state.</param>
 		/// <returns></returns>
-		int ParsePacketEntities(Msg& msg, const int time, clientSnapshot_t* from, clientSnapshot_t* to);
+		int ParsePacketEntities(Msg& msg, const int time, 
+			clientSnapshot_t* from, clientSnapshot_t* to);
 
 		/// <summary>
 		/// Parse all clients.
@@ -291,7 +298,8 @@ namespace Iswenzz
 		/// <param name="time">Server time.</param>
 		/// <param name="from">Pointer to the old snapshot state.</param>
 		/// <param name="to">Pointer to the new snapshot state.</param>
-		void ParsePacketClients(Msg& msg, const int time, clientSnapshot_t* from, clientSnapshot_t* to);
+		void ParsePacketClients(Msg& msg, const int time, 
+			clientSnapshot_t* from, clientSnapshot_t* to);
 
 		/// <summary>
 		/// Read last changed net field.
@@ -307,7 +315,7 @@ namespace Iswenzz
 		/// <param name="msg">The current uncompressed message.</param>
 		/// <param name="bits">Entity bits to read.</param>
 		/// <returns></returns>
-		int ReadEntityIndex(Msg &msg, int indexBits);
+		int ReadEntityIndex(Msg& msg, int indexBits);
 
 		/// <summary>
 		/// Parse a delta entity.
@@ -317,7 +325,8 @@ namespace Iswenzz
 		/// <param name="frame">The old snapshot frame.</param>
 		/// <param name="newnum">The entity num.</param>
 		/// <param name="old">The old entity state.</param>
-		void DeltaEntity(Msg& msg, const int time, clientSnapshot_t* frame, int newnum, entityState_t* old);
+		void DeltaEntity(Msg& msg, const int time, clientSnapshot_t* frame, 
+			int newnum, entityState_t* old);
 
 		/// <summary>
 		/// Parse a delta client.
@@ -357,7 +366,8 @@ namespace Iswenzz
 		/// <param name="from">Pointer to an old entity state.</param>
 		/// <param name="to">Pointer to the new entity state.</param>
 		/// <param name="force">Force updating fields.</param>
-		void WriteDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, bool force);
+		void WriteDeltaEntity(Msg& msg, const int time, 
+			entityState_t* from, entityState_t* to, bool force);
 
 		/// <summary>
 		/// Write entity removal.
@@ -366,7 +376,7 @@ namespace Iswenzz
 		/// <param name="from">Pointer to an old entity.</param>
 		/// <param name="indexBits">Index bits.</param>
 		/// <param name="changeBit">Change bits.</param>
-		void WriteEntityRemoval(Msg& msg, unsigned char* from, int indexBits, unsigned char changeBit);
+		void WriteEntityRemoval(Msg& msg, uint8_t* from, int indexBits, uint8_t changeBit);
 
 		/// <summary>
 		/// Write entity index.
@@ -388,7 +398,7 @@ namespace Iswenzz
 		/// <param name="indexBits">Index bits.</param>
 		/// <param name="stateFields">Net fields to update.</param>
 		/// <returns></returns>
-		int WriteEntityDelta(Msg& msg, const int time, const unsigned char* from, const unsigned char* to,
+		int WriteEntityDelta(Msg& msg, const int time, const uint8_t* from, const uint8_t* to,
 			bool force, int numFields, int indexBits, netField_t* stateFields);
 
 		/// <summary>
@@ -404,8 +414,9 @@ namespace Iswenzz
 		/// <param name="stateFields">Net fields to update.</param>
 		/// <param name="bChangeBit">Change bits.</param>
 		/// <returns></returns>
-		int WriteDeltaStruct(Msg& msg, const int time, const unsigned char* from, const unsigned char* to,
-			bool force, int numFields, int indexBits, netField_t* stateFields, unsigned char bChangeBit);
+		int WriteDeltaStruct(Msg& msg, const int time, 
+			const uint8_t* from, const uint8_t* to,
+			bool force, int numFields, int indexBits, netField_t* stateFields, uint8_t bChangeBit);
 
 		/// <summary>
 		/// Check if delta values are equal.
@@ -426,8 +437,9 @@ namespace Iswenzz
 		/// <param name="field">The net field.</param>
 		/// <param name="fieldNum">The net field index.</param>
 		/// <param name="forceSend">Should force updating.</param>
-		void WriteDeltaField(Msg& msg, const int time, const unsigned char* from, const unsigned char* to,
-			netField_s* field, int fieldNum, unsigned char forceSend);
+		void WriteDeltaField(Msg& msg, const int time, 
+			const uint8_t* from, const uint8_t* to,
+			netField_s* field, int fieldNum, uint8_t forceSend);
 
 		/// <summary>
 		/// Write a command string.
@@ -441,7 +453,7 @@ namespace Iswenzz
 		/// </summary>
 		/// <param name="msg">The current uncompressed message.</param>
 		/// <param name="clientnum">The client num.</param>
-		void WriteConfigClient(Msg& msg, unsigned int clientnum);
+		void WriteConfigClient(Msg& msg, uint32_t clientnum);
 
 		/// <summary>
 		/// Write a snapshot.
@@ -477,7 +489,7 @@ namespace Iswenzz
 		/// <param name="fields">The net fields.</param>
 		/// <param name="numFields">The net field count.</param>
 		/// <returns></returns>
-		int WriteDeltaLastChangedField(unsigned char* from, unsigned char* to, netField_t* fields, int numFields);
+		int WriteDeltaLastChangedField(uint8_t* from, uint8_t* to, netField_t* fields, int numFields);
 
 		/// <summary>
 		/// Write delta hud elements.
@@ -487,7 +499,8 @@ namespace Iswenzz
 		/// <param name="from">Pointer to old hudelem.</param>
 		/// <param name="to">Pointer to new hudelem.</param>
 		/// <param name="count">The field count.</param>
-		void WriteDeltaHudElems(Msg& msg, const int time, hudelem_t* from, hudelem_t* to, const int count);
+		void WriteDeltaHudElems(Msg& msg, const int time, 
+			hudelem_t* from, hudelem_t* to, const int count);
 
 		/// <summary>
 		/// Write packet entities.
@@ -496,7 +509,8 @@ namespace Iswenzz
 		/// <param name="time">The server time.</param>
 		/// <param name="oldframe">Pointer to old client snapshot.</param>
 		/// <param name="newframe">Pointer to new client snapshot.</param>
-		void WritePacketEntities(Msg& msg, const int time, clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
+		void WritePacketEntities(Msg& msg, const int time, 
+			clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
 
 		/// <summary>
 		/// Write packet clients.
@@ -505,7 +519,8 @@ namespace Iswenzz
 		/// <param name="time">The server time.</param>
 		/// <param name="oldframe">Pointer to old client snapshot.</param>
 		/// <param name="newframe">Pointer to new client snapshot.</param>
-		void WritePacketClients(Msg& msg, const int time, clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
+		void WritePacketClients(Msg& msg, const int time, 
+			clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
 
 		/// <summary>
 		/// Write delta client.
@@ -515,7 +530,8 @@ namespace Iswenzz
 		/// <param name="from">Pointer to old client state.</param>
 		/// <param name="to">Pointer to new client state.</param>
 		/// <param name="force">Should force updating.</param>
-		void WriteDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, bool force);
+		void WriteDeltaClient(Msg& msg, const int time, 
+			clientState_t* from, clientState_t* to, bool force);
 
 		/// <summary>
 		/// Write client delta.
@@ -540,5 +556,12 @@ namespace Iswenzz
 		/// <param name="field">The player state field to check.</param>
 		/// <returns></returns>
 		bool ShouldSendPSField(bool sendOriginAndVel, playerState_t* from, playerState_t* to, netField_t* field);
+
+		/// <summary>
+		/// Check the snapshot validity.
+		/// </summary>
+		/// <param name="snapshot">The snapshot.</param>
+		/// <returns></returns>
+		bool CheckSnapshotValidity(clientSnapshot_t& snapshot);
 	};
 }

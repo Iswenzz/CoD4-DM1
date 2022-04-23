@@ -15,10 +15,12 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 # Tests
-include(CTest)
-add_executable(CoD4DM1.Tests)
-target_link_libraries(CoD4DM1.Tests PUBLIC ${CONAN_LIBS} CoD4DM1.Lib)
-add_test(NAME Tests COMMAND CoD4DM1.Tests)
+if(ENABLE_TESTING)
+	include(CTest)
+	add_executable(CoD4DM1.Tests)
+	target_link_libraries(CoD4DM1.Tests PUBLIC ${CONAN_LIBS} CoD4DM1.Lib)
+	add_test(NAME Tests COMMAND CoD4DM1.Tests)
+endif()
 
 # Build
 add_subdirectory(fixtures)
@@ -29,5 +31,5 @@ target_link_libraries(CoD4DM1 PRIVATE ${CONAN_LIBS} CoD4DM1.Lib)
 # Pack
 install(TARGETS CoD4DM1 DESTINATION bin)
 install(TARGETS CoD4DM1.Lib LIBRARY DESTINATION lib)
-install(DIRECTORY src/ DESTINATION lib/include/CoD4DM1 
+install(DIRECTORY src/ DESTINATION lib/include/CoD4DM1
     FILES_MATCHING PATTERN "*.hpp" PATTERN "__test__" EXCLUDE)

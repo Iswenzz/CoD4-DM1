@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Iswenzz
+namespace Iswenzz::CoD4::DM1
 {
 	class Utility
 	{
