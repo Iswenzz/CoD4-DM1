@@ -15,7 +15,7 @@ Reverse of CoD4 & CoD4X ``.DM_1`` demo files with features such as parsing snaps
 
 ## Building
 
-1. [CMake](https://cmake.org/) and [Conan](https://conan.io/).
+1. [CMake](https://cmake.org/) and [Conan](https://conan.io/)
 2. [Visual Studio](https://visualstudio.microsoft.com/)
 
 _Build Command:_
