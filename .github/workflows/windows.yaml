@@ -19,8 +19,8 @@ jobs:
     - name: Build
       run: |
         mkdir build && cd build
-        conan install .. --build missing
-        cmake ..
+        conan install .. --build missing -o enable_testing=True
+        cmake .. -DENABLE_TESTING=True
         cmake --build .
 
     - name: Artifact
