@@ -19,7 +19,7 @@ jobs:
     - name: Build
       run: |
         mkdir build && cd build
-        conan install .. --build missing -o enable_testing=True
+        conan install .. --build missing -o enable_testing=True -s build_type=Debug
         cmake .. -DENABLE_TESTING=True
         cmake --build .
 
