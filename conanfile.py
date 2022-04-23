@@ -34,4 +34,3 @@ class CoD4DM1(ConanFile):
 
 	def package_info(self):
 		self.cpp_info.libs = ["CoD4DM1"]
-
