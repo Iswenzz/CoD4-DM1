@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [master]
 
-env:
-  BUILD_TYPE: Debug
-
 jobs:
   build:
     runs-on: windows-latest
@@ -22,8 +19,8 @@ jobs:
     - name: Build
       run: |
         mkdir build && cd build
-        conan install .. --build --profile ../.conan/windows.conf
-        cmake .. -G "Visual Studio 16 2019" -A Win32
+        conan install .. --build missing
+        cmake ..
         cmake --build .
 
     - name: Artifact
