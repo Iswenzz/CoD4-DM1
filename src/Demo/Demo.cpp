@@ -547,7 +547,7 @@ namespace Iswenzz::CoD4::DM1
 		// Get the right field list from the eType value
 		if (std::string{ stateFields[0].name } == "eType")
 		{
-			int entityFieldOffset = *reinterpret_cast<int*>(reinterpret_cast<int>(to) + stateFields[0].offset);
+			int entityFieldOffset = *reinterpret_cast<int*>(to + stateFields[0].offset);
 			if (entityFieldOffset > NET_FIELDS_COUNT - 1)
 				entityFieldOffset = NET_FIELDS_COUNT - 1;
 
@@ -1983,8 +1983,8 @@ namespace Iswenzz::CoD4::DM1
 
 		for (int k = 0; k < numHE; ++k) 
 		{
-			int lc = WriteDeltaLastChangedField(reinterpret_cast<uint8_t*>((from) + k), 
-				reinterpret_cast<uint8_t*>((to) + k), NetFields::HudElemFields, 
+			int lc = WriteDeltaLastChangedField(reinterpret_cast<uint8_t*>(from + k), 
+				reinterpret_cast<uint8_t*>(to + k), NetFields::HudElemFields, 
 				sizeof(NetFields::HudElemFields) / sizeof(NetFields::HudElemFields[0]));
 
 			int size = sizeof(NetFields::HudElemFields) / sizeof(NetFields::HudElemFields[0]);
@@ -2000,8 +2000,8 @@ namespace Iswenzz::CoD4::DM1
 
 			for (i = 0; i <= lc; ++i) // Write out the fields unit the last changed one
 			{
-				WriteDeltaField(msg, time, reinterpret_cast<uint8_t*>((from) + k),
-					reinterpret_cast<uint8_t*>((to) + k), &NetFields::HudElemFields[i], i, false);
+				WriteDeltaField(msg, time, reinterpret_cast<uint8_t*>(from + k),
+					reinterpret_cast<uint8_t*>(to + k), &NetFields::HudElemFields[i], i, false);
 			}
 		}
 	}
