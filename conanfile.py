@@ -21,9 +21,9 @@ class CoD4DM1(ConanFile):
 			self.build_requires("gtest/cci.20210126", force_host_context=True)
 
 	def build(self):
-		cmake_release = CMake(self, build_type="Release")
-		cmake_release.configure()
-		cmake_release.build()
+		cmake = CMake(self)
+		cmake.configure()
+		cmake.build()
 
 	def package(self):
 		self.copy("LICENSE, README.md")
