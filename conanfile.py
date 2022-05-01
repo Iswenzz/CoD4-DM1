@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake
+import os
 
 class CoD4DM1(ConanFile):
 	name = "CoD4DM1"
@@ -26,11 +27,12 @@ class CoD4DM1(ConanFile):
 
 	def package(self):
 		self.copy("LICENSE, README.md")
-		self.copy("*.hpp", src="src", dst="include")
+		self.copy("*.hpp", src="src", dst="include/CoD4DM1")
 		self.copy("*.a", dst="lib", keep_path=False)
 		self.copy("*.lib", dst="lib", keep_path=False)
 		self.copy("*.dll", dst="bin", keep_path=False)
 		self.copy("*.so", dst="bin", keep_path=False)
 
 	def package_info(self):
+		self.cpp_info.includedirs.append(os.path.join("include", "CoD4DM1"))
 		self.cpp_info.libs = ["CoD4DM1"]
