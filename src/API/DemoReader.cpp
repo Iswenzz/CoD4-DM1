@@ -7,7 +7,12 @@
 
 namespace Iswenzz::CoD4::DM1
 {
-	DemoReader::DemoReader(std::string filePath) : FilePath(filePath) 
+	DemoReader::DemoReader(std::string filePath) : FilePath(filePath)
+	{
+		Open(filePath);
+	}
+
+	void DemoReader::Open(std::string filePath)
 	{
 		DemoFile = std::make_shared<Demo>(filePath);
 	}

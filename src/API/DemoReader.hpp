@@ -25,6 +25,11 @@ namespace Iswenzz::CoD4::DM1
 		/// <summary>
 		/// Initialize a new DemoReader instance.
 		/// </summary>
+		DemoReader() = default;
+
+		/// <summary>
+		/// Initialize a new DemoReader instance.
+		/// </summary>
 		/// <param name="filePath">The file path of the demo file.</param>
 		DemoReader(std::string filePath);
 
@@ -32,6 +37,12 @@ namespace Iswenzz::CoD4::DM1
 		/// Dispose all resources.
 		/// </summary>
 		virtual ~DemoReader() = default;
+
+		/// <summary>
+		/// Open a demo file from specified path.
+		/// </summary>
+		/// <param name="filePath">File path to a demo file (.dm_1).</param>
+		void Open(std::string filePath);
 
 		/// <summary>
 		/// Reads the next demo message.
