@@ -17,6 +17,11 @@ namespace Iswenzz::CoD4::DM1
 		DemoFile = std::make_shared<Demo>(filePath);
 	}
 
+	bool DemoReader::IsOpen()
+	{
+		return DemoFile && DemoFile->IsOpen;
+	}
+
 	bool DemoReader::Next()
 	{
 		// Update previous data for comparisons

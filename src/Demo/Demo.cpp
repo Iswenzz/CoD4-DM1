@@ -23,11 +23,14 @@ namespace Iswenzz::CoD4::DM1
 	{
 		if (IsOpen)
 			Close();
-		IsOpen = true;
 		Filepath = filepath;
 
-		DemoFile.open(filepath, std::ios::binary);
-		DemoFileOut.open(filepath + ".1.dm_1", std::ios::binary);
+		if (std::filesystem::exists(filepath))
+		{
+			DemoFile.open(filepath, std::ios::binary);
+			DemoFileOut.open(filepath + ".1.dm_1", std::ios::binary);
+			IsOpen = true;
+		}
 	}
 
 	void Demo::Parse()

@@ -45,6 +45,11 @@ namespace Iswenzz::CoD4::DM1
 		void Open(std::string filePath);
 
 		/// <summary>
+		/// Check if the demo is open.
+		/// </summary>
+		bool IsOpen();
+
+		/// <summary>
 		/// Reads the next demo message.
 		/// </summary>
 		/// <returns></returns>

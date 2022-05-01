@@ -6,6 +6,7 @@
 #include <cmath>
 #include <string>
 #include <fstream>
+#include <filesystem>
 
 namespace Iswenzz::CoD4::DM1
 {
