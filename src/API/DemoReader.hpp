@@ -13,13 +13,13 @@ namespace Iswenzz::CoD4::DM1
 		std::string FilePath;
 
 		clientSnapshot_t Snapshot = { 0 };
-		clientSnapshot_t PreviousSnapshot = { 0 };
-
 		std::array<entityState_t, MAX_PARSE_ENTITIES> Entities{ };
-		std::array<entityState_t, MAX_PARSE_ENTITIES> PreviousEntities{ };
 		std::array<clientState_t, MAX_PARSE_CLIENTS> Clients{ };
-		std::array<clientState_t, MAX_PARSE_CLIENTS> PreviousClients{ };
 		std::array<archivedFrame_t, MAX_FRAMES> Frames{ };
+
+		clientSnapshot_t PreviousSnapshot = { 0 };
+		std::array<entityState_t, MAX_PARSE_ENTITIES> PreviousEntities{ };
+		std::array<clientState_t, MAX_PARSE_CLIENTS> PreviousClients{ };
 		std::array<archivedFrame_t, MAX_FRAMES> PreviousFrames{ };
 
 		/// <summary>
@@ -56,6 +56,11 @@ namespace Iswenzz::CoD4::DM1
 		bool Next();
 
 		/// <summary>
+		/// Parse the entire demo file.
+		/// </summary>
+		void Parse();
+
+		/// <summary>
 		/// Close the demo file and free resources.
 		/// </summary>
 		void Close();
@@ -65,6 +70,12 @@ namespace Iswenzz::CoD4::DM1
 		/// </summary>
 		/// <returns></returns>
 		float GetTime();
+
+		/// <summary>
+		/// Get the demo time in milliseconds.
+		/// </summary>
+		/// <returns></returns>
+		float GetTimeMilliseconds();
 
 		/// <summary>
 		/// Get the server time.

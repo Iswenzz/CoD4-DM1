@@ -14,6 +14,7 @@ namespace Iswenzz::CoD4::DM1
 
 	void DemoReader::Open(std::string filePath)
 	{
+		FilePath = filePath;
 		DemoFile = std::make_shared<Demo>(filePath);
 	}
 
@@ -43,6 +44,11 @@ namespace Iswenzz::CoD4::DM1
 		return false;
 	}
 
+	void DemoReader::Parse()
+	{
+		while (Next());
+	}
+
 	void DemoReader::Close()
 	{
 		DemoFile->Close();
@@ -51,6 +57,11 @@ namespace Iswenzz::CoD4::DM1
 	float DemoReader::GetTime()
 	{
 		return (DemoFile->CurrentFrameTime - DemoFile->StartFrameTime) / 50.0f / 20.0f;
+	}
+
+	float DemoReader::GetTimeMilliseconds()
+	{
+		return GetTime() * 1000.0f;
 	}
 
 	int DemoReader::GetServerTime()
