@@ -217,7 +217,10 @@ namespace Iswenzz::CoD4::DM1
 			CurrentFrameTime = StartFrameTime;
 		}
 		else if (frame.commandTime > CurrentFrameTime)
+		{
+			PreviousFrameTime = CurrentFrameTime;
 			CurrentFrameTime = frame.commandTime;
+		}
 
 		LastFrameSrvMsgSeq = CurrentCompressedMsg.SrvMsgSeq;
 		memcpy(&Frames[LastFrameSrvMsgSeq & MAX_FRAMES - 1], &frame, sizeof(archivedFrame_t));
@@ -264,7 +267,6 @@ namespace Iswenzz::CoD4::DM1
 
 		msg.ClearLastReferencedEntity();
 		ServerCommandSequence = msg.ReadInt();
-		MatchInProgress = true;
 
 		while (true)
 		{
@@ -329,7 +331,6 @@ namespace Iswenzz::CoD4::DM1
 
 		msg.ClearLastReferencedEntity();
 		ServerCommandSequence = msg.ReadInt();
-		MatchInProgress = true;
 
 		while (true)
 		{
