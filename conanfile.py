@@ -11,7 +11,10 @@ class CoD4DM1(ConanFile):
 	generators = "cmake"
 	exports_sources = "LICENSE", "README.md", "CMakeLists.txt", "src/*", "fixtures/*"
 
-	requires = "cxxopts/3.0.0"
+	requires = (
+		"cxxopts/3.0.0",
+		"nlohmann_json/3.10.5"
+	)
 	settings = "os", "arch", "compiler", "build_type"
 	options = {"enable_testing": [True, False]}
 	default_options  = {"enable_testing": False}
