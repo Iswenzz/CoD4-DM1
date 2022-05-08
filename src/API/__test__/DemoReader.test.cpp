@@ -6,11 +6,11 @@ TEST_F(DemoFixture, DemoReader)
     std::unique_ptr<DemoReader> demoReader = std::make_unique<DemoReader>(DEMO_19);
     while (demoReader->Next())
     {
-        auto frame = demoReader->GetCurrentFrame();
-        float x = frame.velocity[0];
-        float y = frame.velocity[1];
+        auto snapshot = demoReader->GetCurrentSnapshot();
+        float x = snapshot.ps.velocity[0];
+        float y = snapshot.ps.velocity[1];
 
-        //std::cout << frame.commandTime << " " << std::sqrt((x * x) + (y * y)) << std::endl;
+        //std::cout << snapshot.serverTime << " " << std::sqrt((x * x) + (y * y)) << std::endl;
     }
     EXPECT_GE(demoReader->Frames.size(), 1);
 }

@@ -10,12 +10,12 @@
 #define OBJECTIVE_FIELDS_COUNT					6
 
 #define NETFE(x) x, sizeof(x) / sizeof(netField_t)
-#define NETF(x) const_cast<char *>(#x), reinterpret_cast<uintptr_t>(&((entityState_t*)0)->x)
-#define OBJF(x) const_cast<char*>(#x), reinterpret_cast<uintptr_t>(&((objective_t*)0)->x)
-#define AEF(x) const_cast<char*>(#x), reinterpret_cast<uintptr_t>(&((archivedEntity_t*)0)->x)
-#define CSF(x) const_cast<char*>(#x), reinterpret_cast<uintptr_t>(&((clientState_t*)0)->x)
-#define HEF(x) const_cast<char*>(#x), reinterpret_cast<uintptr_t>(&((hudelem_t*)0)->x)
-#define PSF(x) const_cast<char*>(#x), reinterpret_cast<uintptr_t>(&((playerState_t*)0)->x)
+#define NETF(x) const_cast<char *>(#x), static_cast<int>(reinterpret_cast<uintptr_t>(&((entityState_t*)0)->x))
+#define OBJF(x) const_cast<char*>(#x), static_cast<int>(reinterpret_cast<uintptr_t>(&((objective_t*)0)->x))
+#define AEF(x) const_cast<char*>(#x), static_cast<int>(reinterpret_cast<uintptr_t>(&((archivedEntity_t*)0)->x))
+#define CSF(x) const_cast<char*>(#x), static_cast<int>(reinterpret_cast<uintptr_t>(&((clientState_t*)0)->x))
+#define HEF(x) const_cast<char*>(#x), static_cast<int>(reinterpret_cast<uintptr_t>(&((hudelem_t*)0)->x))
+#define PSF(x) const_cast<char*>(#x), static_cast<int>(reinterpret_cast<uintptr_t>(&((playerState_t*)0)->x))
 
 #ifdef _MSC_VER
 #define __clz __lzcnt
