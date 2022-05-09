@@ -70,6 +70,11 @@ namespace Iswenzz::CoD4::DM1
 		return DemoFile->CurrentFrameTime;
 	}
 
+	int DemoReader::GetFPS()
+	{
+		return DemoFile->FPS;
+	}
+
 	clientSnapshot_t DemoReader::GetCurrentSnapshot()
 	{
 		return DemoFile->CurrentSnapshot;

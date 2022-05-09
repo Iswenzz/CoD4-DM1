@@ -29,6 +29,7 @@ namespace Iswenzz::CoD4::DM1
 		int CurrentFrameTime = 0;
 		int LastFrameSrvMsgSeq = 0;
 		int FirstFrameSrvMsgSeq = 0;
+		int FPS = 0;
 
 		int ClientNum = 0;
 		int ChecksumFeed = 0;

@@ -85,6 +85,12 @@ namespace Iswenzz::CoD4::DM1
 		int GetServerTime();
 
 		/// <summary>
+		/// Get the demo FPS.
+		/// </summary>
+		/// <returns></returns>
+		int GetFPS();
+
+		/// <summary>
 		/// Get the current snapshot data.
 		/// </summary>
 		/// <returns></returns>

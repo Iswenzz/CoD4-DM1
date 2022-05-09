@@ -61,7 +61,6 @@ namespace Iswenzz::CoD4::DM1
 				ReadProtocol();
 				break;
 			case MSGType::MSG_RELIABLE:
-				std::cout << "reliable msg" << std::endl;
 				break;
 			}
 			return true;
@@ -494,6 +493,7 @@ namespace Iswenzz::CoD4::DM1
 		}
 		SnapMessageNum = CurrentSnapshot.messageNum;
 		CurrentSnapshot.ping = 999;
+		FPS = 1000 / (CurrentFrameTime - PreviousFrameTime);
 
 		// Save the snapshot in the backup array for later delta comparisons
 		memcpy(&Snapshots[SnapMessageNum & PACKET_MASK], &CurrentSnapshot, sizeof(clientSnapshot_t));
