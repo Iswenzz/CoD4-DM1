@@ -26,15 +26,16 @@ namespace Iswenzz::CoD4::DM1
 	bool DemoReader::Next()
 	{
 		// Update previous data for comparisons
-		PreviousSnapshot = DemoFile->CurrentSnapshot;
-		std::copy(DemoFile->ParseClients.cbegin(), DemoFile->ParseClients.cend(), PreviousClients.data());
-		std::copy(DemoFile->ParseEntities.cbegin(), DemoFile->ParseEntities.cend(), PreviousEntities.data());
-		std::copy(DemoFile->Frames.cbegin(), DemoFile->Frames.cend(), PreviousFrames.data());
+		PreviousFrame = GetCurrentFrame();
+		PreviousSnapshot = GetCurrentSnapshot();
+		PreviousClients = DemoFile->ParseClients;
+		PreviousEntities = DemoFile->ParseEntities;
 
 		// Parse demo and update reader fields
 		if (DemoFile->Next())
 		{
-			Snapshot = DemoFile->CurrentSnapshot;
+			Frame = GetCurrentFrame();
+			Snapshot = GetCurrentSnapshot();
 
 			UpdateClients();
 			UpdateEntities();
@@ -76,9 +77,9 @@ namespace Iswenzz::CoD4::DM1
 
 	archivedFrame_t DemoReader::GetCurrentFrame()
 	{
-		std::vector<archivedFrame_t> orderedFrames = Utility::GetArrayDifference<archivedFrame_t>(
-			DemoFile->Frames, PreviousFrames,
-			[](const archivedFrame_t& a, const archivedFrame_t& b) { return a.commandTime == b.commandTime; });
+		auto orderedFrames = DemoFile->Frames;
+		std::sort(orderedFrames.begin(), orderedFrames.end(),
+			[](const archivedFrame_t& a, const archivedFrame_t& b) { return a.commandTime > b.commandTime; });
 		return orderedFrames.size() > 0 ? orderedFrames.back() : archivedFrame_t();
 	}
 
@@ -104,5 +105,31 @@ namespace Iswenzz::CoD4::DM1
 	{
 		for (const entityState_t& entity : GetLastUpdatedEntities())
 			Entities[entity.number] = entity;
+	}
+
+	std::string DemoReader::ReflectDemoValue(const std::string path)
+	{
+		nlohmann::json json = *this;
+		std::string result;
+
+		std::istringstream stream{ path };
+		std::string current;
+
+		while (std::getline(stream, current, '.'))
+		{
+			if (current.find_first_not_of("0123456789") == std::string::npos)
+				json = json[std::stoi(current)];
+			else
+				json = json[current];
+		}
+		if (json.is_boolean())
+			result = json.get<bool>() ? "1" : "0";
+		if (json.is_number())
+			result = std::to_string(json.get<int>());
+		if (json.is_number_float())
+			result = std::to_string(json.get<float>());
+		if (json.is_string())
+			result = json.get<std::string>();
+		return result;
 	}
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "Demo/Demo.hpp"
+#include <nlohmann/json.hpp>
 
 namespace Iswenzz::CoD4::DM1
 {
@@ -13,14 +14,14 @@ namespace Iswenzz::CoD4::DM1
 		std::string FilePath;
 
 		clientSnapshot_t Snapshot = { 0 };
+		archivedFrame_t Frame = { 0 };
 		std::array<entityState_t, MAX_PARSE_ENTITIES> Entities{ };
 		std::array<clientState_t, MAX_PARSE_CLIENTS> Clients{ };
-		std::array<archivedFrame_t, MAX_FRAMES> Frames{ };
 
 		clientSnapshot_t PreviousSnapshot = { 0 };
+		archivedFrame_t PreviousFrame = { 0 };
 		std::array<entityState_t, MAX_PARSE_ENTITIES> PreviousEntities{ };
 		std::array<clientState_t, MAX_PARSE_CLIENTS> PreviousClients{ };
-		std::array<archivedFrame_t, MAX_FRAMES> PreviousFrames{ };
 
 		/// <summary>
 		/// Initialize a new DemoReader instance.
@@ -107,6 +108,16 @@ namespace Iswenzz::CoD4::DM1
 		/// <returns></returns>
 		std::vector<entityState_t> GetLastUpdatedEntities();
 
+		/// <summary>
+		/// Reflect demo variables from a path.
+		/// i.e: Snapshot.origin.0
+		/// i.e: Snapshot.origin.1
+		/// i.e: Frame.commandTime
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
+		std::string ReflectDemoValue(const std::string path);
+
 	private:
 		/// <summary>
 		/// Update the reader clients field.
@@ -118,4 +129,6 @@ namespace Iswenzz::CoD4::DM1
 		/// </summary>
 		void UpdateEntities();
 	};
+
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DemoReader, FilePath, Snapshot, Frame, Entities, Clients);
 }
