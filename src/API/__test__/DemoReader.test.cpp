@@ -1,36 +1,46 @@
 #include "Demo/__test__/Demo.test.hpp"
-#include "API/DemoReader.hpp"
 
 TEST_F(DemoFixture, DemoReader)
 {
-    std::unique_ptr<DemoReader> demoReader = std::make_unique<DemoReader>(DEMO_19);
-    while (demoReader->Next())
+    while (Reader->Next())
     {
-        auto archive = demoReader->GetCurrentFrame();
-        auto snapshot = demoReader->GetCurrentSnapshot();
+        auto archive = Reader->GetCurrentFrame();
+        auto snapshot = Reader->GetCurrentSnapshot();
 
         float x = snapshot.ps.velocity[0];
         float y = snapshot.ps.velocity[1];
 
         //std::cout << snapshot.serverTime << " " << std::sqrt((x * x) + (y * y)) << std::endl;
     }
-    EXPECT_GE(demoReader->GetCurrentFrame().commandTime, 1);
+    EXPECT_TRUE(Reader->GetCurrentFrame().commandTime);
+}
+
+TEST_F(DemoFixture, DemoReaderPlayerName)
+{
+    Reader->Parse();
+
+    EXPECT_TRUE(Reader->GetPlayerName().netname.size());
+}
+
+TEST_F(DemoFixture, DemoReaderParseConfigString)
+{
+    Reader->Parse();
+
+    EXPECT_TRUE(Reader->ParseConfigString("mapname").size());
 }
 
 TEST_F(DemoFixture, DemoReaderReflect)
 {
-    std::unique_ptr<DemoReader> demoReader = std::make_unique<DemoReader>(DEMO_19);
-    demoReader->Parse();
+    Reader->Parse();
 
-    EXPECT_EQ(demoReader->ReflectDemoValue("Snapshot.ping"), "999");
+    EXPECT_EQ(Reader->ReflectDemoValue("Snapshot.ping"), "999");
 }
 
 TEST_F(DemoFixture, DemoReaderDifference)
 {
-    std::unique_ptr<DemoReader> demoReader = std::make_unique<DemoReader>(DEMO_19);
-    while (demoReader->Next())
+    while (Reader->Next())
     {
-        auto entities = demoReader->GetLastUpdatedEntities();
+        auto entities = Reader->GetLastUpdatedEntities();
 
         if (entities.size() > 0)
             EXPECT_TRUE(entities.back().number);
@@ -39,12 +49,11 @@ TEST_F(DemoFixture, DemoReaderDifference)
 
 TEST_F(DemoFixture, DemoReaderTime)
 {
-    std::unique_ptr<DemoReader> demoReader = std::make_unique<DemoReader>(DEMO_19);
-    demoReader->Parse();
+    Reader->Parse();
 
-    float time = demoReader->GetTime();
-    float ms = demoReader->GetTimeMilliseconds();
-    float server = demoReader->GetServerTime();
+    float time = Reader->GetTime();
+    float ms = Reader->GetTimeMilliseconds();
+    float server = Reader->GetServerTime();
 
     EXPECT_TRUE(time);
     EXPECT_TRUE(ms);

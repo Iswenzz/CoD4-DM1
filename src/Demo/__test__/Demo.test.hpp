@@ -1,3 +1,4 @@
+#include "API/DemoReader.hpp"
 #include "Demo/Demo.hpp"
 #include "Crypt/Huffman.hpp"
 
@@ -13,11 +14,16 @@ using namespace Iswenzz::CoD4::DM1;
 class DemoFixture : public testing::Test
 {
 public:
+    std::unique_ptr<Demo> DemoFile;
+    std::unique_ptr<DemoReader> Reader;
+
     /// <summary>
     /// Initialize huffman compression.
     /// </summary>
     void SetUp() override 
     {
         Huffman::InitMain();
+        DemoFile = std::make_unique<Demo>(DEMO_19);
+        Reader = std::make_unique<DemoReader>(DEMO_19);
     }
 };

@@ -1,10 +1,20 @@
 #pragma once
+#include <string>
+#include <vector>
 
 namespace Iswenzz::CoD4::DM1
 {
 	class Utility
 	{
 	public:
+		/// <summary>
+		/// Split a string from a delimiter.
+		/// </summary>
+		/// <param name="source">The string source.</param>
+		/// <param name="delimiter">The split delimiter.</param>
+		/// <returns></returns>
+		static std::vector<std::string> SplitString(const std::string& source, char delimiter = ' ');
+
 		/// <summary>
 		/// Get the difference between 2 containers.
 		/// </summary>

@@ -118,6 +118,18 @@ namespace Iswenzz::CoD4::DM1
 		/// <returns></returns>
 		std::string ReflectDemoValue(const std::string path);
 
+		/// <summary>
+		/// Parse a config string.
+		/// </summary>
+		/// <param name="name">The config string name.</param>
+		/// <returns></returns>
+		std::string ParseConfigString(const std::string name);
+
+		/// <summary>
+		/// Get the player name.
+		/// </summary>
+		clientNames_t GetPlayerName();
+
 	private:
 		/// <summary>
 		/// Update the reader clients field.

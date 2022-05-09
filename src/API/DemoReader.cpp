@@ -132,4 +132,30 @@ namespace Iswenzz::CoD4::DM1
 			result = json.get<std::string>();
 		return result;
 	}
+
+	std::string DemoReader::ParseConfigString(const std::string name)
+	{
+		for (const std::string& config : DemoFile->ConfigStrings)
+		{
+			if (config.empty())
+				continue;
+
+			std::vector<std::string> tokens = Utility::SplitString(config, '\\');
+			for (int i = 1; i < tokens.size(); i += 2)
+			{
+				std::string key = tokens[i - 1];
+				if (key == name)
+					return tokens[i];
+			}
+		}
+		return "";
+	}
+
+	clientNames_t DemoReader::GetPlayerName()
+	{
+		const clientSnapshot_t& snapshot = GetCurrentSnapshot();
+		const int clientNum = snapshot.ps.ClientNum;
+
+		return DemoFile->ClientNames.at(clientNum);
+	}
 }
