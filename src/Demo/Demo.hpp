@@ -1,6 +1,7 @@
 #pragma once
 #include "Crypt/Msg.hpp"
 #include "Crypt/NetFields.hpp"
+#include "Utils/Utility.hpp"
 
 #include <cstring>
 #include <cmath>
@@ -29,7 +30,9 @@ namespace Iswenzz::CoD4::DM1
 		int CurrentFrameTime = 0;
 		int LastFrameSrvMsgSeq = 0;
 		int FirstFrameSrvMsgSeq = 0;
+
 		int FPS = 0;
+		std::vector<int> FrameTimes{ };
 
 		int ClientNum = 0;
 		int ChecksumFeed = 0;

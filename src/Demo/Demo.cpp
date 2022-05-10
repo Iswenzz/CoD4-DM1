@@ -29,7 +29,7 @@ namespace Iswenzz::CoD4::DM1
 		{
 			DemoFile.open(filepath, std::ios::binary);
 			DemoFileOut.open(filepath + ".1.dm_1", std::ios::binary);
-			IsOpen = true;
+			IsOpen = DemoFile.is_open();
 		}
 	}
 
@@ -219,6 +219,7 @@ namespace Iswenzz::CoD4::DM1
 		{
 			PreviousFrameTime = CurrentFrameTime;
 			CurrentFrameTime = frame.commandTime;
+			FrameTimes.push_back(1000 / (CurrentFrameTime - PreviousFrameTime));
 		}
 
 		LastFrameSrvMsgSeq = CurrentCompressedMsg.SrvMsgSeq;
@@ -493,7 +494,11 @@ namespace Iswenzz::CoD4::DM1
 		}
 		SnapMessageNum = CurrentSnapshot.messageNum;
 		CurrentSnapshot.ping = 999;
-		FPS = 1000 / (CurrentFrameTime - PreviousFrameTime);
+		if (!FrameTimes.empty())
+		{
+			FPS = Utility::VectorAverageMode(FrameTimes);
+			FrameTimes.clear();
+		}
 
 		// Save the snapshot in the backup array for later delta comparisons
 		memcpy(&Snapshots[SnapMessageNum & PACKET_MASK], &CurrentSnapshot, sizeof(clientSnapshot_t));
