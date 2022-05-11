@@ -24,6 +24,7 @@ namespace Iswenzz::CoD4::DM1
 		bool Verbose;
 
 		int Protocol = COD4_PROTOCOL;
+		MSGType CurrentMessageType = { };
 
 		int StartFrameTime = 0;
 		int PreviousFrameTime = 0;

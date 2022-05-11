@@ -45,11 +45,10 @@ namespace Iswenzz::CoD4::DM1
 			if (CurrentCompressedMsg.SrvMsgSeq == -1)
 				return false;
 
-			MSGType msgType = { };
-			DemoFile.read(reinterpret_cast<char*>(&msgType), sizeof(char));
-			VerboseLog("msg: " << static_cast<int>(msgType) << std::endl);
+			DemoFile.read(reinterpret_cast<char*>(&CurrentMessageType), sizeof(char));
+			VerboseLog("msg: " << static_cast<int>(CurrentMessageType) << std::endl);
 
-			switch (msgType)
+			switch (CurrentMessageType)
 			{
 			case MSGType::MSG_SNAPSHOT:
 				ReadMessage();
@@ -210,12 +209,7 @@ namespace Iswenzz::CoD4::DM1
 		DemoFile.read(reinterpret_cast<char*>(&frame.angles[1]), sizeof(float));
 		DemoFile.read(reinterpret_cast<char*>(&frame.angles[2]), sizeof(float));
 
-		if (!StartFrameTime)
-		{
-			StartFrameTime = frame.commandTime;
-			CurrentFrameTime = StartFrameTime;
-		}
-		else if (frame.commandTime > CurrentFrameTime)
+		if (frame.commandTime > CurrentFrameTime)
 		{
 			PreviousFrameTime = CurrentFrameTime;
 			CurrentFrameTime = frame.commandTime;
@@ -448,6 +442,9 @@ namespace Iswenzz::CoD4::DM1
 		CurrentSnapshot.serverCommandNum = ServCmdSequence;
 		CurrentSnapshot.serverTime = msg.ReadInt();
 		CurrentSnapshot.messageNum = msg.SrvMsgSeq;
+
+		if (!StartFrameTime)
+			StartFrameTime = CurrentSnapshot.serverTime;
 
 		uint8_t deltaNum = msg.ReadByte();
 		CurrentSnapshot.deltaNum = !deltaNum ? -1 : CurrentSnapshot.messageNum - deltaNum;
