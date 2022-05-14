@@ -26,14 +26,21 @@ namespace Iswenzz::CoD4::DM1
 	bool DemoReader::Next()
 	{
 		// Update previous data for comparisons
-		PreviousFrame = GetCurrentFrame();
-		PreviousSnapshot = GetCurrentSnapshot();
-		PreviousClients = DemoFile->ParseClients;
-		PreviousEntities = DemoFile->ParseEntities;
+		if (DemoFile->CurrentSnapshot.valid)
+		{
+			PreviousFrame = GetCurrentFrame();
+			PreviousSnapshot = GetCurrentSnapshot();
+			PreviousClients = DemoFile->ParseClients;
+			PreviousEntities = DemoFile->ParseEntities;
+		}
 
 		// Parse demo and update reader fields
 		if (DemoFile->Next())
 		{
+			// Skip not valid snapshot
+			if (!DemoFile->CurrentSnapshot.valid)
+				return true;
+
 			Frame = GetCurrentFrame();
 			Snapshot = GetCurrentSnapshot();
 
