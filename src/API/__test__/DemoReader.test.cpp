@@ -7,10 +7,14 @@ TEST_F(DemoFixture, DemoReader)
         auto archive = Reader->GetCurrentFrame();
         auto snapshot = Reader->GetCurrentSnapshot();
 
+        if (!snapshot.valid)
+            continue;
+
         float x = snapshot.ps.velocity[0];
         float y = snapshot.ps.velocity[1];
 
         //std::cout << snapshot.serverTime << " " << std::sqrt((x * x) + (y * y)) << std::endl;
+        //std::cout << Reader->GetFPS() << std::endl;
     }
     EXPECT_TRUE(Reader->GetCurrentFrame().commandTime);
 }
