@@ -218,6 +218,7 @@ namespace Iswenzz::CoD4::DM1
 
 		LastFrameSrvMsgSeq = CurrentCompressedMsg.SrvMsgSeq;
 		memcpy(&Frames[LastFrameSrvMsgSeq & MAX_FRAMES - 1], &frame, sizeof(archivedFrame_t));
+		CurrentFrame = frame;
 
 		char seq = 1;
 		DemoFileOut.write(reinterpret_cast<char*>(&seq), sizeof(seq));

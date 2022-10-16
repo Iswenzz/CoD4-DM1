@@ -89,10 +89,7 @@ namespace Iswenzz::CoD4::DM1
 
 	archivedFrame_t DemoReader::GetCurrentFrame()
 	{
-		auto orderedFrames = DemoFile->Frames;
-		std::sort(orderedFrames.begin(), orderedFrames.end(),
-			[](const archivedFrame_t& a, const archivedFrame_t& b) { return a.commandTime > b.commandTime; });
-		return orderedFrames.size() > 0 ? orderedFrames.back() : archivedFrame_t();
+		return DemoFile->CurrentFrame;
 	}
 
 	std::vector<clientState_t> DemoReader::GetLastUpdatedClients()

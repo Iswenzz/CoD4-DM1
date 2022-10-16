@@ -51,6 +51,7 @@ namespace Iswenzz::CoD4::DM1
 		int SnapMessageNum = 0;
 
 		clientSnapshot_t CurrentSnapshot = { 0 };
+		archivedFrame_t CurrentFrame = { 0 };
 
 		std::array<std::string, MAX_CMDSTRINGS> CommandStrings{ };
 		std::array<std::string, MAX_CONFIGSTRINGS> ValidConfigStrings{ };
