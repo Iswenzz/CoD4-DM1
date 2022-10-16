@@ -23,11 +23,14 @@ namespace Iswenzz::CoD4::DM1
 	{
 		if (IsOpen)
 			Close();
-		IsOpen = true;
 		Filepath = filepath;
 
-		DemoFile.open(filepath, std::ios::binary);
-		DemoFileOut.open(filepath + ".1.dm_1", std::ios::binary);
+		if (std::filesystem::exists(filepath))
+		{
+			DemoFile.open(filepath, std::ios::binary);
+			DemoFileOut.open(filepath + ".1.dm_1", std::ios::binary);
+			IsOpen = DemoFile.is_open();
+		}
 	}
 
 	void Demo::Parse()
@@ -42,11 +45,10 @@ namespace Iswenzz::CoD4::DM1
 			if (CurrentCompressedMsg.SrvMsgSeq == -1)
 				return false;
 
-			MSGType msgType = { };
-			DemoFile.read(reinterpret_cast<char*>(&msgType), sizeof(char));
-			VerboseLog("msg: " << static_cast<int>(msgType) << std::endl);
+			DemoFile.read(reinterpret_cast<char*>(&CurrentMessageType), sizeof(char));
+			VerboseLog("msg: " << static_cast<int>(CurrentMessageType) << std::endl);
 
-			switch (msgType)
+			switch (CurrentMessageType)
 			{
 			case MSGType::MSG_SNAPSHOT:
 				ReadMessage();
@@ -58,7 +60,6 @@ namespace Iswenzz::CoD4::DM1
 				ReadProtocol();
 				break;
 			case MSGType::MSG_RELIABLE:
-				std::cout << "reliable msg" << std::endl;
 				break;
 			}
 			return true;
@@ -208,13 +209,12 @@ namespace Iswenzz::CoD4::DM1
 		DemoFile.read(reinterpret_cast<char*>(&frame.angles[1]), sizeof(float));
 		DemoFile.read(reinterpret_cast<char*>(&frame.angles[2]), sizeof(float));
 
-		if (!StartFrameTime)
+		if (frame.commandTime > CurrentFrameTime)
 		{
-			StartFrameTime = frame.commandTime;
-			CurrentFrameTime = StartFrameTime;
-		}
-		else if (frame.commandTime > CurrentFrameTime)
+			PreviousFrameTime = CurrentFrameTime;
 			CurrentFrameTime = frame.commandTime;
+			FrameTimes.push_back(1000 / (CurrentFrameTime - PreviousFrameTime));
+		}
 
 		LastFrameSrvMsgSeq = CurrentCompressedMsg.SrvMsgSeq;
 		memcpy(&Frames[LastFrameSrvMsgSeq & MAX_FRAMES - 1], &frame, sizeof(archivedFrame_t));
@@ -261,7 +261,6 @@ namespace Iswenzz::CoD4::DM1
 
 		msg.ClearLastReferencedEntity();
 		ServerCommandSequence = msg.ReadInt();
-		MatchInProgress = true;
 
 		while (true)
 		{
@@ -326,7 +325,6 @@ namespace Iswenzz::CoD4::DM1
 
 		msg.ClearLastReferencedEntity();
 		ServerCommandSequence = msg.ReadInt();
-		MatchInProgress = true;
 
 		while (true)
 		{
@@ -445,6 +443,9 @@ namespace Iswenzz::CoD4::DM1
 		CurrentSnapshot.serverTime = msg.ReadInt();
 		CurrentSnapshot.messageNum = msg.SrvMsgSeq;
 
+		if (!StartFrameTime)
+			StartFrameTime = CurrentSnapshot.serverTime;
+
 		uint8_t deltaNum = msg.ReadByte();
 		CurrentSnapshot.deltaNum = !deltaNum ? -1 : CurrentSnapshot.messageNum - deltaNum;
 		CurrentSnapshot.snapFlags = msg.ReadByte();
@@ -490,6 +491,11 @@ namespace Iswenzz::CoD4::DM1
 		}
 		SnapMessageNum = CurrentSnapshot.messageNum;
 		CurrentSnapshot.ping = 999;
+		if (!FrameTimes.empty())
+		{
+			FPS = Utility::VectorAverageMode(FrameTimes);
+			FrameTimes.clear();
+		}
 
 		// Save the snapshot in the backup array for later delta comparisons
 		memcpy(&Snapshots[SnapMessageNum & PACKET_MASK], &CurrentSnapshot, sizeof(clientSnapshot_t));

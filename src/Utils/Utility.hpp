@@ -1,10 +1,40 @@
 #pragma once
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
 
 namespace Iswenzz::CoD4::DM1
 {
 	class Utility
 	{
 	public:
+		/// <summary>
+		/// Split a string from a delimiter.
+		/// </summary>
+		/// <param name="source">The string source.</param>
+		/// <param name="delimiter">The split delimiter.</param>
+		/// <returns></returns>
+		static std::vector<std::string> SplitString(const std::string& source, char delimiter = ' ');
+
+		/// <summary>
+		/// Average mode a given vector.
+		/// </summary>
+		/// <typeparam name="T">The elemements type.</typeparam>
+		/// <param name="vec">The vector source.</param>
+		/// <returns></returns>
+		template <class T>
+		static T VectorAverageMode(const std::vector<T>& vec)
+		{
+			std::unordered_map<T, size_t> modeMap;
+			for (const T& elem : vec)
+				++modeMap[elem];
+
+			auto mode = std::max_element(modeMap.cbegin(), modeMap.cend(),
+				[](const auto& a, const auto& b) { return a.second < b.second; });
+			return mode->first;
+		}
+
 		/// <summary>
 		/// Get the difference between 2 containers.
 		/// </summary>

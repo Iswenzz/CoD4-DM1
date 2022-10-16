@@ -1,11 +1,13 @@
 #pragma once
 #include "Crypt/Msg.hpp"
 #include "Crypt/NetFields.hpp"
+#include "Utils/Utility.hpp"
 
 #include <cstring>
 #include <cmath>
 #include <string>
 #include <fstream>
+#include <filesystem>
 
 namespace Iswenzz::CoD4::DM1
 {
@@ -22,38 +24,24 @@ namespace Iswenzz::CoD4::DM1
 		bool Verbose;
 
 		int Protocol = COD4_PROTOCOL;
+		MSGType CurrentMessageType = { };
 
-		bool MatchInProgress = false;
 		int StartFrameTime = 0;
+		int PreviousFrameTime = 0;
 		int CurrentFrameTime = 0;
 		int LastFrameSrvMsgSeq = 0;
 		int FirstFrameSrvMsgSeq = 0;
 
-		int MatchNum = 0;
-		int RoundNum = 0;
+		int FPS = 0;
+		std::vector<int> FrameTimes{ };
+
 		int ClientNum = 0;
-		int TeamNum = 0;
-		int PlayerClientNum = 0;
-		int PlayerClientNumOld = 0;
-		int KillCamEntity = 0;
-		int KillCamEntityOld = 0;
-		bool DemoStartedInKillCam = 0;
 		int ChecksumFeed = 0;
 		int ServerCommandSequence = 0;
 		int ServerConfigSequence = 0;
-		clientSnapshot_t CurrentSnapshot = { 0 };
-		float LerpPosOffsets[3] = { 0, 0, 0 };
+		int GamestateCount = 0;
 		float MapCenter[3] = { 0, 0, 0 };
 		bool SendOriginAndVel = true;
-		int GamestateCount = 0;
-
-		bool ModDM = false;
-		std::string TeamNameAllies;
-		std::string TeamScoreAllies;
-		std::string TeamNameAxis;
-		std::string TeamScoreAxis;
-		std::string DefaultWeapon_mp;
-		std::string FogParams;
 
 		int ServCmdSequence = 0;
 		int ParseEntitiesNum = 0;
@@ -62,9 +50,12 @@ namespace Iswenzz::CoD4::DM1
 		int WriteClientsNum = 0;
 		int SnapMessageNum = 0;
 
+		clientSnapshot_t CurrentSnapshot = { 0 };
+
 		std::array<std::string, MAX_CMDSTRINGS> CommandStrings{ };
 		std::array<std::string, MAX_CONFIGSTRINGS> ValidConfigStrings{ };
 		std::array<std::string, MAX_CONFIGSTRINGS> ConfigStrings{ };
+
 		std::array<entityState_t, MAX_GENTITIES> EntityBaselines{ };
 		std::array<entityState_t, MAX_PARSE_ENTITIES> ParseEntities{ };
 		std::array<clientState_t, MAX_PARSE_CLIENTS> ParseClients{ };

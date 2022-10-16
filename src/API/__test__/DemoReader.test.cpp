@@ -1,15 +1,65 @@
 #include "Demo/__test__/Demo.test.hpp"
-#include "API/DemoReader.hpp"
 
 TEST_F(DemoFixture, DemoReader)
 {
-    std::unique_ptr<DemoReader> demoReader = std::make_unique<DemoReader>(DEMO_19);
-    while (demoReader->Next())
+    while (Reader->Next())
     {
-        auto frame = demoReader->GetCurrentFrame();
-        float x = frame.velocity[0];
-        float y = frame.velocity[1];
+        auto archive = Reader->GetCurrentFrame();
+        auto snapshot = Reader->GetCurrentSnapshot();
 
-        std::cout << frame.commandTime << " " << std::sqrt((x * x) + (y * y)) << std::endl;
+        if (!snapshot.valid)
+            continue;
+
+        float x = snapshot.ps.velocity[0];
+        float y = snapshot.ps.velocity[1];
+
+        //std::cout << snapshot.serverTime << " " << std::sqrt((x * x) + (y * y)) << std::endl;
+        //std::cout << Reader->GetFPS() << std::endl;
     }
+    EXPECT_TRUE(Reader->GetCurrentFrame().commandTime);
+}
+
+TEST_F(DemoFixture, DemoReaderPlayerName)
+{
+    Reader->Parse();
+
+    EXPECT_TRUE(Reader->GetPlayerName().netname.size());
+}
+
+TEST_F(DemoFixture, DemoReaderParseConfigString)
+{
+    Reader->Parse();
+
+    EXPECT_TRUE(Reader->ParseConfigString("mapname").size());
+}
+
+TEST_F(DemoFixture, DemoReaderReflect)
+{
+    Reader->Parse();
+
+    EXPECT_EQ(Reader->ReflectDemoValue("Snapshot.ping"), "999");
+}
+
+TEST_F(DemoFixture, DemoReaderDifference)
+{
+    while (Reader->Next())
+    {
+        auto entities = Reader->GetLastUpdatedEntities();
+
+        if (entities.size() > 0)
+            EXPECT_TRUE(entities.back().number);
+    }
+}
+
+TEST_F(DemoFixture, DemoReaderTime)
+{
+    Reader->Parse();
+
+    float time = Reader->GetTime();
+    float ms = Reader->GetTimeMilliseconds();
+    float server = Reader->GetServerTime();
+
+    EXPECT_TRUE(time);
+    EXPECT_TRUE(ms);
+    EXPECT_TRUE(server);
 }
