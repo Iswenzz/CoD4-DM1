@@ -30,6 +30,7 @@ namespace Iswenzz::CoD4::DM1
 			DemoFile.open(filepath, std::ios::binary);
 			DemoFileOut.open(filepath + ".1.dm_1", std::ios::binary);
 			IsOpen = DemoFile.is_open();
+			IsEOF = false;
 		}
 	}
 
@@ -43,7 +44,10 @@ namespace Iswenzz::CoD4::DM1
 		if (DemoFile.is_open())
 		{
 			if (CurrentCompressedMsg.SrvMsgSeq == -1)
+			{
+				IsEOF = true;
 				return false;
+			}
 
 			DemoFile.read(reinterpret_cast<char*>(&CurrentMessageType), sizeof(char));
 			VerboseLog("msg: " << static_cast<int>(CurrentMessageType) << std::endl);
@@ -70,7 +74,10 @@ namespace Iswenzz::CoD4::DM1
 	void Demo::Close()
 	{
 		if (DemoFile.is_open())
+		{
 			DemoFile.close();
+			DemoFileOut.close();
+		}
 		IsOpen = false;
 	}
 

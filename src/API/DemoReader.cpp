@@ -23,6 +23,11 @@ namespace Iswenzz::CoD4::DM1
 		return DemoFile && DemoFile->IsOpen;
 	}
 
+	bool DemoReader::IsEOF()
+	{
+		return DemoFile && DemoFile->IsEOF;
+	}
+
 	bool DemoReader::Next()
 	{
 		// Update previous data for comparisons

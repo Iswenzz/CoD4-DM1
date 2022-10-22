@@ -51,6 +51,12 @@ namespace Iswenzz::CoD4::DM1
 		bool IsOpen();
 
 		/// <summary>
+		/// Check demo end of file.
+		/// </summary>
+		/// <returns></returns>
+		bool IsEOF();
+
+		/// <summary>
 		/// Reads the next demo message.
 		/// </summary>
 		/// <returns></returns>

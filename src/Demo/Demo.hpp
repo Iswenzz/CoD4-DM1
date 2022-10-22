@@ -21,6 +21,7 @@ namespace Iswenzz::CoD4::DM1
 		std::ifstream DemoFile;
 		std::ofstream DemoFileOut;
 		bool IsOpen = false;
+		bool IsEOF = true;
 		bool Verbose;
 
 		int Protocol = COD4_PROTOCOL;
