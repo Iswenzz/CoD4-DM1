@@ -131,6 +131,12 @@ namespace Iswenzz::CoD4::DM1
 		std::string ReflectDemoValue(const std::string path);
 
 		/// <summary>
+		/// Get a config string.
+		/// </summary>
+		/// <param name="name">The config string name.</param>
+		std::string GetConfigString(const std::string name);
+
+		/// <summary>
 		/// Parse a config string.
 		/// </summary>
 		/// <param name="name">The config string name.</param>

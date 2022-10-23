@@ -9,7 +9,9 @@ namespace Iswenzz::CoD4::DM1
 {
 	Demo::Demo(std::string filepath) : Demo(filepath, false) { }
 
-	Demo::Demo(std::string filepath, bool verbose) : Filepath(filepath), Verbose(verbose)
+	Demo::Demo(std::string filepath, bool verbose) : Demo(filepath, false, verbose) { }
+
+	Demo::Demo(std::string filepath, bool write, bool verbose) : Filepath(filepath), Verbose(verbose), IsWriting(write)
 	{
 		Open(filepath);
 	}
@@ -28,7 +30,8 @@ namespace Iswenzz::CoD4::DM1
 		if (std::filesystem::exists(filepath))
 		{
 			DemoFile.open(filepath, std::ios::binary);
-			DemoFileOut.open(filepath + ".1.dm_1", std::ios::binary);
+			if (IsWriting)
+				DemoFileOut.open(std::filesystem::path(filepath).stem().string() + ".out.dm_1", std::ios::binary);
 			IsOpen = DemoFile.is_open();
 			IsEOF = false;
 		}
@@ -76,7 +79,8 @@ namespace Iswenzz::CoD4::DM1
 		if (DemoFile.is_open())
 		{
 			DemoFile.close();
-			DemoFileOut.close();
+			if (IsWriting)
+				DemoFileOut.close();
 		}
 		IsOpen = false;
 	}
@@ -101,10 +105,12 @@ namespace Iswenzz::CoD4::DM1
 		// EOF
 		if (CurrentCompressedMsg.SrvMsgSeq == -1)
 		{
-			DemoFileOut.write(reinterpret_cast<char*>(&slen), sizeof(slen));
-			DemoFileOut.write(reinterpret_cast<char*>(&dummyEnd), sizeof(dummyEnd));
-			DemoFileOut.write(reinterpret_cast<char*>(&dummyEnd), sizeof(dummyEnd));
-
+			if (IsWriting)
+			{
+				DemoFileOut.write(reinterpret_cast<char*>(&slen), sizeof(slen));
+				DemoFileOut.write(reinterpret_cast<char*>(&dummyEnd), sizeof(dummyEnd));
+				DemoFileOut.write(reinterpret_cast<char*>(&dummyEnd), sizeof(dummyEnd));
+			}
 			return;
 		}
 
@@ -180,6 +186,9 @@ namespace Iswenzz::CoD4::DM1
 		CurrentWritingCompressedMsg.CurSize = 4 + Huffman::Compress(&CurrentWritingUncompressedMsg.Buffer[0],
 			CurrentWritingUncompressedMsg.CurSize, &CurrentWritingCompressedMsg.Buffer[0], 0);
 
+		if (!IsWriting)
+			return;
+
 		char seq = 0;
 		DemoFileOut.write(reinterpret_cast<char*>(&seq), sizeof(seq));
 		DemoFileOut.write(reinterpret_cast<char*>(&CurrentCompressedMsg.SrvMsgSeq),
@@ -227,6 +236,9 @@ namespace Iswenzz::CoD4::DM1
 		memcpy(&Frames[LastFrameSrvMsgSeq & MAX_FRAMES - 1], &frame, sizeof(archivedFrame_t));
 		CurrentFrame = frame;
 
+		if (!IsWriting)
+			return;
+
 		char seq = 1;
 		DemoFileOut.write(reinterpret_cast<char*>(&seq), sizeof(seq));
 		DemoFileOut.write(reinterpret_cast<char*>(&CurrentCompressedMsg.SrvMsgSeq), sizeof(int));
@@ -253,7 +265,11 @@ namespace Iswenzz::CoD4::DM1
 		DemoFile.read(reinterpret_cast<char*>(&legacyEnd), sizeof(int));
 		DemoFile.read(reinterpret_cast<char*>(&reserved), sizeof(uint64_t));
 
-		std::cout << "Protocol: " << Protocol << std::endl;
+		if (Verbose)
+			std::cout << "Protocol: " << Protocol << std::endl;
+
+		if (!IsWriting)
+			return;
 
 		char seq = 2;
 		DemoFileOut.write(reinterpret_cast<char*>(&seq), sizeof(seq));

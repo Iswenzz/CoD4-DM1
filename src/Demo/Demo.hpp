@@ -22,6 +22,7 @@ namespace Iswenzz::CoD4::DM1
 		std::ofstream DemoFileOut;
 		bool IsOpen = false;
 		bool IsEOF = true;
+		bool IsWriting = false;
 		bool Verbose;
 
 		int Protocol = COD4_PROTOCOL;
@@ -90,6 +91,15 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="verbose">Prints debug informations.</param>
 		/// <returns></returns>
 		Demo(std::string filepath, bool verbose);
+
+		/// <summary>
+		/// Initialize a new Demo object with the specified demo file path.
+		/// </summary>
+		/// <param name="filepath">File path to a demo file (.dm_1)</param>
+		/// <param name="write">Rewrite demo.</param>
+		/// <param name="verbose">Prints debug informations.</param>
+		/// <returns></returns>
+		Demo(std::string filepath, bool write, bool verbose);
 
 		/// <summary>
 		/// Dispose all resources.

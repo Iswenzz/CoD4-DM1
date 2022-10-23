@@ -147,6 +147,16 @@ namespace Iswenzz::CoD4::DM1
 		return result;
 	}
 
+	std::string DemoReader::GetConfigString(const std::string name)
+	{
+		for (const std::string& config : DemoFile->ConfigStrings)
+		{
+			if (!config.empty() && !config.find(name))
+				return config;
+		}
+		return "";
+	}
+
 	std::string DemoReader::ParseConfigString(const std::string name)
 	{
 		for (const std::string& config : DemoFile->ConfigStrings)
