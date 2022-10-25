@@ -37,6 +37,7 @@ namespace Iswenzz::CoD4::DM1
 			PreviousSnapshot = GetCurrentSnapshot();
 			PreviousClients = DemoFile->ParseClients;
 			PreviousEntities = DemoFile->ParseEntities;
+			PreviousCommandStrings = DemoFile->CommandStrings;
 		}
 
 		// Parse demo and update reader fields
@@ -119,6 +120,12 @@ namespace Iswenzz::CoD4::DM1
 	{
 		for (const entityState_t& entity : GetLastUpdatedEntities())
 			Entities[entity.number] = entity;
+	}
+
+	std::vector<std::string> DemoReader::GetLastCommandStrings()
+	{
+		return Utility::GetArrayDifference<std::string>(DemoFile->CommandStrings, PreviousCommandStrings,
+			[&](const std::string& a, const std::string& b) { return a == b; });
 	}
 
 	std::string DemoReader::ReflectDemoValue(const std::string path)

@@ -22,6 +22,7 @@ namespace Iswenzz::CoD4::DM1
 		archivedFrame_t PreviousFrame = { 0 };
 		std::array<entityState_t, MAX_PARSE_ENTITIES> PreviousEntities{ };
 		std::array<clientState_t, MAX_PARSE_CLIENTS> PreviousClients{ };
+		std::array<std::string, MAX_CMDSTRINGS> PreviousCommandStrings{ };
 
 		/// <summary>
 		/// Initialize a new DemoReader instance.
@@ -119,6 +120,12 @@ namespace Iswenzz::CoD4::DM1
 		/// </summary>
 		/// <returns></returns>
 		std::vector<entityState_t> GetLastUpdatedEntities();
+
+		/// <summary>
+		/// Get the last updated command strings.
+		/// </summary>
+		/// <returns></returns>
+		std::vector<std::string> GetLastCommandStrings();
 
 		/// <summary>
 		/// Reflect demo variables from a path.
