@@ -99,14 +99,14 @@ namespace Iswenzz::CoD4::DM1
 
 	std::vector<clientState_t> DemoReader::GetLastUpdatedClients()
 	{
-		return Utility::GetArrayDifference<clientState_t>(DemoFile->ParseClients, PreviousClients,
-			[](const clientState_t& a, const clientState_t& b) { return memcmp(&a, &b, sizeof(clientState_t)); });
+		return Utility::GetArrayDifference<clientState_t>(Clients, PreviousClients,
+			[](const clientState_t& a, const clientState_t& b) { return !memcmp(&a, &b, sizeof(clientState_t)); });
 	}
 
 	std::vector<entityState_t> DemoReader::GetLastUpdatedEntities()
 	{
-		return Utility::GetArrayDifference<entityState_t>(DemoFile->Entities, PreviousEntities,
-			[](const entityState_t& a, const entityState_t& b) { return memcmp(&a, &b, sizeof(entityState_t)); });
+		return Utility::GetArrayDifference<entityState_t>(Entities, PreviousEntities,
+			[](const entityState_t& a, const entityState_t& b) { return !memcmp(&a, &b, sizeof(entityState_t)); });
 	}
 
 	std::vector<std::string> DemoReader::GetLastCommandStrings()

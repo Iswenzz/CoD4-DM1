@@ -6,21 +6,13 @@ TEST_F(DemoFixture, DemoReader)
     {
         auto archive = Reader->GetCurrentFrame();
         auto snapshot = Reader->GetCurrentSnapshot();
+        auto entities = Reader->GetLastUpdatedEntities();
 
-        if (!snapshot.valid)
-            continue;
-
-        for (const entityState_t& entity : Reader->GetLastUpdatedEntities())
+        if (entities.size())
         {
-            if (entity.number != 208)
-                continue;
-
-            std::cout
-                << entity.lerp.pos.trTime << " "
-                << entity.lerp.pos.trDuration << " "
-                << entity.lerp.pos.trBase[0] << " "
-                << entity.lerp.pos.trBase[1] << " "
-                << entity.lerp.pos.trBase[2] << " "
+            std::cout << entities.size() << " "
+                << Reader->Entities[208].lerp.pos.trTime << " "
+                << Reader->PreviousEntities[208].lerp.pos.trTime << " "
                 << std::endl;
         }
 
