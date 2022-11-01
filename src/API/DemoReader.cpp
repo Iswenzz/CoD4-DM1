@@ -35,8 +35,8 @@ namespace Iswenzz::CoD4::DM1
 		{
 			PreviousFrame = GetCurrentFrame();
 			PreviousSnapshot = GetCurrentSnapshot();
-			PreviousClients = DemoFile->ParseClients;
-			PreviousEntities = DemoFile->ParseEntities;
+			PreviousClients = DemoFile->Clients;
+			PreviousEntities = DemoFile->Entities;
 			PreviousCommandStrings = DemoFile->CommandStrings;
 		}
 
@@ -49,9 +49,8 @@ namespace Iswenzz::CoD4::DM1
 
 			Frame = GetCurrentFrame();
 			Snapshot = GetCurrentSnapshot();
-
-			UpdateClients();
-			UpdateEntities();
+			Entities = DemoFile->Entities;
+			Clients = DemoFile->Clients;
 
 			return true;
 		}
@@ -96,30 +95,6 @@ namespace Iswenzz::CoD4::DM1
 	archivedFrame_t DemoReader::GetCurrentFrame()
 	{
 		return DemoFile->CurrentFrame;
-	}
-
-	std::vector<clientState_t> DemoReader::GetLastUpdatedClients()
-	{
-		return Utility::GetArrayDifference<clientState_t>(DemoFile->ParseClients, PreviousClients,
-			[](const clientState_t& a, const clientState_t& b) { return a.clientIndex == b.clientIndex; });
-	}
-
-	std::vector<entityState_t> DemoReader::GetLastUpdatedEntities()
-	{
-		return Utility::GetArrayDifference<entityState_t>(DemoFile->ParseEntities, PreviousEntities,
-			[](const entityState_t& a, const entityState_t& b) { return a.number == b.number; });
-	}
-
-	void DemoReader::UpdateClients()
-	{
-		for (const clientState_t& client : GetLastUpdatedClients())
-			Clients[client.clientIndex] = client;
-	}
-
-	void DemoReader::UpdateEntities()
-	{
-		for (const entityState_t& entity : GetLastUpdatedEntities())
-			Entities[entity.number] = entity;
 	}
 
 	std::vector<std::string> DemoReader::GetLastCommandStrings()

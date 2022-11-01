@@ -110,18 +110,6 @@ namespace Iswenzz::CoD4::DM1
 		archivedFrame_t GetCurrentFrame();
 
 		/// <summary>
-		/// Get the last updated clients.
-		/// </summary>
-		/// <returns></returns>
-		std::vector<clientState_t> GetLastUpdatedClients();
-
-		/// <summary>
-		/// Get the last updated entities.
-		/// </summary>
-		/// <returns></returns>
-		std::vector<entityState_t> GetLastUpdatedEntities();
-
-		/// <summary>
 		/// Get the last updated command strings.
 		/// </summary>
 		/// <returns></returns>
@@ -154,17 +142,6 @@ namespace Iswenzz::CoD4::DM1
 		/// Get the player name.
 		/// </summary>
 		clientNames_t GetPlayerName();
-
-	private:
-		/// <summary>
-		/// Update the reader clients field.
-		/// </summary>
-		void UpdateClients();
-
-		/// <summary>
-		/// Update the reader entities field.
-		/// </summary>
-		void UpdateEntities();
 	};
 
 	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DemoReader, FilePath, Snapshot, Frame, Entities, Clients);

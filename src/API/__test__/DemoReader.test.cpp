@@ -10,6 +10,20 @@ TEST_F(DemoFixture, DemoReader)
         if (!snapshot.valid)
             continue;
 
+        for (const entityState_t& entity : Reader->Entities)
+        {
+            if (entity.number != 208)
+                continue;
+
+            std::cout
+                << entity.lerp.pos.trTime << " "
+                << entity.lerp.pos.trDuration << " "
+                << entity.lerp.pos.trBase[0] << " "
+                << entity.lerp.pos.trBase[1] << " "
+                << entity.lerp.pos.trBase[2] << " "
+                << std::endl;
+        }
+
         float x = snapshot.ps.velocity[0];
         float y = snapshot.ps.velocity[1];
 
@@ -38,17 +52,6 @@ TEST_F(DemoFixture, DemoReaderReflect)
     Reader->Parse();
 
     EXPECT_EQ(Reader->ReflectDemoValue("Snapshot.ping"), "999");
-}
-
-TEST_F(DemoFixture, DemoReaderDifference)
-{
-    while (Reader->Next())
-    {
-        auto entities = Reader->GetLastUpdatedEntities();
-
-        if (entities.size() > 0)
-            EXPECT_TRUE(entities.back().number);
-    }
 }
 
 TEST_F(DemoFixture, DemoReaderTime)

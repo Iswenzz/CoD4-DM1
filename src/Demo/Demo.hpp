@@ -62,6 +62,8 @@ namespace Iswenzz::CoD4::DM1
 		std::array<entityState_t, MAX_GENTITIES> EntityBaselines{ };
 		std::array<entityState_t, MAX_PARSE_ENTITIES> ParseEntities{ };
 		std::array<clientState_t, MAX_PARSE_CLIENTS> ParseClients{ };
+		std::array<entityState_t, MAX_PARSE_ENTITIES> Entities{ };
+		std::array<clientState_t, MAX_PARSE_CLIENTS> Clients{ };
 		std::array<clientNames_t, MAX_CLIENTS> ClientNames{ };
 		std::array<clientSnapshot_t, PACKET_BACKUP> Snapshots{ };
 		std::array<archivedFrame_t, MAX_FRAMES> Frames{ };

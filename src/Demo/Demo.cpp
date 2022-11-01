@@ -870,6 +870,7 @@ namespace Iswenzz::CoD4::DM1
 			memcpy(&ParseEntities[ParseEntitiesNum++ & MAX_PARSE_ENTITIES - 1],
 				oldstate, sizeof(entityState_t));
 			++to->numEntities;
+			Entities[oldnum] = *oldstate;
 
 			if (++oldindex < from->numEntities)
 			{
@@ -950,6 +951,7 @@ namespace Iswenzz::CoD4::DM1
 		while (oldnum != 99999 && !msg.Overflowed)
 		{
 			DeltaClient(msg, time, to, oldnum, oldstate, true);
+			Clients[oldnum] = *oldstate;
 
 			if (++oldindex < from->numClients)
 			{
