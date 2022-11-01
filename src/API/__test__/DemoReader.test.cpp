@@ -10,7 +10,7 @@ TEST_F(DemoFixture, DemoReader)
         if (!snapshot.valid)
             continue;
 
-        for (const entityState_t& entity : Reader->Entities)
+        for (const entityState_t& entity : Reader->GetLastUpdatedEntities())
         {
             if (entity.number != 208)
                 continue;

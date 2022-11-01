@@ -110,6 +110,18 @@ namespace Iswenzz::CoD4::DM1
 		archivedFrame_t GetCurrentFrame();
 
 		/// <summary>
+		/// Get the last updated clients.
+		/// </summary>
+		/// <returns></returns>
+		std::vector<clientState_t> GetLastUpdatedClients();
+
+		/// <summary>
+		/// Get the last updated entities.
+		/// </summary>
+		/// <returns></returns>
+		std::vector<entityState_t> GetLastUpdatedEntities();
+
+		/// <summary>
 		/// Get the last updated command strings.
 		/// </summary>
 		/// <returns></returns>
