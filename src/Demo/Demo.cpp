@@ -841,6 +841,8 @@ namespace Iswenzz::CoD4::DM1
 				{
 					oldstate = &ParseEntities[(oldindex + from->parseEntitiesNum) & MAX_PARSE_ENTITIES - 1];
 					oldnum = oldstate->number;
+
+					Entities[oldnum] = *oldstate;
 				}
 				else
 					oldnum = 99999;
@@ -854,6 +856,8 @@ namespace Iswenzz::CoD4::DM1
 				{
 					oldstate = &ParseEntities[(oldindex + from->parseEntitiesNum) & MAX_PARSE_ENTITIES - 1];
 					oldnum = oldstate->number;
+
+					Entities[oldnum] = *oldstate;
 				}
 				else
 					oldnum = 99999;
@@ -870,13 +874,14 @@ namespace Iswenzz::CoD4::DM1
 			memcpy(&ParseEntities[ParseEntitiesNum++ & MAX_PARSE_ENTITIES - 1],
 				oldstate, sizeof(entityState_t));
 			++to->numEntities;
-			Entities[oldnum] = *oldstate;
 
 			if (++oldindex < from->numEntities)
 			{
 				oldstate = &ParseEntities[(static_cast<short>(oldindex) + (uint16_t)from->parseEntitiesNum) &
 					MAX_PARSE_ENTITIES - 1];
 				oldnum = oldstate->number;
+
+				Entities[oldnum] = *oldstate;
 			}
 			else
 				oldnum = 99999;
@@ -924,6 +929,8 @@ namespace Iswenzz::CoD4::DM1
 				{
 					oldstate = &ParseClients[(oldindex + from->parseClientsNum) & MAX_PARSE_CLIENTS - 1];
 					oldnum = oldstate->clientIndex;
+
+					Clients[oldnum] = *oldstate;
 				}
 				else
 					oldnum = 99999;
@@ -937,6 +944,8 @@ namespace Iswenzz::CoD4::DM1
 				{
 					oldstate = &ParseClients[(oldindex + from->parseClientsNum) & MAX_PARSE_CLIENTS - 1];
 					oldnum = oldstate->clientIndex;
+
+					Clients[oldnum] = *oldstate;
 				}
 				else
 					oldnum = 99999;
@@ -951,12 +960,13 @@ namespace Iswenzz::CoD4::DM1
 		while (oldnum != 99999 && !msg.Overflowed)
 		{
 			DeltaClient(msg, time, to, oldnum, oldstate, true);
-			Clients[oldnum] = *oldstate;
-
+			
 			if (++oldindex < from->numClients)
 			{
 				oldstate = &ParseClients[(oldindex + from->parseClientsNum) & MAX_PARSE_CLIENTS - 1];
 				oldnum = oldstate->clientIndex;
+
+				Clients[oldnum] = *oldstate;
 			}
 			else
 				oldnum = 99999;

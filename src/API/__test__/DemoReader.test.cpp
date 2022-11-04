@@ -8,13 +8,8 @@ TEST_F(DemoFixture, DemoReader)
         auto snapshot = Reader->GetCurrentSnapshot();
         auto entities = Reader->GetLastUpdatedEntities();
 
-        if (entities.size())
-        {
-            std::cout << entities.size() << " "
-                << Reader->Entities[208].lerp.pos.trTime << " "
-                << Reader->PreviousEntities[208].lerp.pos.trTime << " "
-                << std::endl;
-        }
+        if (!Reader->GetCurrentSnapshot().valid)
+            continue;
 
         float x = snapshot.ps.velocity[0];
         float y = snapshot.ps.velocity[1];
