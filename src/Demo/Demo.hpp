@@ -21,6 +21,8 @@ namespace Iswenzz::CoD4::DM1
 		std::ifstream DemoFile;
 		std::ofstream DemoFileOut;
 		bool IsOpen = false;
+		bool IsEOF = true;
+		bool IsWriting = false;
 		bool Verbose;
 
 		int Protocol = COD4_PROTOCOL;
@@ -51,6 +53,7 @@ namespace Iswenzz::CoD4::DM1
 		int SnapMessageNum = 0;
 
 		clientSnapshot_t CurrentSnapshot = { 0 };
+		archivedFrame_t CurrentFrame = { 0 };
 
 		std::array<std::string, MAX_CMDSTRINGS> CommandStrings{ };
 		std::array<std::string, MAX_CONFIGSTRINGS> ValidConfigStrings{ };
@@ -59,6 +62,8 @@ namespace Iswenzz::CoD4::DM1
 		std::array<entityState_t, MAX_GENTITIES> EntityBaselines{ };
 		std::array<entityState_t, MAX_PARSE_ENTITIES> ParseEntities{ };
 		std::array<clientState_t, MAX_PARSE_CLIENTS> ParseClients{ };
+		std::array<entityState_t, MAX_PARSE_ENTITIES> Entities{ };
+		std::array<clientState_t, MAX_PARSE_CLIENTS> Clients{ };
 		std::array<clientNames_t, MAX_CLIENTS> ClientNames{ };
 		std::array<clientSnapshot_t, PACKET_BACKUP> Snapshots{ };
 		std::array<archivedFrame_t, MAX_FRAMES> Frames{ };
@@ -88,6 +93,15 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="verbose">Prints debug informations.</param>
 		/// <returns></returns>
 		Demo(std::string filepath, bool verbose);
+
+		/// <summary>
+		/// Initialize a new Demo object with the specified demo file path.
+		/// </summary>
+		/// <param name="filepath">File path to a demo file (.dm_1)</param>
+		/// <param name="write">Rewrite demo.</param>
+		/// <param name="verbose">Prints debug informations.</param>
+		/// <returns></returns>
+		Demo(std::string filepath, bool write, bool verbose);
 
 		/// <summary>
 		/// Dispose all resources.

@@ -9,7 +9,9 @@ namespace Iswenzz::CoD4::DM1
 {
 	Demo::Demo(std::string filepath) : Demo(filepath, false) { }
 
-	Demo::Demo(std::string filepath, bool verbose) : Filepath(filepath), Verbose(verbose)
+	Demo::Demo(std::string filepath, bool verbose) : Demo(filepath, false, verbose) { }
+
+	Demo::Demo(std::string filepath, bool write, bool verbose) : Filepath(filepath), Verbose(verbose), IsWriting(write)
 	{
 		Open(filepath);
 	}
@@ -28,8 +30,10 @@ namespace Iswenzz::CoD4::DM1
 		if (std::filesystem::exists(filepath))
 		{
 			DemoFile.open(filepath, std::ios::binary);
-			DemoFileOut.open(filepath + ".1.dm_1", std::ios::binary);
+			if (IsWriting)
+				DemoFileOut.open(std::filesystem::path(filepath).stem().string() + ".out.dm_1", std::ios::binary);
 			IsOpen = DemoFile.is_open();
+			IsEOF = false;
 		}
 	}
 
@@ -43,7 +47,10 @@ namespace Iswenzz::CoD4::DM1
 		if (DemoFile.is_open())
 		{
 			if (CurrentCompressedMsg.SrvMsgSeq == -1)
+			{
+				IsEOF = true;
 				return false;
+			}
 
 			DemoFile.read(reinterpret_cast<char*>(&CurrentMessageType), sizeof(char));
 			VerboseLog("msg: " << static_cast<int>(CurrentMessageType) << std::endl);
@@ -70,7 +77,11 @@ namespace Iswenzz::CoD4::DM1
 	void Demo::Close()
 	{
 		if (DemoFile.is_open())
+		{
 			DemoFile.close();
+			if (IsWriting)
+				DemoFileOut.close();
+		}
 		IsOpen = false;
 	}
 
@@ -94,10 +105,12 @@ namespace Iswenzz::CoD4::DM1
 		// EOF
 		if (CurrentCompressedMsg.SrvMsgSeq == -1)
 		{
-			DemoFileOut.write(reinterpret_cast<char*>(&slen), sizeof(slen));
-			DemoFileOut.write(reinterpret_cast<char*>(&dummyEnd), sizeof(dummyEnd));
-			DemoFileOut.write(reinterpret_cast<char*>(&dummyEnd), sizeof(dummyEnd));
-
+			if (IsWriting)
+			{
+				DemoFileOut.write(reinterpret_cast<char*>(&slen), sizeof(slen));
+				DemoFileOut.write(reinterpret_cast<char*>(&dummyEnd), sizeof(dummyEnd));
+				DemoFileOut.write(reinterpret_cast<char*>(&dummyEnd), sizeof(dummyEnd));
+			}
 			return;
 		}
 
@@ -173,6 +186,9 @@ namespace Iswenzz::CoD4::DM1
 		CurrentWritingCompressedMsg.CurSize = 4 + Huffman::Compress(&CurrentWritingUncompressedMsg.Buffer[0],
 			CurrentWritingUncompressedMsg.CurSize, &CurrentWritingCompressedMsg.Buffer[0], 0);
 
+		if (!IsWriting)
+			return;
+
 		char seq = 0;
 		DemoFileOut.write(reinterpret_cast<char*>(&seq), sizeof(seq));
 		DemoFileOut.write(reinterpret_cast<char*>(&CurrentCompressedMsg.SrvMsgSeq),
@@ -218,6 +234,10 @@ namespace Iswenzz::CoD4::DM1
 
 		LastFrameSrvMsgSeq = CurrentCompressedMsg.SrvMsgSeq;
 		memcpy(&Frames[LastFrameSrvMsgSeq & MAX_FRAMES - 1], &frame, sizeof(archivedFrame_t));
+		CurrentFrame = frame;
+
+		if (!IsWriting)
+			return;
 
 		char seq = 1;
 		DemoFileOut.write(reinterpret_cast<char*>(&seq), sizeof(seq));
@@ -245,7 +265,11 @@ namespace Iswenzz::CoD4::DM1
 		DemoFile.read(reinterpret_cast<char*>(&legacyEnd), sizeof(int));
 		DemoFile.read(reinterpret_cast<char*>(&reserved), sizeof(uint64_t));
 
-		std::cout << "Protocol: " << Protocol << std::endl;
+		if (Verbose)
+			std::cout << "Protocol: " << Protocol << std::endl;
+
+		if (!IsWriting)
+			return;
 
 		char seq = 2;
 		DemoFileOut.write(reinterpret_cast<char*>(&seq), sizeof(seq));
@@ -817,6 +841,8 @@ namespace Iswenzz::CoD4::DM1
 				{
 					oldstate = &ParseEntities[(oldindex + from->parseEntitiesNum) & MAX_PARSE_ENTITIES - 1];
 					oldnum = oldstate->number;
+
+					Entities[oldnum] = *oldstate;
 				}
 				else
 					oldnum = 99999;
@@ -830,6 +856,8 @@ namespace Iswenzz::CoD4::DM1
 				{
 					oldstate = &ParseEntities[(oldindex + from->parseEntitiesNum) & MAX_PARSE_ENTITIES - 1];
 					oldnum = oldstate->number;
+
+					Entities[oldnum] = *oldstate;
 				}
 				else
 					oldnum = 99999;
@@ -852,6 +880,8 @@ namespace Iswenzz::CoD4::DM1
 				oldstate = &ParseEntities[(static_cast<short>(oldindex) + (uint16_t)from->parseEntitiesNum) &
 					MAX_PARSE_ENTITIES - 1];
 				oldnum = oldstate->number;
+
+				Entities[oldnum] = *oldstate;
 			}
 			else
 				oldnum = 99999;
@@ -899,6 +929,8 @@ namespace Iswenzz::CoD4::DM1
 				{
 					oldstate = &ParseClients[(oldindex + from->parseClientsNum) & MAX_PARSE_CLIENTS - 1];
 					oldnum = oldstate->clientIndex;
+
+					Clients[oldnum] = *oldstate;
 				}
 				else
 					oldnum = 99999;
@@ -912,6 +944,8 @@ namespace Iswenzz::CoD4::DM1
 				{
 					oldstate = &ParseClients[(oldindex + from->parseClientsNum) & MAX_PARSE_CLIENTS - 1];
 					oldnum = oldstate->clientIndex;
+
+					Clients[oldnum] = *oldstate;
 				}
 				else
 					oldnum = 99999;
@@ -926,11 +960,13 @@ namespace Iswenzz::CoD4::DM1
 		while (oldnum != 99999 && !msg.Overflowed)
 		{
 			DeltaClient(msg, time, to, oldnum, oldstate, true);
-
+			
 			if (++oldindex < from->numClients)
 			{
 				oldstate = &ParseClients[(oldindex + from->parseClientsNum) & MAX_PARSE_CLIENTS - 1];
 				oldnum = oldstate->clientIndex;
+
+				Clients[oldnum] = *oldstate;
 			}
 			else
 				oldnum = 99999;

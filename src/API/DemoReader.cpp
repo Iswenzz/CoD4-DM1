@@ -23,6 +23,11 @@ namespace Iswenzz::CoD4::DM1
 		return DemoFile && DemoFile->IsOpen;
 	}
 
+	bool DemoReader::IsEOF()
+	{
+		return DemoFile && DemoFile->IsEOF;
+	}
+
 	bool DemoReader::Next()
 	{
 		// Update previous data for comparisons
@@ -30,8 +35,9 @@ namespace Iswenzz::CoD4::DM1
 		{
 			PreviousFrame = GetCurrentFrame();
 			PreviousSnapshot = GetCurrentSnapshot();
-			PreviousClients = DemoFile->ParseClients;
-			PreviousEntities = DemoFile->ParseEntities;
+			PreviousClients = DemoFile->Clients;
+			PreviousEntities = DemoFile->Entities;
+			PreviousCommandStrings = DemoFile->CommandStrings;
 		}
 
 		// Parse demo and update reader fields
@@ -43,9 +49,8 @@ namespace Iswenzz::CoD4::DM1
 
 			Frame = GetCurrentFrame();
 			Snapshot = GetCurrentSnapshot();
-
-			UpdateClients();
-			UpdateEntities();
+			Entities = DemoFile->Entities;
+			Clients = DemoFile->Clients;
 
 			return true;
 		}
@@ -89,34 +94,25 @@ namespace Iswenzz::CoD4::DM1
 
 	archivedFrame_t DemoReader::GetCurrentFrame()
 	{
-		auto orderedFrames = DemoFile->Frames;
-		std::sort(orderedFrames.begin(), orderedFrames.end(),
-			[](const archivedFrame_t& a, const archivedFrame_t& b) { return a.commandTime > b.commandTime; });
-		return orderedFrames.size() > 0 ? orderedFrames.back() : archivedFrame_t();
+		return DemoFile->CurrentFrame;
 	}
 
 	std::vector<clientState_t> DemoReader::GetLastUpdatedClients()
 	{
-		return Utility::GetArrayDifference<clientState_t>(DemoFile->ParseClients, PreviousClients,
-			[](const clientState_t& a, const clientState_t& b) { return a.clientIndex == b.clientIndex; });
+		return Utility::GetArrayDifference<clientState_t>(Clients, PreviousClients,
+			[](const clientState_t& a, const clientState_t& b) { return !memcmp(&a, &b, sizeof(clientState_t)); });
 	}
 
 	std::vector<entityState_t> DemoReader::GetLastUpdatedEntities()
 	{
-		return Utility::GetArrayDifference<entityState_t>(DemoFile->ParseEntities, PreviousEntities,
-			[](const entityState_t& a, const entityState_t& b) { return a.number == b.number; });
+		return Utility::GetArrayDifference<entityState_t>(Entities, PreviousEntities,
+			[](const entityState_t& a, const entityState_t& b) { return !memcmp(&a, &b, sizeof(entityState_t)); });
 	}
 
-	void DemoReader::UpdateClients()
+	std::vector<std::string> DemoReader::GetLastCommandStrings()
 	{
-		for (const clientState_t& client : GetLastUpdatedClients())
-			Clients[client.clientIndex] = client;
-	}
-
-	void DemoReader::UpdateEntities()
-	{
-		for (const entityState_t& entity : GetLastUpdatedEntities())
-			Entities[entity.number] = entity;
+		return Utility::GetArrayDifference<std::string>(DemoFile->CommandStrings, PreviousCommandStrings,
+			[&](const std::string& a, const std::string& b) { return a == b; });
 	}
 
 	std::string DemoReader::ReflectDemoValue(const std::string path)
@@ -143,6 +139,16 @@ namespace Iswenzz::CoD4::DM1
 		if (json.is_string())
 			result = json.get<std::string>();
 		return result;
+	}
+
+	std::string DemoReader::GetConfigString(const std::string name)
+	{
+		for (const std::string& config : DemoFile->ConfigStrings)
+		{
+			if (!config.empty() && !config.find(name))
+				return config;
+		}
+		return "";
 	}
 
 	std::string DemoReader::ParseConfigString(const std::string name)

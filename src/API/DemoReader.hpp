@@ -22,6 +22,7 @@ namespace Iswenzz::CoD4::DM1
 		archivedFrame_t PreviousFrame = { 0 };
 		std::array<entityState_t, MAX_PARSE_ENTITIES> PreviousEntities{ };
 		std::array<clientState_t, MAX_PARSE_CLIENTS> PreviousClients{ };
+		std::array<std::string, MAX_CMDSTRINGS> PreviousCommandStrings{ };
 
 		/// <summary>
 		/// Initialize a new DemoReader instance.
@@ -49,6 +50,12 @@ namespace Iswenzz::CoD4::DM1
 		/// Check if the demo is open.
 		/// </summary>
 		bool IsOpen();
+
+		/// <summary>
+		/// Check demo end of file.
+		/// </summary>
+		/// <returns></returns>
+		bool IsEOF();
 
 		/// <summary>
 		/// Reads the next demo message.
@@ -115,6 +122,12 @@ namespace Iswenzz::CoD4::DM1
 		std::vector<entityState_t> GetLastUpdatedEntities();
 
 		/// <summary>
+		/// Get the last updated command strings.
+		/// </summary>
+		/// <returns></returns>
+		std::vector<std::string> GetLastCommandStrings();
+
+		/// <summary>
 		/// Reflect demo variables from a path.
 		/// i.e: Snapshot.origin.0
 		/// i.e: Snapshot.origin.1
@@ -123,6 +136,12 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="path"></param>
 		/// <returns></returns>
 		std::string ReflectDemoValue(const std::string path);
+
+		/// <summary>
+		/// Get a config string.
+		/// </summary>
+		/// <param name="name">The config string name.</param>
+		std::string GetConfigString(const std::string name);
 
 		/// <summary>
 		/// Parse a config string.
@@ -135,17 +154,6 @@ namespace Iswenzz::CoD4::DM1
 		/// Get the player name.
 		/// </summary>
 		clientNames_t GetPlayerName();
-
-	private:
-		/// <summary>
-		/// Update the reader clients field.
-		/// </summary>
-		void UpdateClients();
-
-		/// <summary>
-		/// Update the reader entities field.
-		/// </summary>
-		void UpdateEntities();
 	};
 
 	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(DemoReader, FilePath, Snapshot, Frame, Entities, Clients);

@@ -3,7 +3,7 @@ import os
 
 class CoD4DM1(ConanFile):
 	name = "CoD4DM1"
-	version = "1.0.1"
+	version = "1.0.2"
 	license = "LICENCE"
 	url = "https://github.com/Iswenzz/CoD4-DM1"
 	description = "Reverse of CoD4 & CoD4X (.DM_1) demo files with features such as parsing snapshot informations, frames, entities, clients and server messages."

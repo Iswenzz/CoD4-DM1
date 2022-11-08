@@ -6,8 +6,9 @@ TEST_F(DemoFixture, DemoReader)
     {
         auto archive = Reader->GetCurrentFrame();
         auto snapshot = Reader->GetCurrentSnapshot();
+        auto entities = Reader->GetLastUpdatedEntities();
 
-        if (!snapshot.valid)
+        if (!Reader->GetCurrentSnapshot().valid)
             continue;
 
         float x = snapshot.ps.velocity[0];
@@ -38,17 +39,6 @@ TEST_F(DemoFixture, DemoReaderReflect)
     Reader->Parse();
 
     EXPECT_EQ(Reader->ReflectDemoValue("Snapshot.ping"), "999");
-}
-
-TEST_F(DemoFixture, DemoReaderDifference)
-{
-    while (Reader->Next())
-    {
-        auto entities = Reader->GetLastUpdatedEntities();
-
-        if (entities.size() > 0)
-            EXPECT_TRUE(entities.back().number);
-    }
 }
 
 TEST_F(DemoFixture, DemoReaderTime)
