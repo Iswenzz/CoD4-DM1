@@ -225,6 +225,8 @@ namespace Iswenzz::CoD4::DM1
 		DemoFile.read(reinterpret_cast<char*>(&frame.angles[1]), sizeof(float));
 		DemoFile.read(reinterpret_cast<char*>(&frame.angles[2]), sizeof(float));
 
+		if (!StartFrameTime)
+			StartFrameTime = frame.commandTime;
 		if (frame.commandTime > CurrentFrameTime)
 		{
 			PreviousFrameTime = CurrentFrameTime;
@@ -467,12 +469,17 @@ namespace Iswenzz::CoD4::DM1
 		CurrentSnapshot.serverTime = msg.ReadInt();
 		CurrentSnapshot.messageNum = msg.SrvMsgSeq;
 
-		if (!StartFrameTime)
-			StartFrameTime = CurrentSnapshot.serverTime;
-
 		uint8_t deltaNum = msg.ReadByte();
 		CurrentSnapshot.deltaNum = !deltaNum ? -1 : CurrentSnapshot.messageNum - deltaNum;
 		CurrentSnapshot.snapFlags = msg.ReadByte();
+
+		if (!StartSnapshotTime)
+			StartSnapshotTime = CurrentSnapshot.serverTime;
+		if (CurrentSnapshot.serverTime > CurrentSnapshotTime)
+		{
+			PreviousSnapshotTime = CurrentSnapshotTime;
+			CurrentSnapshotTime = CurrentSnapshot.serverTime;
+		}
 
 		// Integrity checks
 		if (CurrentSnapshot.deltaNum > 0)

@@ -8,14 +8,10 @@ TEST_F(DemoFixture, DemoReader)
         auto snapshot = Reader->GetCurrentSnapshot();
         auto entities = Reader->GetLastUpdatedEntities();
 
-        if (!Reader->GetCurrentSnapshot().valid)
+        if (!snapshot.valid)
             continue;
 
-        float x = snapshot.ps.velocity[0];
-        float y = snapshot.ps.velocity[1];
-
-        //std::cout << snapshot.serverTime << " " << std::sqrt((x * x) + (y * y)) << std::endl;
-        //std::cout << Reader->GetFPS() << std::endl;
+        std::cout << Reader->GetTime() << " " << Reader->GetTimeMilliseconds() << std::endl;
     }
     EXPECT_TRUE(Reader->GetCurrentFrame().commandTime);
 }

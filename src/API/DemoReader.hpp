@@ -74,16 +74,28 @@ namespace Iswenzz::CoD4::DM1
 		void Close();
 
 		/// <summary>
-		/// Get the demo time.
+		/// Get the snapshot time.
 		/// </summary>
 		/// <returns></returns>
 		float GetTime();
 
 		/// <summary>
-		/// Get the demo time in milliseconds.
+		/// Get the archive time.
 		/// </summary>
 		/// <returns></returns>
-		float GetTimeMilliseconds();
+		float GetArchiveTime();
+
+		/// <summary>
+		/// Get the snapshot time in milliseconds.
+		/// </summary>
+		/// <returns></returns>
+		int GetTimeMilliseconds();
+
+		/// <summary>
+		/// Get the archive time in milliseconds.
+		/// </summary>
+		/// <returns></returns>
+		int GetArchiveTimeMilliseconds();
 
 		/// <summary>
 		/// Get the server time.

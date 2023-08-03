@@ -69,12 +69,22 @@ namespace Iswenzz::CoD4::DM1
 
 	float DemoReader::GetTime()
 	{
+		return (DemoFile->CurrentSnapshotTime - DemoFile->StartSnapshotTime) / 50.0f / 20.0f;
+	}
+
+	float DemoReader::GetArchiveTime()
+	{
 		return (DemoFile->CurrentFrameTime - DemoFile->StartFrameTime) / 50.0f / 20.0f;
 	}
 
-	float DemoReader::GetTimeMilliseconds()
+	int DemoReader::GetTimeMilliseconds()
 	{
-		return GetTime() * 1000.0f;
+		return GetTime() * 1000;
+	}
+
+	int DemoReader::GetArchiveTimeMilliseconds()
+	{
+		return GetArchiveTime() * 1000;
 	}
 
 	int DemoReader::GetServerTime()

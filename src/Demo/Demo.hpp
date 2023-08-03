@@ -23,7 +23,7 @@ namespace Iswenzz::CoD4::DM1
 		bool IsOpen = false;
 		bool IsEOF = true;
 		bool IsWriting = false;
-		bool Verbose;
+		bool Verbose = false;
 
 		int Protocol = COD4_PROTOCOL;
 		MSGType CurrentMessageType = { };
@@ -31,6 +31,9 @@ namespace Iswenzz::CoD4::DM1
 		int StartFrameTime = 0;
 		int PreviousFrameTime = 0;
 		int CurrentFrameTime = 0;
+		int StartSnapshotTime = 0;
+		int PreviousSnapshotTime = 0;
+		int CurrentSnapshotTime = 0;
 		int LastFrameSrvMsgSeq = 0;
 		int FirstFrameSrvMsgSeq = 0;
 
