@@ -1,41 +1,39 @@
-from conans import ConanFile, CMake
 import os
+from conans import ConanFile, CMake
+
 
 class CoD4DM1(ConanFile):
-	name = "CoD4DM1"
-	version = "1.0.3"
-	license = "LICENCE"
-	url = "https://github.com/Iswenzz/CoD4-DM1"
-	description = "Reverse of CoD4 & CoD4X (.DM_1) demo files with features such as parsing snapshot informations, frames, entities, clients and server messages."
+    name = "CoD4DM1"
+    version = "1.0.4"
+    license = "LICENCE"
+    url = "https://github.com/Iswenzz/CoD4-DM1"
+    description = "Reverse of CoD4 & CoD4X (.DM_1) demo files with features such as parsing snapshot informations, frames, entities, clients and server messages."
 
-	generators = "cmake"
-	exports_sources = "LICENSE", "README.md", "CMakeLists.txt", "src/*", "fixtures/*"
+    generators = "cmake"
+    exports_sources = "LICENSE", "README.md", "CMakeLists.txt", "src/*", "fixtures/*"
 
-	requires = (
-		"cxxopts/3.0.0",
-		"nlohmann_json/3.10.5"
-	)
-	settings = "os", "arch", "compiler", "build_type"
-	options = {"enable_testing": [True, False]}
-	default_options  = {"enable_testing": False}
+    requires = ("cxxopts/3.1.1", "nlohmann_json/3.11.2")
+    settings = "os", "arch", "compiler", "build_type"
+    options = {"enable_testing": [True, False]}
+    default_options = {"enable_testing": False}
 
-	def build_requirements(self):
-		if self.options.enable_testing:
-			self.build_requires("gtest/cci.20210126", force_host_context=True)
+    def build_requirements(self):
+        if self.options.enable_testing:
+            self.build_requires("gtest/1.14.0", force_host_context=True)
 
-	def build(self):
-		cmake = CMake(self)
-		cmake.configure()
-		cmake.build()
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
-	def package(self):
-		self.copy("LICENSE, README.md")
-		self.copy("*.hpp", src="src", dst="include/CoD4DM1")
-		self.copy("*.a", dst="lib", keep_path=False)
-		self.copy("*.lib", dst="lib", keep_path=False)
-		self.copy("*.dll", dst="bin", keep_path=False)
-		self.copy("*.so", dst="bin", keep_path=False)
+    def package(self):
+        self.copy("LICENSE, README.md")
+        self.copy("*.hpp", src="src", dst="include/CoD4DM1")
+        self.copy("*.a", dst="lib", keep_path=False)
+        self.copy("*.lib", dst="lib", keep_path=False)
+        self.copy("*.dll", dst="bin", keep_path=False)
+        self.copy("*.so", dst="bin", keep_path=False)
 
-	def package_info(self):
-		self.cpp_info.includedirs.append(os.path.join("include", "CoD4DM1"))
-		self.cpp_info.libs = ["CoD4DM1"]
+    def package_info(self):
+        self.cpp_info.includedirs.append(os.path.join("include", "CoD4DM1"))
+        self.cpp_info.libs = ["CoD4DM1"]
