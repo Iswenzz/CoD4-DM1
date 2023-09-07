@@ -1,5 +1,5 @@
 file(TO_CMAKE_PATH $ENV{VCPKG_ROOT} VCPKG_ROOT)
-set(VCPKG_TARGET_TRIPLET x64-windows)
+set(VCPKG_TARGET_TRIPLET x64-windows-static)
 
 option(BUILD_CLI "Build CLI" OFF)
 if(BUILD_CLI)
