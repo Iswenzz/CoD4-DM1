@@ -6,9 +6,7 @@ add_subdirectory(Crypt)
 add_subdirectory(Demo)
 add_subdirectory(Utils)
 
-target_link_libraries(CoD4DM1.Lib PUBLIC
-	cxxopts::cxxopts
-	nlohmann_json::nlohmann_json)
+target_link_libraries(CoD4DM1.Lib PUBLIC nlohmann_json::nlohmann_json)
 target_include_directories(CoD4DM1.Lib PUBLIC .)
 
 get_target_property(SOURCES CoD4DM1.Lib SOURCES)

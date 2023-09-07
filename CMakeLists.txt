@@ -11,7 +11,6 @@ set(CPACK_GENERATOR 7Z)
 include(CPack)
 
 # Dependencies
-find_package(cxxopts CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
 # Tests
@@ -33,12 +32,15 @@ endif()
 # Build
 add_subdirectory(fixtures)
 add_subdirectory(src)
-add_executable(CoD4DM1 src/CLI.cpp)
 
-target_link_libraries(CoD4DM1 PRIVATE CoD4DM1.Lib)
+if(BUILD_CLI)
+	find_package(cxxopts CONFIG REQUIRED)
+	add_executable(CoD4DM1 src/CLI.cpp)
+	target_link_libraries(CoD4DM1 PRIVATE CoD4DM1.Lib cxxopts::cxxopts)
+	install(TARGETS CoD4DM1 DESTINATION bin)
+endif()
 
 # Pack
-install(TARGETS CoD4DM1 DESTINATION bin)
 install(TARGETS CoD4DM1.Lib LIBRARY DESTINATION lib)
 install(DIRECTORY src/ DESTINATION lib/include/CoD4DM1
     FILES_MATCHING PATTERN "*.hpp" PATTERN "__test__" EXCLUDE)
