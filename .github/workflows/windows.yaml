@@ -13,16 +13,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Conan
-      uses: turtlebrowser/get-conan@main
-      with:
-        version: 1.59.0
-
     - name: Build
       run: |
         mkdir build && cd build
-        conan install .. --build missing -o enable_testing=True -s build_type=Debug
-        cmake .. -DENABLE_TESTING=True
+        cmake .. -DCMAKE_TOOLCHAIN_FILE=.vcpkg/windows.cmake -DBUILD_TESTING=True
         cmake --build .
 
     - name: Artifact

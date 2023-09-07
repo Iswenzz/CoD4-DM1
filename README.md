@@ -15,14 +15,13 @@ Reverse of CoD4 & CoD4X ``.DM_1`` demo files with features such as parsing snaps
 
 ## Building
 
-1. [CMake](https://cmake.org/) and [Conan](https://conan.io/)
+1. [CMake](https://cmake.org/) and [vcpkg](https://vcpkg.io/en/).
 2. [Visual Studio](https://visualstudio.microsoft.com/)
 
 _Build Command:_
 
     mkdir build && cd build
-    conan install .. --build missing
-    cmake ..
+    cmake .. -DCMAKE_TOOLCHAIN_FILE=.vcpkg/windows.cmake
     cmake --build .
 
 ### [Download](https://github.com/Iswenzz/CoD4-DM1/releases)

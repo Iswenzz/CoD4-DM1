@@ -13,16 +13,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Conan
-      uses: turtlebrowser/get-conan@main
-      with:
-        version: 1.59.0
-
     - name: Build
       run: |
         mkdir build && cd build
-        conan install .. --build missing
-        cmake ..
+        cmake .. -DCMAKE_TOOLCHAIN_FILE=.vcpkg/linux.cmake
         cmake --build .
 
     - name: Artifact

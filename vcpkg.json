@@ -1,0 +1,21 @@
+{
+	"name": "cod4dm1",
+	"version": "1.0.5",
+	"description": "Reverse of CoD4 & CoD4X (.DM_1) demo files with features such as parsing snapshot informations, frames, entities, clients and server messages.",
+  	"homepage": "https://github.com/Iswenzz/CoD4-DM1",
+	"features": {
+		"tests": {
+			"description": "Build tests",
+			"dependencies": ["gtest"]
+		}
+	},
+	"dependencies": [
+		"cxxopts",
+		"nlohmann-json"
+	],
+	"overrides": [
+        { "name": "cxxopts", "version": "3.1.1" },
+        { "name": "nlohmann-json", "version": "3.11.2" },
+        { "name": "gtest", "version": "1.13.0" }
+    ]
+}
