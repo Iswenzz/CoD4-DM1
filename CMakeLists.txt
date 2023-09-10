@@ -40,7 +40,6 @@ if(BUILD_CLI)
 	install(TARGETS CoD4DM1 DESTINATION bin)
 endif()
 
-# Pack
+# Install
 install(TARGETS CoD4DM1.Lib LIBRARY DESTINATION lib)
-install(DIRECTORY src/ DESTINATION lib/include/CoD4DM1
-    FILES_MATCHING PATTERN "*.hpp" PATTERN "__test__" EXCLUDE)
+install(DIRECTORY src/ DESTINATION include/CoD4DM1 FILES_MATCHING PATTERN "*.hpp" PATTERN "__test__" EXCLUDE)
