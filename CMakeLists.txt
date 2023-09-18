@@ -3,7 +3,6 @@ project(CoD4DM1 VERSION 1.0.5 LANGUAGES CXX)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-include(GenerateExportHeader)
 
 # CPack
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
@@ -52,12 +51,17 @@ install(TARGETS CoD4DM1 EXPORT CoD4DM1Targets LIBRARY DESTINATION lib)
 install(DIRECTORY src/ DESTINATION include/CoD4DM1 FILES_MATCHING PATTERN "*.hpp" PATTERN "__test__" EXCLUDE)
 
 # Package
+include(GenerateExportHeader)
 include(CMakePackageConfigHelpers)
 generate_export_header(CoD4DM1)
 
 export(EXPORT CoD4DM1Targets
     FILE "${CMAKE_CURRENT_BINARY_DIR}/CoD4DM1Targets.cmake"
     NAMESPACE CoD4DM1::)
+
+configure_file(cmake/CoD4DM1Config.cmake
+	"${CMAKE_CURRENT_BINARY_DIR}/CoD4DM1Config.cmake"
+	COPYONLY)
 
 install(EXPORT CoD4DM1Targets
     FILE CoD4DM1Targets.cmake
