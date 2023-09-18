@@ -59,9 +59,9 @@ export(EXPORT CoD4DM1Targets
     FILE "${CMAKE_CURRENT_BINARY_DIR}/CoD4DM1Targets.cmake"
     NAMESPACE CoD4DM1::)
 
-configure_file(cmake/CoD4DM1Config.cmake
+configure_package_config_file(cmake/CoD4DM1Config.cmake.in
 	"${CMAKE_CURRENT_BINARY_DIR}/CoD4DM1Config.cmake"
-	COPYONLY)
+	INSTALL_DESTINATION lib/cmake/CoD4DM1)
 
 install(EXPORT CoD4DM1Targets
     FILE CoD4DM1Targets.cmake
