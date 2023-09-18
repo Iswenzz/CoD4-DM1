@@ -56,9 +56,13 @@ include(CMakePackageConfigHelpers)
 generate_export_header(CoD4DM1)
 
 export(EXPORT CoD4DM1Targets
-	FILE "${CMAKE_CURRENT_BINARY_DIR}/CoD4DM1Targets.cmake"
-	NAMESPACE CoD4DM1::)
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/CoD4DM1Targets.cmake"
+    NAMESPACE CoD4DM1::)
 
-configure_file(cmake/CoD4DM1Config.cmake
-	"${CMAKE_CURRENT_BINARY_DIR}/CoD4DM1Config.cmake"
-	COPYONLY)
+install(EXPORT CoD4DM1Targets
+    FILE CoD4DM1Targets.cmake
+    NAMESPACE CoD4DM1::
+    DESTINATION lib/cmake/CoD4DM1)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/CoD4DM1Config.cmake"
+    DESTINATION lib/cmake/CoD4DM1)
