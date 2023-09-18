@@ -1,3 +1,3 @@
-target_sources(CoD4DM1.Lib PRIVATE
+target_sources(CoD4DM1 PRIVATE
 	Utility.hpp
 	Utility.cpp)

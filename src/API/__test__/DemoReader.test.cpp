@@ -11,7 +11,7 @@ TEST_F(DemoFixture, DemoReader)
         if (!snapshot.valid)
             continue;
 
-        std::cout << Reader->GetTime() << " " << Reader->GetTimeMilliseconds() << std::endl;
+        //std::cout << Reader->GetTime() << " " << Reader->GetTimeMilliseconds() << std::endl;
     }
     EXPECT_TRUE(Reader->GetCurrentFrame().commandTime);
 }
