@@ -51,9 +51,7 @@ install(TARGETS CoD4DM1 EXPORT CoD4DM1Targets LIBRARY DESTINATION lib)
 install(DIRECTORY src/ DESTINATION include/CoD4DM1 FILES_MATCHING PATTERN "*.hpp" PATTERN "__test__" EXCLUDE)
 
 # Package
-include(GenerateExportHeader)
 include(CMakePackageConfigHelpers)
-generate_export_header(CoD4DM1)
 
 export(EXPORT CoD4DM1Targets
     FILE "${CMAKE_CURRENT_BINARY_DIR}/CoD4DM1Targets.cmake"
