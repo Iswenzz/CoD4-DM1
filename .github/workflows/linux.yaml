@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [master]
 
+env:
+  BUILD_TYPE: Release
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,14 +16,36 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
+    - name: Vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: 4a600e9fea71bd7872080cbb716797e04d30e6d3
+
     - name: Build
       run: |
         mkdir build && cd build
-        cmake .. -DCMAKE_TOOLCHAIN_FILE=.vcpkg/linux.cmake
-        cmake --build .
+        cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=".vcpkg/linux.cmake" -DBUILD_TESTING=True
+        cmake --build . --config ${{env.BUILD_TYPE}}
 
     - name: Artifact
       uses: actions/upload-artifact@v2
       with:
         name: build-artifact
         path: build
+
+  tests:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: build-artifact
+        path: build
+
+    - name: Tests
+      run: |
+        ctest -C ${{env.BUILD_TYPE}}
