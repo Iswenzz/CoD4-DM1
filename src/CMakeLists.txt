@@ -8,8 +8,7 @@ add_subdirectory(Utils)
 target_link_libraries(CoD4DM1 PUBLIC nlohmann_json::nlohmann_json)
 target_include_directories(CoD4DM1 PRIVATE .)
 
-target_include_directories(CoD4DM1
-    INTERFACE
+target_include_directories(CoD4DM1 INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<INSTALL_INTERFACE:include/CoD4DM1>)
 
