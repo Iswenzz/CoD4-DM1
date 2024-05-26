@@ -1,67 +1,67 @@
 name: Windows
 
 on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+    push:
+        branches: [master]
+    pull_request:
+        branches: [master]
 
 env:
-  BUILD_TYPE: Release
+    BUILD_TYPE: Release
 
 jobs:
-  build:
-    runs-on: windows-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+    build:
+        runs-on: windows-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
 
-    - name: Vcpkg
-      uses: lukka/run-vcpkg@v11
-      with:
-        vcpkgGitCommitId: 4a600e9fea71bd7872080cbb716797e04d30e6d3
+            - name: Vcpkg
+              uses: lukka/run-vcpkg@v11
+              with:
+                  vcpkgGitCommitId: 4a600e9fea71bd7872080cbb716797e04d30e6d3
 
-    - name: Build
-      run: |
-        mkdir build && cd build
-        cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=".vcpkg/windows.cmake" -DBUILD_TESTING=True
-        cmake --build . --config ${{env.BUILD_TYPE}}
+            - name: Build
+              run: |
+                  mkdir build && cd build
+                  cmake .. --preset windows -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTING=True
+                  cmake --build . --config ${{env.BUILD_TYPE}}
 
-    - name: Artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: build-artifact
-        path: build
+            - name: Artifact
+              uses: actions/upload-artifact@v2
+              with:
+                  name: build-artifact
+                  path: build
 
-  tests:
-    runs-on: windows-latest
-    needs: [build]
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+    tests:
+        runs-on: windows-latest
+        needs: [build]
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
 
-    - name: OpenCppCoverage
-      shell: bash
-      run: |
-        choco install -y opencppcoverage
-        echo "C:\Program Files\OpenCppCoverage" >> $GITHUB_PATH
+            - name: OpenCppCoverage
+              shell: bash
+              run: |
+                  choco install -y opencppcoverage
+                  echo "C:\Program Files\OpenCppCoverage" >> $GITHUB_PATH
 
-    - name: Artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: build-artifact
-        path: build
+            - name: Artifact
+              uses: actions/download-artifact@v2
+              with:
+                  name: build-artifact
+                  path: build
 
-    - name: Tests
-      run: |
-        opencppcoverage --quiet --export_type=cobertura:opencppcoverageCoverage.xml --working_dir build --sources src -- build/Release/CoD4DM1.Tests.exe
+            - name: Tests
+              run: |
+                  opencppcoverage --quiet --export_type=cobertura:opencppcoverageCoverage.xml --working_dir build --sources src -- build/Release/CoD4DM1.Tests.exe
 
-    - name: CodeCov
-      uses: codecov/codecov-action@v2
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        files: ./opencppcoverageCoverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: true
-        verbose: true
+            - name: CodeCov
+              uses: codecov/codecov-action@v2
+              with:
+                  token: ${{ secrets.CODECOV_TOKEN }}
+                  files: ./opencppcoverageCoverage.xml
+                  flags: unittests
+                  name: codecov-umbrella
+                  fail_ci_if_error: true
+                  verbose: true

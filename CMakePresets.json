@@ -1,0 +1,30 @@
+{
+	"version": 7,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 27,
+		"patch": 0
+	},
+	"configurePresets": [
+		{
+			"name": "windows",
+			"generator": "Visual Studio 17 2022",
+			"cacheVariables": {
+				"CMAKE_TOOLCHAIN_FILE": ".vcpkg/windows.cmake"
+			}
+		},
+		{
+			"name": "windows-mingw",
+			"generator": "MinGW Makefiles",
+			"cacheVariables": {
+				"CMAKE_TOOLCHAIN_FILE": ".vcpkg/windows.cmake"
+			}
+		},
+		{
+			"name": "linux",
+			"cacheVariables": {
+				"CMAKE_TOOLCHAIN_FILE": ".vcpkg/linux.cmake"
+			}
+		}
+	]
+}

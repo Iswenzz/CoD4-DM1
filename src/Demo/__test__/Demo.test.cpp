@@ -2,7 +2,7 @@
 
 TEST_F(DemoFixture, DemoParsing)
 {
-    DemoFile->Parse();
+	DemoFile->Parse();
 
-    EXPECT_TRUE(DemoFile->CurrentFrameTime);
+	EXPECT_TRUE(DemoFile->CurrentFrameTime);
 }

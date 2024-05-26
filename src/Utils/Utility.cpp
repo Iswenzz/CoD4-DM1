@@ -2,8 +2,8 @@
 
 namespace Iswenzz::CoD4::DM1
 {
-    std::vector<std::string> Utility::SplitString(const std::string& source, char delimiter)
-    {
+	std::vector<std::string> Utility::SplitString(const std::string& source, char delimiter)
+	{
 		std::vector<std::string> results;
 
 		size_t prev = 0;
@@ -19,5 +19,5 @@ namespace Iswenzz::CoD4::DM1
 			results.push_back(source.substr(prev));
 
 		return results;
-    }
+	}
 }

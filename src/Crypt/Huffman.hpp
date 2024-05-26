@@ -1,8 +1,8 @@
 #pragma once
 #include "Msg.hpp"
 
-#define HMAX 256					/* Maximum symbol */
-#define NYT HMAX                    /* NYT = Not Yet Transmitted */
+#define HMAX 256 /* Maximum symbol */
+#define NYT HMAX /* NYT = Not Yet Transmitted */
 #define INTERNAL_NODE (HMAX + 1)
 
 namespace Iswenzz::CoD4::DM1
@@ -12,11 +12,11 @@ namespace Iswenzz::CoD4::DM1
 	/// </summary>
 	typedef struct nodetype
 	{
-		struct nodetype* left, *right, *parent;			/* tree structure */
-		struct nodetype* next, *prev;					/* doubly-linked list */
-		struct nodetype** head;							/* highest ranked node in block */
-		int	weight;
-		int	symbol;
+		struct nodetype *left, *right, *parent; /* tree structure */
+		struct nodetype *next, *prev;			/* doubly-linked list */
+		struct nodetype** head;					/* highest ranked node in block */
+		int weight;
+		int symbol;
 	} node_t;
 
 	/// <summary>
@@ -24,8 +24,8 @@ namespace Iswenzz::CoD4::DM1
 	/// </summary>
 	typedef struct
 	{
-		int	blocNode;
-		int	blocPtrs;
+		int blocNode;
+		int blocPtrs;
 
 		node_t* tree;
 		node_t* lhead;
@@ -47,8 +47,8 @@ namespace Iswenzz::CoD4::DM1
 	} huffman_t;
 
 	/// <summary>
-	/// This is based on the Adaptive Huffman algorithm described in Sayood's Data Compression book. 
-	/// The ranks are not actually stored, but implicitly defined by the location 
+	/// This is based on the Adaptive Huffman algorithm described in Sayood's Data Compression book.
+	/// The ranks are not actually stored, but implicitly defined by the location
 	/// of a node within a doubly linked list.
 	/// </summary>
 	class Huffman
@@ -68,7 +68,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="lenOut">The output buffer length.</param>
 		/// <returns></returns>
 		static int Decompress(uint8_t* bufIn, int lenIn, uint8_t* bufOut, int lenOut);
-		
+
 		/// <summary>
 		/// Compress a message.
 		/// </summary>

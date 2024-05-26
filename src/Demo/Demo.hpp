@@ -3,11 +3,11 @@
 #include "Crypt/NetFields.hpp"
 #include "Utils/Utility.hpp"
 
-#include <cstring>
 #include <cmath>
-#include <string>
-#include <fstream>
+#include <cstring>
 #include <filesystem>
+#include <fstream>
+#include <string>
 
 namespace Iswenzz::CoD4::DM1
 {
@@ -26,7 +26,7 @@ namespace Iswenzz::CoD4::DM1
 		bool Verbose = false;
 
 		int Protocol = COD4_PROTOCOL;
-		MSGType CurrentMessageType = { };
+		MSGType CurrentMessageType = {};
 
 		int StartFrameTime = 0;
 		int PreviousFrameTime = 0;
@@ -38,7 +38,7 @@ namespace Iswenzz::CoD4::DM1
 		int FirstFrameSrvMsgSeq = 0;
 
 		int FPS = 0;
-		std::vector<int> FrameTimes{ };
+		std::vector<int> FrameTimes{};
 
 		int ClientNum = 0;
 		int ChecksumFeed = 0;
@@ -58,22 +58,22 @@ namespace Iswenzz::CoD4::DM1
 		clientSnapshot_t CurrentSnapshot = { 0 };
 		archivedFrame_t CurrentFrame = { 0 };
 
-		std::array<std::string, MAX_CMDSTRINGS> CommandStrings{ };
-		std::array<std::string, MAX_CONFIGSTRINGS> ValidConfigStrings{ };
-		std::array<std::string, MAX_CONFIGSTRINGS> ConfigStrings{ };
+		std::array<std::string, MAX_CMDSTRINGS> CommandStrings{};
+		std::array<std::string, MAX_CONFIGSTRINGS> ValidConfigStrings{};
+		std::array<std::string, MAX_CONFIGSTRINGS> ConfigStrings{};
 
-		std::array<entityState_t, MAX_GENTITIES> EntityBaselines{ };
-		std::array<entityState_t, MAX_PARSE_ENTITIES> ParseEntities{ };
-		std::array<clientState_t, MAX_PARSE_CLIENTS> ParseClients{ };
-		std::array<entityState_t, MAX_PARSE_ENTITIES> Entities{ };
-		std::array<clientState_t, MAX_PARSE_CLIENTS> Clients{ };
-		std::array<clientNames_t, MAX_CLIENTS> ClientNames{ };
-		std::array<clientSnapshot_t, PACKET_BACKUP> Snapshots{ };
-		std::array<archivedFrame_t, MAX_FRAMES> Frames{ };
+		std::array<entityState_t, MAX_GENTITIES> EntityBaselines{};
+		std::array<entityState_t, MAX_PARSE_ENTITIES> ParseEntities{};
+		std::array<clientState_t, MAX_PARSE_CLIENTS> ParseClients{};
+		std::array<entityState_t, MAX_PARSE_ENTITIES> Entities{};
+		std::array<clientState_t, MAX_PARSE_CLIENTS> Clients{};
+		std::array<clientNames_t, MAX_CLIENTS> ClientNames{};
+		std::array<clientSnapshot_t, PACKET_BACKUP> Snapshots{};
+		std::array<archivedFrame_t, MAX_FRAMES> Frames{};
 
-		std::array<uint8_t, MAX_GENTITIES> ActiveBaselines{ };
-		std::array<uint8_t, MAX_GENTITIES> ActiveEntities{ };
-		std::array<clientState_t, MAX_CLIENTS> ActiveClients{ };
+		std::array<uint8_t, MAX_GENTITIES> ActiveBaselines{};
+		std::array<uint8_t, MAX_GENTITIES> ActiveEntities{};
+		std::array<clientState_t, MAX_CLIENTS> ActiveClients{};
 
 		/// <summary>
 		/// Initialize a new Demo object, demo file can be opened with the Open() function.
@@ -134,10 +134,10 @@ namespace Iswenzz::CoD4::DM1
 		void Close();
 
 	private:
-		Msg CurrentCompressedMsg{ };
-		Msg CurrentUncompressedMsg{ };
-		Msg CurrentWritingCompressedMsg{ };
-		Msg CurrentWritingUncompressedMsg{ };
+		Msg CurrentCompressedMsg{};
+		Msg CurrentUncompressedMsg{};
+		Msg CurrentWritingCompressedMsg{};
+		Msg CurrentWritingUncompressedMsg{};
 
 		playerState_t NullPlayerState = { 0 };
 		entityState_t NullEntityState = { 0 };
@@ -206,8 +206,8 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="numFields">Struct field count.</param>
 		/// <param name="indexBits">Min bit count.</param>
 		/// <param name="stateFields">Netfield fields.</param>
-		bool ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to,
-			uint32_t number, int numFields, int indexBits, netField_t* stateFields);
+		bool ReadDeltaStruct(Msg& msg, const int time, const void* from, void* to, uint32_t number, int numFields,
+			int indexBits, netField_t* stateFields);
 
 		/// <summary>
 		/// Read all delta compressed net fields.
@@ -218,8 +218,8 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="numFields">Struct field count.</param>
 		/// <param name="stateFields">Netfield fields.</param>
-		void ReadDeltaFields(Msg& msg, const int time, const uint8_t* from, uint8_t* to,
-			int numFields, netField_t* stateFields);
+		void ReadDeltaFields(Msg& msg, const int time, const uint8_t* from, uint8_t* to, int numFields,
+			netField_t* stateFields);
 
 		/// <summary>
 		/// Read a delta compressed net field.
@@ -231,8 +231,8 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="field">Current netfield to read.</param>
 		/// <param name="noXor">Should start with a value of 0.</param>
 		/// <param name="print">Should print debug information.</param>
-		void ReadDeltaField(Msg& msg, int time, const void* from, const void* to, 
-			const netField_t* field, bool noXor, bool print);
+		void ReadDeltaField(Msg& msg, int time, const void* from, const void* to, const netField_t* field, bool noXor,
+			bool print);
 
 		/// <summary>
 		/// Read a delta compressed entity state.
@@ -243,8 +243,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="number">Entity number.</param>
 		/// <param name="isBaseLine">Is it a baseline entity.</param>
-		bool ReadDeltaEntity(Msg& msg, const int time, 
-			entityState_t* from, entityState_t* to, int number);
+		bool ReadDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, int number);
 
 		/// <summary>
 		/// Read a delta compressed client state.
@@ -254,8 +253,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="from">Pointer to the old struct state.</param>
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="number">Entity number.</param>
-		bool ReadDeltaClient(Msg& msg, const int time, 
-			clientState_t* from, clientState_t* to, int number);
+		bool ReadDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, int number);
 
 		/// <summary>
 		/// Read a delta compressed objective struct.
@@ -284,8 +282,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="from">Pointer to the old struct state.</param>
 		/// <param name="to">Pointer to the new struct state.</param>
 		/// <param name="predictedFieldsIgnoreXor">Should start with a value of 0.</param>
-		void ReadDeltaPlayerState(Msg& msg, int time, 
-			playerState_t* from, playerState_t* to,
+		void ReadDeltaPlayerState(Msg& msg, int time, playerState_t* from, playerState_t* to,
 			bool predictedFieldsIgnoreXor);
 
 		/// <summary>
@@ -296,8 +293,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="from">Pointer to the old snapshot state.</param>
 		/// <param name="to">Pointer to the new snapshot state.</param>
 		/// <returns></returns>
-		int ParsePacketEntities(Msg& msg, const int time, 
-			clientSnapshot_t* from, clientSnapshot_t* to);
+		int ParsePacketEntities(Msg& msg, const int time, clientSnapshot_t* from, clientSnapshot_t* to);
 
 		/// <summary>
 		/// Parse all clients.
@@ -306,8 +302,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="time">Server time.</param>
 		/// <param name="from">Pointer to the old snapshot state.</param>
 		/// <param name="to">Pointer to the new snapshot state.</param>
-		void ParsePacketClients(Msg& msg, const int time, 
-			clientSnapshot_t* from, clientSnapshot_t* to);
+		void ParsePacketClients(Msg& msg, const int time, clientSnapshot_t* from, clientSnapshot_t* to);
 
 		/// <summary>
 		/// Read last changed net field.
@@ -333,8 +328,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="frame">The old snapshot frame.</param>
 		/// <param name="newnum">The entity num.</param>
 		/// <param name="old">The old entity state.</param>
-		void DeltaEntity(Msg& msg, const int time, clientSnapshot_t* frame, 
-			int newnum, entityState_t* old);
+		void DeltaEntity(Msg& msg, const int time, clientSnapshot_t* frame, int newnum, entityState_t* old);
 
 		/// <summary>
 		/// Parse a delta client.
@@ -345,8 +339,8 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="newnum">The entity num.</param>
 		/// <param name="old">The old client state.</param>
 		/// <param name="unchanged">Should not update.</param>
-		void DeltaClient(Msg& msg, const int time, clientSnapshot_t* frame, int newnum,
-			clientState_t* old, bool unchanged);
+		void DeltaClient(Msg& msg, const int time, clientSnapshot_t* frame, int newnum, clientState_t* old,
+			bool unchanged);
 
 		/// <summary>
 		/// Get a predicted origin for server time.
@@ -357,7 +351,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="predictedViewangles">The viewangles to predict.</param>
 		/// <param name="bobCycle">Bob cycle value</param>
 		/// <param name="movementDir">Movement direction.</param>
-		bool GetPredictedOriginForServerTime(const int time, float* predictedOrigin, float* predictedVelocity, 
+		bool GetPredictedOriginForServerTime(const int time, float* predictedOrigin, float* predictedVelocity,
 			float* predictedViewangles, int* bobCycle, int* movementDir);
 
 		/// <summary>
@@ -374,8 +368,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="from">Pointer to an old entity state.</param>
 		/// <param name="to">Pointer to the new entity state.</param>
 		/// <param name="force">Force updating fields.</param>
-		void WriteDeltaEntity(Msg& msg, const int time, 
-			entityState_t* from, entityState_t* to, bool force);
+		void WriteDeltaEntity(Msg& msg, const int time, entityState_t* from, entityState_t* to, bool force);
 
 		/// <summary>
 		/// Write entity removal.
@@ -406,8 +399,8 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="indexBits">Index bits.</param>
 		/// <param name="stateFields">Net fields to update.</param>
 		/// <returns></returns>
-		int WriteEntityDelta(Msg& msg, const int time, const uint8_t* from, const uint8_t* to,
-			bool force, int numFields, int indexBits, netField_t* stateFields);
+		int WriteEntityDelta(Msg& msg, const int time, const uint8_t* from, const uint8_t* to, bool force,
+			int numFields, int indexBits, netField_t* stateFields);
 
 		/// <summary>
 		/// Write delta struct.
@@ -422,9 +415,8 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="stateFields">Net fields to update.</param>
 		/// <param name="bChangeBit">Change bits.</param>
 		/// <returns></returns>
-		int WriteDeltaStruct(Msg& msg, const int time, 
-			const uint8_t* from, const uint8_t* to,
-			bool force, int numFields, int indexBits, netField_t* stateFields, uint8_t bChangeBit);
+		int WriteDeltaStruct(Msg& msg, const int time, const uint8_t* from, const uint8_t* to, bool force,
+			int numFields, int indexBits, netField_t* stateFields, uint8_t bChangeBit);
 
 		/// <summary>
 		/// Check if delta values are equal.
@@ -445,9 +437,8 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="field">The net field.</param>
 		/// <param name="fieldNum">The net field index.</param>
 		/// <param name="forceSend">Should force updating.</param>
-		void WriteDeltaField(Msg& msg, const int time, 
-			const uint8_t* from, const uint8_t* to,
-			netField_s* field, int fieldNum, uint8_t forceSend);
+		void WriteDeltaField(Msg& msg, const int time, const uint8_t* from, const uint8_t* to, netField_s* field,
+			int fieldNum, uint8_t forceSend);
 
 		/// <summary>
 		/// Write a command string.
@@ -507,8 +498,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="from">Pointer to old hudelem.</param>
 		/// <param name="to">Pointer to new hudelem.</param>
 		/// <param name="count">The field count.</param>
-		void WriteDeltaHudElems(Msg& msg, const int time, 
-			hudelem_t* from, hudelem_t* to, const int count);
+		void WriteDeltaHudElems(Msg& msg, const int time, hudelem_t* from, hudelem_t* to, const int count);
 
 		/// <summary>
 		/// Write packet entities.
@@ -517,8 +507,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="time">The server time.</param>
 		/// <param name="oldframe">Pointer to old client snapshot.</param>
 		/// <param name="newframe">Pointer to new client snapshot.</param>
-		void WritePacketEntities(Msg& msg, const int time, 
-			clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
+		void WritePacketEntities(Msg& msg, const int time, clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
 
 		/// <summary>
 		/// Write packet clients.
@@ -527,8 +516,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="time">The server time.</param>
 		/// <param name="oldframe">Pointer to old client snapshot.</param>
 		/// <param name="newframe">Pointer to new client snapshot.</param>
-		void WritePacketClients(Msg& msg, const int time, 
-			clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
+		void WritePacketClients(Msg& msg, const int time, clientSnapshot_t* oldframe, clientSnapshot_t* newframe);
 
 		/// <summary>
 		/// Write delta client.
@@ -538,8 +526,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="from">Pointer to old client state.</param>
 		/// <param name="to">Pointer to new client state.</param>
 		/// <param name="force">Should force updating.</param>
-		void WriteDeltaClient(Msg& msg, const int time, 
-			clientState_t* from, clientState_t* to, bool force);
+		void WriteDeltaClient(Msg& msg, const int time, clientState_t* from, clientState_t* to, bool force);
 
 		/// <summary>
 		/// Write client delta.
@@ -552,8 +539,8 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="numFields">The fields count.</param>
 		/// <param name="indexBits">Index bits.</param>
 		/// <param name="stateFields">The net fields.</param>
-		void WriteClientDelta(Msg& msg, const int time, clientState_t* from, clientState_t* to,
-			bool force, int numFields, int indexBits, netField_t* stateFields);
+		void WriteClientDelta(Msg& msg, const int time, clientState_t* from, clientState_t* to, bool force,
+			int numFields, int indexBits, netField_t* stateFields);
 
 		/// <summary>
 		/// Should send player state field.

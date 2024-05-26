@@ -1,10 +1,10 @@
 #pragma once
 #include "Demo/DemoData.hpp"
 
-#include <cstring>
 #include <cmath>
-#include <vector>
+#include <cstring>
 #include <memory>
+#include <vector>
 
 namespace Iswenzz::CoD4::DM1
 {
@@ -29,10 +29,10 @@ namespace Iswenzz::CoD4::DM1
 	{
 		svc_nop,
 		svc_gamestate,
-		svc_configstring,       // [short] [string] only in gamestate messages
-		svc_baseline,           // only in gamestate messages
-		svc_serverCommand,      // [string] to be executed by client game module
-		svc_download,           // [short] size [size bytes]
+		svc_configstring,  // [short] [string] only in gamestate messages
+		svc_baseline,	   // only in gamestate messages
+		svc_serverCommand, // [string] to be executed by client game module
+		svc_download,	   // [short] size [size bytes]
 		svc_snapshot,
 		svc_EOF,
 		svc_steamcommands,
@@ -46,9 +46,9 @@ namespace Iswenzz::CoD4::DM1
 	/// </summary>
 	enum class clc_ops_e
 	{
-		clc_move,               // [usercmd_t]
-		clc_moveNoDelta,        // [usercmd_t]
-		clc_clientCommand,      // [string] message
+		clc_move,		   // [usercmd_t]
+		clc_moveNoDelta,   // [usercmd_t]
+		clc_clientCommand, // [string] message
 		clc_EOF,
 		clc_nop,
 		clc_download,
@@ -64,7 +64,7 @@ namespace Iswenzz::CoD4::DM1
 	class Msg
 	{
 	public:
-		MSGType Type = { };
+		MSGType Type = {};
 		int SrvMsgSeq = 0;
 		int Dummy = 0;
 		int Protocol = 16;
@@ -73,14 +73,14 @@ namespace Iswenzz::CoD4::DM1
 		bool Overflowed = false;
 		bool Readonly = false;
 
-		std::vector<uint8_t> Buffer{ };
-		std::vector<uint8_t> SplitBuffer{ };
+		std::vector<uint8_t> Buffer{};
+		std::vector<uint8_t> SplitBuffer{};
 
-		int	MaxSize = 0;
-		int	CurSize = 0;
-		int	SplitSize = 0;
-		int	ReadCount = 0;
-		int	Bit = 0;
+		int MaxSize = 0;
+		int CurSize = 0;
+		int SplitSize = 0;
+		int ReadCount = 0;
+		int Bit = 0;
 		int LastRefEntity = 0;
 
 		/// <summary>
@@ -103,7 +103,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="mode">The crypt mode.</param>
 		/// <param name="protocol">The game protocol.</param>
 		/// <returns></returns>
-		Msg(uint8_t *buffer, int len, MSGCrypt mode, int protocol);
+		Msg(uint8_t* buffer, int len, MSGCrypt mode, int protocol);
 
 		/// <summary>
 		/// Initialize a new Msg object from an existing msg.
@@ -221,7 +221,7 @@ namespace Iswenzz::CoD4::DM1
 		/// </summary>
 		/// <param name="buffer">The output buffer.</param>
 		/// <param name="len">The size to read.</param>
-		void ReadData(void *buffer, int len);
+		void ReadData(void* buffer, int len);
 
 		/// <summary>
 		/// Write a 16 bit short using the ANGLE2SHORT macro.

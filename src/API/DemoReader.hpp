@@ -1,5 +1,6 @@
 #pragma once
 #include "Demo/Demo.hpp"
+
 #include <nlohmann/json.hpp>
 
 namespace Iswenzz::CoD4::DM1
@@ -15,14 +16,14 @@ namespace Iswenzz::CoD4::DM1
 
 		clientSnapshot_t Snapshot = { 0 };
 		archivedFrame_t Frame = { 0 };
-		std::array<entityState_t, MAX_PARSE_ENTITIES> Entities{ };
-		std::array<clientState_t, MAX_PARSE_CLIENTS> Clients{ };
+		std::array<entityState_t, MAX_PARSE_ENTITIES> Entities{};
+		std::array<clientState_t, MAX_PARSE_CLIENTS> Clients{};
 
 		clientSnapshot_t PreviousSnapshot = { 0 };
 		archivedFrame_t PreviousFrame = { 0 };
-		std::array<entityState_t, MAX_PARSE_ENTITIES> PreviousEntities{ };
-		std::array<clientState_t, MAX_PARSE_CLIENTS> PreviousClients{ };
-		std::array<std::string, MAX_CMDSTRINGS> PreviousCommandStrings{ };
+		std::array<entityState_t, MAX_PARSE_ENTITIES> PreviousEntities{};
+		std::array<clientState_t, MAX_PARSE_CLIENTS> PreviousClients{};
+		std::array<std::string, MAX_CMDSTRINGS> PreviousCommandStrings{};
 
 		/// <summary>
 		/// Initialize a new DemoReader instance.

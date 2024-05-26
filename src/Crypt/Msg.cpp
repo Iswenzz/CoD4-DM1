@@ -2,20 +2,16 @@
 #include "Huffman.hpp"
 #include "NetFields.hpp"
 
-#include <cstring>
-#include <cmath>
 #include <stdint.h>
+#include <cmath>
+#include <cstring>
 #include <iostream>
 
 namespace Iswenzz::CoD4::DM1
 {
-	long long kbitmask[33] =
-	{
-		0, 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191,
-		16383, 32767, 65535, 131071, 262143, 524287, 1048575, 2097151,
-		4194303, 8388607, 16777215, 33554431, 67108863, 134217727,
-		268435455, 536870911, 1073741823, 2147483647, 4294967295
-	};
+	long long kbitmask[33] = { 0, 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191, 16383, 32767, 65535,
+		131071, 262143, 524287, 1048575, 2097151, 4194303, 8388607, 16777215, 33554431, 67108863, 134217727, 268435455,
+		536870911, 1073741823, 2147483647, 4294967295 };
 
 	Msg::Msg(int protocol) : Protocol(protocol) { }
 
@@ -139,7 +135,7 @@ namespace Iswenzz::CoD4::DM1
 	int Msg::ReadShort()
 	{
 		signed short* c;
-		if (ReadCount + sizeof(short) > CurSize) 
+		if (ReadCount + sizeof(short) > CurSize)
 		{
 			Overflowed = 1;
 			return -1;
@@ -154,7 +150,7 @@ namespace Iswenzz::CoD4::DM1
 	{
 		int32_t* c;
 
-		if (ReadCount + sizeof(int32_t) > CurSize) 
+		if (ReadCount + sizeof(int32_t) > CurSize)
 		{
 			Overflowed = 1;
 			return -1;
@@ -168,7 +164,7 @@ namespace Iswenzz::CoD4::DM1
 	int64_t Msg::ReadInt64()
 	{
 		int64_t* c;
-		if (ReadCount + sizeof(int64_t) > CurSize) 
+		if (ReadCount + sizeof(int64_t) > CurSize)
 		{
 			Overflowed = 1;
 			return -1;
@@ -182,7 +178,7 @@ namespace Iswenzz::CoD4::DM1
 	float Msg::ReadFloat()
 	{
 		float* c;
-		if (ReadCount + sizeof(float) > CurSize) 
+		if (ReadCount + sizeof(float) > CurSize)
 		{
 			Overflowed = 1;
 			return -1;
@@ -232,10 +228,10 @@ namespace Iswenzz::CoD4::DM1
 		{
 			float center[3]{ 0, 0, 0 };
 			VectorCopy(center, MapCenter);
-			
+
 			coord = static_cast<signed int>(center[bits != -92] + 0.5);
-			return static_cast<double>(((static_cast<signed int>(oldValue) - coord + 0x8000) 
-				^ ReadBits(16)) + coord - 0x8000);
+			return static_cast<double>(
+				((static_cast<signed int>(oldValue) - coord + 0x8000) ^ ReadBits(16)) + coord - 0x8000);
 		}
 		return static_cast<double>(ReadBits(7) - 64) + oldValue;
 	}
@@ -254,10 +250,10 @@ namespace Iswenzz::CoD4::DM1
 		{
 			float center[3]{ 0, 0, 0 };
 			VectorCopy(center, MapCenter);
-			
+
 			coord = static_cast<signed int>(center[2] + 0.5);
-			return static_cast<double>(((static_cast<signed int>(oldValue) - coord + 0x8000)
-				^ ReadBits(16)) + coord - 0x8000);
+			return static_cast<double>(
+				((static_cast<signed int>(oldValue) - coord + 0x8000) ^ ReadBits(16)) + coord - 0x8000);
 		}
 		return static_cast<double>(ReadBits(7) - 64) + oldValue;
 	}
@@ -278,13 +274,13 @@ namespace Iswenzz::CoD4::DM1
 
 			str += static_cast<uint8_t>(c);
 			l++;
-		} 
+		}
 		return str;
 	}
 
 	std::string Msg::ReadStringLine()
 	{
-		int	l = 0, c;
+		int l = 0, c;
 		std::string str;
 		while (true)
 		{
@@ -298,7 +294,7 @@ namespace Iswenzz::CoD4::DM1
 
 			str += static_cast<char>(c);
 			l++;
-		} 
+		}
 		return str;
 	}
 
@@ -322,12 +318,12 @@ namespace Iswenzz::CoD4::DM1
 				databyte = ReadByte();
 				if (databyte >= 'A' && databyte <= 'Z')
 					databyte -= 'A';
-				else if (databyte >= 'a' && databyte <= 'z') 
+				else if (databyte >= 'a' && databyte <= 'z')
 				{
 					databyte -= 'a';
 					databyte += 26;
 				}
-				else if (databyte >= '0' && databyte <= '9') 
+				else if (databyte >= '0' && databyte <= '9')
 				{
 					databyte -= '0';
 					databyte += 52;
@@ -336,7 +332,7 @@ namespace Iswenzz::CoD4::DM1
 					databyte = 62;
 				else if (databyte == '/')
 					databyte = 63;
-				else 
+				else
 				{
 					databyte = -1;
 					break;
@@ -347,15 +343,14 @@ namespace Iswenzz::CoD4::DM1
 			outbuf[i + 1] = reinterpret_cast<char*>(&b64data)[1];
 			outbuf[i + 2] = reinterpret_cast<char*>(&b64data)[0];
 			i += 3;
-		} 
-		while (databyte != -1 && (i + 4) < len);
+		} while (databyte != -1 && (i + 4) < len);
 		outbuf[i] = '\0';
 	}
-	
-	void Msg::WriteInt(int value) 
+
+	void Msg::WriteInt(int value)
 	{
 		int32_t* dst;
-		if (MaxSize - CurSize < 4) 
+		if (MaxSize - CurSize < 4)
 		{
 			Overflowed = true;
 			return;
@@ -369,7 +364,7 @@ namespace Iswenzz::CoD4::DM1
 	void Msg::WriteByte(int value)
 	{
 		int8_t* dst;
-		if (MaxSize - CurSize < 1) 
+		if (MaxSize - CurSize < 1)
 		{
 			Overflowed = true;
 			return;
@@ -383,7 +378,7 @@ namespace Iswenzz::CoD4::DM1
 	void Msg::WriteShort(int value)
 	{
 		signed short* dst;
-		if (MaxSize - CurSize < 2) 
+		if (MaxSize - CurSize < 2)
 		{
 			Overflowed = true;
 			return;
@@ -452,7 +447,7 @@ namespace Iswenzz::CoD4::DM1
 		}
 	}
 
-	void Msg::WriteString(const char* string) 
+	void Msg::WriteString(const char* string)
 	{
 		for (int i = 0; i < strlen(string); i++)
 			WriteByte(string[i]);

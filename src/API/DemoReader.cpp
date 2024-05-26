@@ -59,7 +59,8 @@ namespace Iswenzz::CoD4::DM1
 
 	void DemoReader::Parse()
 	{
-		while (Next());
+		while (Next())
+			;
 	}
 
 	void DemoReader::Close()

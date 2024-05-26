@@ -1,16 +1,16 @@
 #pragma once
-#define ARCHIVED_ENTITY_FIELDS_COUNT			69
-#define CLIENT_STATE_FIELDS_COUNT				24
-#define HUD_ELEM_FIELDS_COUNT					40
-#define PLAYER_STATE_FIELDS_COUNT				141
-#define NET_FIELDS_COUNT						18
-#define PLANE_STATE_FIELDS_COUNT				60
-#define HELICOPTER_ENTITY_STATE_FIELDS_COUNT	58
-#define ENTITY_STATE_FIELDS_COUNT				59
-#define OBJECTIVE_FIELDS_COUNT					6
+#define ARCHIVED_ENTITY_FIELDS_COUNT 69
+#define CLIENT_STATE_FIELDS_COUNT 24
+#define HUD_ELEM_FIELDS_COUNT 40
+#define PLAYER_STATE_FIELDS_COUNT 141
+#define NET_FIELDS_COUNT 18
+#define PLANE_STATE_FIELDS_COUNT 60
+#define HELICOPTER_ENTITY_STATE_FIELDS_COUNT 58
+#define ENTITY_STATE_FIELDS_COUNT 59
+#define OBJECTIVE_FIELDS_COUNT 6
 
 #define NETFE(x) x, sizeof(x) / sizeof(netField_t)
-#define NETF(x) const_cast<char *>(#x), static_cast<int>(reinterpret_cast<uintptr_t>(&((entityState_t*)0)->x))
+#define NETF(x) const_cast<char*>(#x), static_cast<int>(reinterpret_cast<uintptr_t>(&((entityState_t*)0)->x))
 #define OBJF(x) const_cast<char*>(#x), static_cast<int>(reinterpret_cast<uintptr_t>(&((objective_t*)0)->x))
 #define AEF(x) const_cast<char*>(#x), static_cast<int>(reinterpret_cast<uintptr_t>(&((archivedEntity_t*)0)->x))
 #define CSF(x) const_cast<char*>(#x), static_cast<int>(reinterpret_cast<uintptr_t>(&((clientState_t*)0)->x))
@@ -18,9 +18,9 @@
 #define PSF(x) const_cast<char*>(#x), static_cast<int>(reinterpret_cast<uintptr_t>(&((playerState_t*)0)->x))
 
 #ifdef _MSC_VER
-#define __clz __lzcnt
+	#define __clz __lzcnt
 #else
-#define __clz __builtin_clz
+	#define __clz __builtin_clz
 #endif
 
 namespace Iswenzz::CoD4::DM1

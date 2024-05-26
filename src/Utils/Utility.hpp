@@ -1,8 +1,8 @@
 #pragma once
-#include <string>
-#include <vector>
-#include <unordered_map>
 #include <algorithm>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace Iswenzz::CoD4::DM1
 {
@@ -44,7 +44,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="b">The second container.</param>
 		/// <returns></returns>
 		template <class T, class Container>
-		static std::vector<T> GetArrayDifference(const Container &a, const Container &b)
+		static std::vector<T> GetArrayDifference(const Container& a, const Container& b)
 		{
 			return GetArrayDifference(a, b, Equal);
 		}
@@ -60,7 +60,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="predicate">The predicate function.</param>
 		/// <returns></returns>
 		template <typename T, class Container, typename Predicate>
-		static std::vector<T> GetArrayDifference(const Container &a, const Container &b, Predicate predicate)
+		static std::vector<T> GetArrayDifference(const Container& a, const Container& b, Predicate predicate)
 		{
 			std::vector<T> difference;
 			typename Container::const_iterator itA = a.begin(), itB = b.begin();
@@ -83,7 +83,7 @@ namespace Iswenzz::CoD4::DM1
 		/// <param name="a">Variable A.</param>
 		/// <param name="b">Variable B.</param>
 		/// <returns></returns>
-		template <typename T> 
+		template <typename T>
 		static bool Equal(T& a, T& b)
 		{
 			return a == b;

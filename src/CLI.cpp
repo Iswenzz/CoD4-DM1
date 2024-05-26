@@ -31,7 +31,7 @@ using namespace Iswenzz::CoD4::DM1;
 /// <returns></returns>
 int main()
 {
-    Huffman::InitMain(); // Initialize huffman compression
+	Huffman::InitMain(); // Initialize huffman compression
 
-    return 0;
+	return 0;
 }
