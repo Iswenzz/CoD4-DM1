@@ -1,6 +1,6 @@
 {
 	"name": "cod4dm1",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"description": "Reverse of CoD4 & CoD4X (.DM_1) demo files with features such as parsing snapshot informations, frames, entities, clients and server messages.",
   	"homepage": "https://github.com/Iswenzz/CoD4-DM1",
 	"features": {
