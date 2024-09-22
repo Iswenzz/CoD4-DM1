@@ -1,6 +1,6 @@
 # CoD4 DM1
 
-[![Checks](https://img.shields.io/github/checks-status/Iswenzz/CoD4-DM1/master?logo=github)](https://github.com/Iswenzz/CoD4-DM1/actions)
+[![Checks](https://img.shields.io/github/check-runs/Iswenzz/CoD4-DM1/master?logo=github)](https://github.com/Iswenzz/CoD4-DM1/actions)
 [![CodeFactor](https://img.shields.io/codefactor/grade/github/Iswenzz/CoD4-DM1?label=codefactor&logo=codefactor)](https://www.codefactor.io/repository/github/iswenzz/CoD4-DM1)
 [![CodeCov](https://img.shields.io/codecov/c/github/Iswenzz/CoD4-DM1?label=codecov&logo=codecov)](https://codecov.io/gh/Iswenzz/CoD4-DM1)
 [![License](https://img.shields.io/github/license/Iswenzz/CoD4-DM1?color=blue&logo=gitbook&logoColor=white)](https://github.com/Iswenzz/CoD4-DM1/blob/master/LICENSE)
