@@ -28,7 +28,7 @@ jobs:
                   cmake --build . --config ${{env.BUILD_TYPE}}
 
             - name: Artifact
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v4
               with:
                   name: build-artifact
                   path: build
@@ -47,7 +47,7 @@ jobs:
                   echo "C:\Program Files\OpenCppCoverage" >> $GITHUB_PATH
 
             - name: Artifact
-              uses: actions/download-artifact@v2
+              uses: actions/download-artifact@v4
               with:
                   name: build-artifact
                   path: build
