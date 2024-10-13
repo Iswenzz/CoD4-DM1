@@ -1,6 +1,6 @@
 ﻿#include "Huffman.hpp"
 
-namespace Iswenzz::CoD4::DM1
+namespace CoD4::DM1
 {
 	static huffman_t msgHuff;
 	static int bloc = 0;

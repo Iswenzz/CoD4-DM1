@@ -5,7 +5,7 @@
 #include <iostream>
 #include <iterator>
 
-namespace Iswenzz::CoD4::DM1
+namespace CoD4::DM1
 {
 	DemoReader::DemoReader(std::string filePath) : FilePath(filePath)
 	{

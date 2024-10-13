@@ -57,7 +57,7 @@
 	if (Verbose)            \
 	std::cout << ostream
 
-namespace Iswenzz::CoD4::DM1
+namespace CoD4::DM1
 {
 	typedef unsigned int clipHandle_t;
 

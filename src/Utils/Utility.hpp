@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace Iswenzz::CoD4::DM1
+namespace CoD4::DM1
 {
 	class Utility
 	{

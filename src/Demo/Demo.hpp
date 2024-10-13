@@ -9,7 +9,7 @@
 #include <fstream>
 #include <string>
 
-namespace Iswenzz::CoD4::DM1
+namespace CoD4::DM1
 {
 	/// <summary>
 	/// Represent a demo file .DM_1

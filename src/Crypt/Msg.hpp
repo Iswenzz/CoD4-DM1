@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-namespace Iswenzz::CoD4::DM1
+namespace CoD4::DM1
 {
 	enum class MSGType
 	{

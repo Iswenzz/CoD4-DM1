@@ -2,7 +2,7 @@
 #include "Demo/DemoData.hpp"
 
 // clang-format off
-namespace Iswenzz::CoD4::DM1
+namespace CoD4::DM1
 {
 	netField_t NetFields::EntityStateFields[ENTITY_STATE_FIELDS_COUNT] =
 	{

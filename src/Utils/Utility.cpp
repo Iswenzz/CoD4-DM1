@@ -1,6 +1,6 @@
 #include "Utility.hpp"
 
-namespace Iswenzz::CoD4::DM1
+namespace CoD4::DM1
 {
 	std::vector<std::string> Utility::SplitString(const std::string& source, char delimiter)
 	{

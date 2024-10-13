@@ -3,7 +3,7 @@
 
 #include <nlohmann/json.hpp>
 
-namespace Iswenzz::CoD4::DM1
+namespace CoD4::DM1
 {
 	/// <summary>
 	/// Reader API for demo files. (.DM_1)

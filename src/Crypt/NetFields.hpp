@@ -23,7 +23,7 @@
 	#define __clz __builtin_clz
 #endif
 
-namespace Iswenzz::CoD4::DM1
+namespace CoD4::DM1
 {
 	typedef struct
 	{
