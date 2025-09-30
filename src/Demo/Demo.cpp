@@ -47,7 +47,7 @@ namespace CoD4::DM1
 	{
 		if (DemoFile.is_open())
 		{
-			if (CurrentCompressedMsg.SrvMsgSeq == -1)
+			if (CurrentCompressedMsg.SrvMsgSeq == -1 || DemoFile.eof())
 			{
 				IsEOF = true;
 				return false;
@@ -2178,3 +2178,4 @@ namespace CoD4::DM1
 		return true;
 	}
 }
+
