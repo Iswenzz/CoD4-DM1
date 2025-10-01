@@ -1153,7 +1153,12 @@ namespace CoD4::DM1
 		for (i = 0; i < inuse; ++i)
 		{
 			lc = msg.ReadBits(6);
-			assert(lc <= sizeof(NetFields::HudElemFields) / sizeof(NetFields::HudElemFields[0]));
+			if (static_cast<unsigned int>(lc) > HUD_ELEM_FIELDS_COUNT)
+			{
+				VerboseLog("Error parsing hud elements");
+				msg.Overflowed = true;
+				return;
+			}
 
 			for (y = 0; y <= lc; ++y)
 				ReadDeltaField(msg, time, &from[i], &to[i], &NetFields::HudElemFields[y], false, false);
@@ -2186,4 +2191,5 @@ namespace CoD4::DM1
 		return true;
 	}
 }
+
 
