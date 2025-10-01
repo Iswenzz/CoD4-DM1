@@ -1165,7 +1165,7 @@ namespace CoD4::DM1
 		for (i = 0; i < inuse; ++i)
 		{
 			lc = msg.ReadBits(6);
-			if (static_cast<unsigned int>(lc) > HUD_ELEM_FIELDS_COUNT)
+			if (static_cast<unsigned int>(lc) >= HUD_ELEM_FIELDS_COUNT)
 			{
 				VerboseLog("Error parsing hud elements");
 				msg.Overflowed = true;
