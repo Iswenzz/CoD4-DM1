@@ -834,9 +834,10 @@ namespace CoD4::DM1
 			newnum = ReadEntityIndex(msg, GENTITYNUM_BITS);
 			if (newnum == 1023)
 				break;
-			if (msg.ReadCount > msg.CurSize)
+			if (msg.ReadCount > msg.CurSize || static_cast<unsigned int>(newnum) >= 1024)
 			{
 				VerboseLog("Error parsing entities");
+				msg.Overflowed = true;
 				return -1;
 			}
 
@@ -921,9 +922,10 @@ namespace CoD4::DM1
 		{
 			VerboseLog("clientnum: " << newnum << std::endl);
 			newnum = ReadEntityIndex(msg, 6);
-			if (msg.ReadCount > msg.CurSize)
+			if (msg.ReadCount > msg.CurSize || static_cast<unsigned int>(newnum) >= MAX_CLIENTS)
 			{
 				VerboseLog("Error parsing clients");
+				msg.Overflowed = true;
 				return;
 			}
 
@@ -1016,6 +1018,12 @@ namespace CoD4::DM1
 
 		bool readOriginAndVel = SendOriginAndVel = msg.ReadBit() > 0;
 		int lastChangedField = ReadLastChangedField(msg, PLAYER_STATE_FIELDS_COUNT);
+		if (static_cast<unsigned int>(lastChangedField) > PLAYER_STATE_FIELDS_COUNT)
+		{
+			VerboseLog("Error parsing playerstate");
+			msg.Overflowed = true;
+			return;
+		}
 
 		netField_t* stateFields = NetFields::PlayerStateFields;
 		for (int i = 0; i < lastChangedField; ++i)
