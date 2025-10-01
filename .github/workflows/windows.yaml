@@ -19,7 +19,7 @@ jobs:
             - name: Vcpkg
               uses: lukka/run-vcpkg@v11
               with:
-                  vcpkgGitCommitId: 4a600e9fea71bd7872080cbb716797e04d30e6d3
+                  vcpkgGitCommitId: bd136dad4da8059ba93f71412f52b2ec7c09d377
 
             - name: Build
               run: |
@@ -50,3 +50,4 @@ jobs:
               run: |
                   cd build
                   ctest -C Release
+
