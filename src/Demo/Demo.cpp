@@ -2203,6 +2203,3 @@ namespace CoD4::DM1
 		return true;
 	}
 }
-
-
-
