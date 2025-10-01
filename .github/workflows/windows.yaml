@@ -40,12 +40,6 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v2
 
-            - name: OpenCppCoverage
-              shell: bash
-              run: |
-                  choco install -y opencppcoverage
-                  echo "C:\Program Files\OpenCppCoverage" >> $GITHUB_PATH
-
             - name: Artifact
               uses: actions/download-artifact@v4
               with:
@@ -54,14 +48,5 @@ jobs:
 
             - name: Tests
               run: |
-                  opencppcoverage --quiet --export_type=cobertura:opencppcoverageCoverage.xml --working_dir build --sources src -- build/Release/CoD4DM1.Tests.exe
-
-            - name: CodeCov
-              uses: codecov/codecov-action@v2
-              with:
-                  token: ${{ secrets.CODECOV_TOKEN }}
-                  files: ./opencppcoverageCoverage.xml
-                  flags: unittests
-                  name: codecov-umbrella
-                  fail_ci_if_error: true
-                  verbose: true
+                  cd build
+                  ctest -C Release
