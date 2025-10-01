@@ -326,7 +326,13 @@ namespace CoD4::DM1
 			else if (command == svc_ops_e::svc_baseline)
 			{
 				newnum = ReadEntityIndex(msg, GENTITYNUM_BITS);
-
+				if (static_cast<unsigned int>(newnum) >= 1024)
+				{
+					VerboseLog("Error parsing baseline entities");
+					msg.Overflowed = true;
+					return;
+				}
+				
 				entityState_t* es = &EntityBaselines[newnum];
 				NullEntityState = { 0 };
 
@@ -388,6 +394,12 @@ namespace CoD4::DM1
 			else if (command == svc_ops_e::svc_baseline)
 			{
 				newnum = ReadEntityIndex(msg, GENTITYNUM_BITS);
+				if (static_cast<unsigned int>(newnum) >= 1024)
+				{
+					VerboseLog("Error parsing baseline entities");
+					msg.Overflowed = true;
+					return;
+				}
 
 				entityState_t* es = &EntityBaselines[newnum];
 				NullEntityState = { 0 };
@@ -2191,5 +2203,6 @@ namespace CoD4::DM1
 		return true;
 	}
 }
+
 
 
