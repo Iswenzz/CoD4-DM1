@@ -25,33 +25,33 @@
 
 namespace CoD4::DM1
 {
-	typedef struct
+	struct subNetEntlist_t
 	{
 		const char* name;
 		int a;
 		int b;
-	} subNetEntlist_t;
+	};
 
-	typedef struct
+	struct netEntlist_t
 	{
 		subNetEntlist_t* sub;
 		int z;
-	} netEntlist_t;
+	};
 
-	typedef struct netField_s
+	struct netField_t
 	{
 		char* name;
 		int offset;
 		int bits; // 0 = float
 		unsigned char changeHints;
 		unsigned char pad[3];
-	} netField_t;
+	};
 
-	typedef struct
+	struct netFieldList_t
 	{
 		netField_t* field;
 		int numFields;
-	} netFieldList_t;
+	};
 
 	enum PacketEntityType
 	{
@@ -107,18 +107,13 @@ namespace CoD4::DM1
 		static netField_t PlaneStateFields[PLANE_STATE_FIELDS_COUNT];
 		static netField_t VehicleEntityStateFields[ENTITY_STATE_FIELDS_COUNT];
 		static netField_t EventEntityStateFields[ENTITY_STATE_FIELDS_COUNT];
-		static netFieldList_t List[NET_FIELDS_COUNT];
 		static netField_t PlayerStateFields[PLAYER_STATE_FIELDS_COUNT];
 		static netField_t HudElemFields[HUD_ELEM_FIELDS_COUNT];
 		static netField_t ClientStateFields[CLIENT_STATE_FIELDS_COUNT];
 		static netField_t ArchivedEntityFields[ARCHIVED_ENTITY_FIELDS_COUNT];
 		static netField_t ObjectiveFields[OBJECTIVE_FIELDS_COUNT];
+		static netFieldList_t List[NET_FIELDS_COUNT];
 
-		/// <summary>
-		/// Get the min bit count of an integer.
-		/// </summary>
-		/// <param name="x">The integer to check the min bit count.</param>
-		/// <returns></returns>
 		static int GetMinBitCount(int x);
 	};
 }

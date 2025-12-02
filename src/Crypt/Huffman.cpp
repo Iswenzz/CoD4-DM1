@@ -37,6 +37,41 @@ namespace CoD4::DM1
 		1112, 923, 1103, 817, 1899, 1872, 976, 841, 1127, 956, 1159, 950, 7791, 954, 1289, 933, 1127, 3207, 1020, 927,
 		1355, 768, 1040, 745, 952, 805, 1073, 740, 1013, 805, 1008, 796, 996, 1057, 11457, 13504 };
 
+	void Huffman::InitMain()
+	{
+		Huff_Init(&msgHuff);
+		Init_COD4();
+	}
+
+	void Huffman::Init_COD4()
+	{
+		memset(msg_hDataDone, 0, sizeof(msg_hDataDone));
+
+		int i = FindLowest(msg_hDataDone, msg_hData_COD4);
+		while (i != -1)
+		{
+			for (int j = 0; j < msg_hData_COD4[i]; j++)
+			{
+				Huff_AddRef(&msgHuff.compressor, static_cast<uint8_t>(i));
+				Huff_AddRef(&msgHuff.decompressor, static_cast<uint8_t>(i));
+			}
+			msg_hDataDone[i] = 1;
+			i = FindLowest(msg_hDataDone, msg_hData_COD4);
+		}
+	}
+
+	void Huffman::Init_Q3()
+	{
+		for (int i = 0; i < HMAX; i++)
+		{
+			for (int j = 0; j < msg_hData_Q3[i]; j++)
+			{
+				Huff_AddRef(&msgHuff.compressor, static_cast<uint8_t>(i));
+				Huff_AddRef(&msgHuff.decompressor, static_cast<uint8_t>(i));
+			}
+		}
+	}
+
 	int Huffman::Decompress(uint8_t* bufIn, int lenIn, uint8_t* bufOut, int lenOut)
 	{
 		lenIn *= 8;
@@ -69,6 +104,29 @@ namespace CoD4::DM1
 		for (offset = 0, i = 0; i < lenIn; i++)
 			Huff_OffsetTransmit(&msgHuff.compressor, static_cast<int>(bufIn[i]), bufOut, &offset);
 		return (offset + 7) / 8;
+	}
+
+	void Huffman::Huff_Init(huffman_t* huff)
+	{
+		std::memset(&huff->compressor, 0, sizeof(huff_t));
+		memset(&huff->decompressor, 0, sizeof(huff_t));
+
+		// Initialize the tree & list with the NYT node
+		huff->decompressor.tree = huff->decompressor.lhead = huff->decompressor.ltail = huff->decompressor.loc[NYT] =
+			&(huff->decompressor.nodeList[huff->decompressor.blocNode++]);
+		huff->decompressor.tree->symbol = NYT;
+		huff->decompressor.tree->weight = 0;
+		huff->decompressor.lhead->next = huff->decompressor.lhead->prev = nullptr;
+		huff->decompressor.tree->parent = huff->decompressor.tree->left = huff->decompressor.tree->right = nullptr;
+
+		// Add the NYT (not yet transmitted) node into the tree/list */
+		huff->compressor.tree = huff->compressor.lhead = huff->compressor.loc[NYT] =
+			&(huff->compressor.nodeList[huff->compressor.blocNode++]);
+		huff->compressor.tree->symbol = NYT;
+		huff->compressor.tree->weight = 0;
+		huff->compressor.lhead->next = huff->compressor.lhead->prev = nullptr;
+		huff->compressor.tree->parent = huff->compressor.tree->left = huff->compressor.tree->right = nullptr;
+		huff->compressor.loc[NYT] = huff->compressor.tree;
 	}
 
 	void Huffman::Huff_PutBit(int bit, uint8_t* fout, int* offset)
@@ -392,63 +450,5 @@ namespace CoD4::DM1
 			}
 		}
 		return lowest;
-	}
-
-	void Huffman::Huff_Init(huffman_t* huff)
-	{
-		std::memset(&huff->compressor, 0, sizeof(huff_t));
-		memset(&huff->decompressor, 0, sizeof(huff_t));
-
-		// Initialize the tree & list with the NYT node
-		huff->decompressor.tree = huff->decompressor.lhead = huff->decompressor.ltail = huff->decompressor.loc[NYT] =
-			&(huff->decompressor.nodeList[huff->decompressor.blocNode++]);
-		huff->decompressor.tree->symbol = NYT;
-		huff->decompressor.tree->weight = 0;
-		huff->decompressor.lhead->next = huff->decompressor.lhead->prev = nullptr;
-		huff->decompressor.tree->parent = huff->decompressor.tree->left = huff->decompressor.tree->right = nullptr;
-
-		// Add the NYT (not yet transmitted) node into the tree/list */
-		huff->compressor.tree = huff->compressor.lhead = huff->compressor.loc[NYT] =
-			&(huff->compressor.nodeList[huff->compressor.blocNode++]);
-		huff->compressor.tree->symbol = NYT;
-		huff->compressor.tree->weight = 0;
-		huff->compressor.lhead->next = huff->compressor.lhead->prev = nullptr;
-		huff->compressor.tree->parent = huff->compressor.tree->left = huff->compressor.tree->right = nullptr;
-		huff->compressor.loc[NYT] = huff->compressor.tree;
-	}
-
-	void Huffman::Init_COD4()
-	{
-		memset(msg_hDataDone, 0, sizeof(msg_hDataDone));
-
-		int i = FindLowest(msg_hDataDone, msg_hData_COD4);
-		while (i != -1)
-		{
-			for (int j = 0; j < msg_hData_COD4[i]; j++)
-			{
-				Huff_AddRef(&msgHuff.compressor, static_cast<uint8_t>(i));
-				Huff_AddRef(&msgHuff.decompressor, static_cast<uint8_t>(i));
-			}
-			msg_hDataDone[i] = 1;
-			i = FindLowest(msg_hDataDone, msg_hData_COD4);
-		}
-	}
-
-	void Huffman::Init_Q3()
-	{
-		for (int i = 0; i < HMAX; i++)
-		{
-			for (int j = 0; j < msg_hData_Q3[i]; j++)
-			{
-				Huff_AddRef(&msgHuff.compressor, static_cast<uint8_t>(i));
-				Huff_AddRef(&msgHuff.decompressor, static_cast<uint8_t>(i));
-			}
-		}
-	}
-
-	void Huffman::InitMain()
-	{
-		Huff_Init(&msgHuff);
-		Init_COD4();
 	}
 }

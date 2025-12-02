@@ -823,28 +823,6 @@ namespace CoD4::DM1
 		{ NETF(partBits[3]), 32, 1 }
 	};
 
-	netFieldList_t NetFields::List[NET_FIELDS_COUNT] =
-	{
-		{ NETFE(EntityStateFields) },
-		{ NETFE(PlayerEntityStateFields) },
-		{ NETFE(CorpseEntityStateFields) },
-		{ NETFE(ItemEntityStateFields) },
-		{ NETFE(MissleEntityStateFields) },
-		{ NETFE(EntityStateFields) },
-		{ NETFE(ScriptMoverStateFields) },
-		{ NETFE(SoundBlendEntityStateFields) },
-		{ NETFE(FxStateFields) },
-		{ NETFE(LoopFxEntityStateFields) },
-		{ NETFE(EntityStateFields) },
-		{ NETFE(EntityStateFields) },
-		{ NETFE(HelicopterEntityStateFields) },
-		{ NETFE(PlaneStateFields) },
-		{ NETFE(VehicleEntityStateFields) },
-		{ NETFE(EntityStateFields) },
-		{ NETFE(EntityStateFields) },
-		{ NETFE(EventEntityStateFields) }
-	};
-
 	netField_t NetFields::PlayerStateFields[PLAYER_STATE_FIELDS_COUNT] =
 	{
 		{ PSF(commandTime), -97, 0 },
@@ -1143,6 +1121,28 @@ namespace CoD4::DM1
 		{ OBJF(icon), 12, 0 },
 		{ OBJF(entNum), 10, 0 },
 		{ OBJF(teamNum), 4, 0 }
+	};
+
+	netFieldList_t NetFields::List[NET_FIELDS_COUNT] =
+	{
+		{ NETFE(EntityStateFields) },
+		{ NETFE(PlayerEntityStateFields) },
+		{ NETFE(CorpseEntityStateFields) },
+		{ NETFE(ItemEntityStateFields) },
+		{ NETFE(MissleEntityStateFields) },
+		{ NETFE(EntityStateFields) },
+		{ NETFE(ScriptMoverStateFields) },
+		{ NETFE(SoundBlendEntityStateFields) },
+		{ NETFE(FxStateFields) },
+		{ NETFE(LoopFxEntityStateFields) },
+		{ NETFE(EntityStateFields) },
+		{ NETFE(EntityStateFields) },
+		{ NETFE(HelicopterEntityStateFields) },
+		{ NETFE(PlaneStateFields) },
+		{ NETFE(VehicleEntityStateFields) },
+		{ NETFE(EntityStateFields) },
+		{ NETFE(EntityStateFields) },
+		{ NETFE(EventEntityStateFields) }
 	};
 
 	int NetFields::GetMinBitCount(int x)

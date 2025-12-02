@@ -1434,7 +1434,7 @@ namespace CoD4::DM1
 	{
 		int i, lc;
 		int *fromF, *toF;
-		netField_s* field;
+		netField_t* field;
 		int entityNumber = *reinterpret_cast<const uint32_t*>(to);
 		int oldbitcount = msg.GetUsedBitCount();
 
@@ -1509,7 +1509,7 @@ namespace CoD4::DM1
 		return result;
 	}
 
-	void Demo::WriteDeltaField(Msg& msg, const int time, const uint8_t* from, const uint8_t* to, netField_s* field,
+	void Demo::WriteDeltaField(Msg& msg, const int time, const uint8_t* from, const uint8_t* to, netField_t* field,
 		int fieldNum, uint8_t forceSend)
 	{
 		int nullfield;

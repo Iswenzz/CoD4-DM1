@@ -126,32 +126,6 @@ namespace CoD4::DM1
 			[&](const std::string& a, const std::string& b) { return a == b; });
 	}
 
-	std::string DemoReader::ReflectDemoValue(const std::string path)
-	{
-		nlohmann::json json = *this;
-		std::string result;
-
-		std::istringstream stream{ path };
-		std::string current;
-
-		while (std::getline(stream, current, '.'))
-		{
-			if (current.find_first_not_of("0123456789") == std::string::npos)
-				json = json[std::stoi(current)];
-			else
-				json = json[current];
-		}
-		if (json.is_boolean())
-			result = json.get<bool>() ? "1" : "0";
-		if (json.is_number())
-			result = std::to_string(json.get<int>());
-		if (json.is_number_float())
-			result = std::to_string(json.get<float>());
-		if (json.is_string())
-			result = json.get<std::string>();
-		return result;
-	}
-
 	std::string DemoReader::GetConfigString(const std::string name)
 	{
 		for (const std::string& config : DemoFile->ConfigStrings)
@@ -160,6 +134,14 @@ namespace CoD4::DM1
 				return config;
 		}
 		return "";
+	}
+
+	clientNames_t DemoReader::GetPlayerName()
+	{
+		const clientSnapshot_t& snapshot = GetCurrentSnapshot();
+		const int clientNum = snapshot.ps.ClientNum;
+
+		return DemoFile->ClientNames.at(clientNum);
 	}
 
 	std::string DemoReader::ParseConfigString(const std::string name)
@@ -178,13 +160,5 @@ namespace CoD4::DM1
 			}
 		}
 		return "";
-	}
-
-	clientNames_t DemoReader::GetPlayerName()
-	{
-		const clientSnapshot_t& snapshot = GetCurrentSnapshot();
-		const int clientNum = snapshot.ps.ClientNum;
-
-		return DemoFile->ClientNames.at(clientNum);
 	}
 }

@@ -30,13 +30,6 @@ TEST_F(DemoFixture, DemoReaderParseConfigString)
 	EXPECT_TRUE(Reader->ParseConfigString("mapname").size());
 }
 
-TEST_F(DemoFixture, DemoReaderReflect)
-{
-	Reader->Parse();
-
-	EXPECT_EQ(Reader->ReflectDemoValue("Snapshot.ping"), "999");
-}
-
 TEST_F(DemoFixture, DemoReaderTime)
 {
 	Reader->Parse();

@@ -1,6 +1,5 @@
 #pragma once
 #include <array>
-#include <nlohmann/json.hpp>
 #include <string>
 
 #define NETCHAN_UNSENTBUFFER_SIZE 0x20000
@@ -151,7 +150,7 @@ namespace CoD4::DM1
 		HE_TYPE_COUNT = 0xE,
 	} he_type_t;
 
-	/* 6853 */
+	// 6853
 	typedef struct
 	{
 		char r;
@@ -160,7 +159,7 @@ namespace CoD4::DM1
 		char a;
 	} hudelem_colorsplit_t;
 
-	/* 6854 */
+	// 6854
 	typedef union
 	{
 		hudelem_colorsplit_t split;
@@ -241,10 +240,10 @@ namespace CoD4::DM1
 		int speed;					  // 96
 		float delta_angles[3];		  // 100
 
-		/*The ground entity's rotation will be added onto the player's view.  In particular, this will
-		* cause the player's yaw to rotate around the entity's z-axis instead of the world z-axis.
-		* Any rotation that the reference entity undergoes will affect the player.
-		* http://zeroy.com/script/player/playersetgroundreferenceent.htm */
+		// The ground entity's rotation will be added onto the player's view.  In particular, this will
+		// cause the player's yaw to rotate around the entity's z-axis instead of the world z-axis.
+		// Any rotation that the reference entity undergoes will affect the player.
+		// http://zeroy.com/script/player/playersetgroundreferenceent.htm
 		int groundEntityNum; // 112
 		float vLadderVec[3]; // 116
 		int jumpTime;		 // 128
@@ -554,8 +553,8 @@ namespace CoD4::DM1
 	// the structure size is fairly large
 	typedef struct entityState_s
 	{							 // Confirmed names and offsets but not types
-		int number;				 // entity index	//0x00
-		enum entityType_t eType; // entityType_t	//0x04
+		int number;				 // entity index 0x00
+		enum entityType_t eType; // entityType_t 0x04
 
 		struct LerpEntityState lerp;
 		int time2;			   // 0x70
@@ -571,7 +570,7 @@ namespace CoD4::DM1
 		int iHeadIconTeam;	// 0x94
 		int solid;			// 0x98 for client side prediction, trap_linkentity sets this properly	0x98
 
-		int eventParm;	   // 0x9c impulse events -- muzzle flashes, footsteps, etc
+		int eventParm;	   // 0x9c impulse events - muzzle flashes, footsteps, etc
 		int eventSequence; // 0xa0
 
 		float events[4];	 // 0xa4
@@ -628,7 +627,7 @@ namespace CoD4::DM1
 		std::string clantag;
 	} clientNames_t;
 
-	/* 7472 */
+	// 7472
 	typedef struct
 	{
 		int svFlags;
@@ -637,7 +636,7 @@ namespace CoD4::DM1
 		float absmax[3];
 	} archivedEntityShared_t;
 
-	/* 7473 */
+	// 7473
 	typedef struct archivedEntity_s
 	{
 		entityState_t s;
@@ -654,289 +653,4 @@ namespace CoD4::DM1
 		int commandTime;
 		float angles[3];
 	} archivedFrame_t;
-
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(sprintState_t, sprintButtonUpRequired, sprintDelay, lastSprintStart,
-		lastSprintEnd, sprintStartMaxLength);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(mantleState_t, yaw, timer, transIndex, flags);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ActionSlotParam_SpecifyWeapon_t, index);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(ActionSlotParam_t, specifyWeapon);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(objective_t, state, origin, entNum, teamNum, icon);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(hudelem_colorsplit_t, r, g, b, a);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(hudelem_color_t, split, rgba);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(hudelem_t, type, x, y, z, targetEntNum, fontScale, font, alignOrg, alignScreen,
-		color, fromColor, fadeStartTime, fadeTime, label, width, height, materialIndex, offscreenMaterialIdx, fromWidth,
-		fromHeight, scaleStartTime, scaleTime, fromX, fromY, fromAlignOrg, fromAlignScreen, moveStartTime, moveTime,
-		time, duration, value, text, sort, glowColor, fxBirthTime, fxLetterTime, fxDecayStartTime, fxDecayDuration,
-		soundID, flags);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(hudElemState_t, current, archival);
-
-	inline void to_json(nlohmann::json& j, const playerState_t& s)
-	{
-		j = nlohmann::json{
-			{ "commandTime", s.commandTime },
-			{ "pm_type", s.pm_type },
-			{ "bobCycle", s.bobCycle },
-			{ "pm_flags", s.pm_flags },
-			{ "weapFlags", s.weapFlags },
-			{ "otherFlags", s.otherFlags },
-			{ "pm_time", s.pm_time },
-			{ "origin", s.origin },
-			{ "velocity", s.velocity },
-			{ "oldVelocity", s.oldVelocity },
-			{ "weaponTime", s.weaponTime },
-			{ "weaponDelay", s.weaponDelay },
-			{ "grenadeTimeLeft", s.grenadeTimeLeft },
-			{ "throwBackGrenadeOwner", s.throwBackGrenadeOwner },
-			{ "throwBackGrenadeTimeLeft", s.throwBackGrenadeTimeLeft },
-			{ "weaponRestrictKickTime", s.weaponRestrictKickTime },
-			{ "foliageSoundTime", s.foliageSoundTime },
-			{ "gravity", s.gravity },
-			{ "leanf", s.leanf },
-			{ "speed", s.speed },
-			{ "delta_angles", s.delta_angles },
-			{ "groundEntityNum", s.groundEntityNum },
-			{ "vLadderVec", s.vLadderVec },
-			{ "jumpTime", s.jumpTime },
-			{ "jumpOriginZ", s.jumpOriginZ },
-			{ "legsTimer", s.legsTimer },
-			{ "legsAnim", s.legsAnim },
-			{ "torsoTimer", s.torsoTimer },
-			{ "torsoAnim", s.torsoAnim },
-			{ "legsAnimDuration", s.legsAnimDuration },
-			{ "torsoAnimDuration", s.torsoAnimDuration },
-			{ "damageTimer", s.damageTimer },
-			{ "damageDuration", s.damageDuration },
-			{ "flinchYawAnim", s.flinchYawAnim },
-			{ "movementDir", s.movementDir },
-			{ "eFlags", s.eFlags },
-			{ "eventSequence", s.eventSequence },
-			{ "events", s.events },
-			{ "eventParms", s.eventParms },
-			{ "oldEventSequence", s.oldEventSequence },
-			{ "ClientNum", s.ClientNum },
-			{ "offHandIndex", s.offHandIndex },
-			{ "offhandSecondary", s.offhandSecondary },
-			{ "weapon", s.weapon },
-			{ "weaponstate", s.weaponstate },
-			{ "weaponShotCount", s.weaponShotCount },
-			{ "fWeaponPosFrac", s.fWeaponPosFrac },
-			{ "adsDelayTime", s.adsDelayTime },
-			{ "spreadOverride", s.spreadOverride },
-			{ "spreadOverrideState", s.spreadOverrideState },
-			{ "viewmodelIndex", s.viewmodelIndex },
-			{ "viewangles", s.viewangles },
-			{ "viewHeightTarget", s.viewHeightTarget },
-			{ "viewHeightCurrent", s.viewHeightCurrent },
-			{ "viewHeightLerpTime", s.viewHeightLerpTime },
-			{ "viewHeightLerpTarget", s.viewHeightLerpTarget },
-			{ "viewHeightLerpDown", s.viewHeightLerpDown },
-			{ "viewAngleClampBase", s.viewAngleClampBase },
-			{ "viewAngleClampRange", s.viewAngleClampRange },
-			{ "damageEvent", s.damageEvent },
-			{ "damageYaw", s.damageYaw },
-			{ "damagePitch", s.damagePitch },
-			{ "damageCount", s.damageCount },
-			{ "stats", s.stats },
-			{ "ammo", s.ammo },
-			{ "ammoclip", s.ammoclip },
-			{ "weapons", s.weapons },
-			{ "weaponold", s.weaponold },
-			{ "weaponrechamber", s.weaponrechamber },
-			{ "proneDirection", s.proneDirection },
-			{ "proneDirectionPitch", s.proneDirectionPitch },
-			{ "proneTorsoPitch", s.proneTorsoPitch },
-			{ "viewlocked", s.viewlocked },
-			{ "viewlocked_entNum", s.viewlocked_entNum },
-			{ "cursorHint", s.cursorHint },
-			{ "cursorHintString", s.cursorHintString },
-			{ "cursorHintEntIndex", s.cursorHintEntIndex },
-			{ "iCompassPlayerInfo", s.iCompassPlayerInfo },
-			{ "radarEnabled", s.radarEnabled },
-			{ "locationSelectionInfo", s.locationSelectionInfo },
-			{ "sprintState", s.sprintState },
-			{ "fTorsoPitch", s.fTorsoPitch },
-			{ "fWaistPitch", s.fWaistPitch },
-			{ "holdBreathScale", s.holdBreathScale },
-			{ "holdBreathTimer", s.holdBreathTimer },
-			{ "moveSpeedScaleMultiplier", s.moveSpeedScaleMultiplier },
-			{ "mantleState", s.mantleState },
-			{ "meleeChargeYaw", s.meleeChargeYaw },
-			{ "meleeChargeDist", s.meleeChargeDist },
-			{ "meleeChargeTime", s.meleeChargeTime },
-			{ "perks", s.perks },
-			{ "actionSlotType", s.actionSlotType },
-			{ "actionSlotParam", s.actionSlotParam },
-			{ "entityEventSequence", s.entityEventSequence },
-			{ "weapAnim", s.weapAnim },
-			{ "aimSpreadScale", s.aimSpreadScale },
-			{ "shellshockIndex", s.shellshockIndex },
-			{ "shellshockTime", s.shellshockTime },
-			{ "shellshockDuration", s.shellshockDuration },
-			{ "dofNearStart", s.dofNearStart },
-			{ "dofNearEnd", s.dofNearEnd },
-			{ "dofFarStart", s.dofFarStart },
-			{ "dofFarEnd", s.dofFarEnd },
-			{ "dofNearBlur", s.dofNearBlur },
-			{ "dofFarBlur", s.dofFarBlur },
-			{ "dofViewmodelStart", s.dofViewmodelStart },
-			{ "dofViewmodelEnd", s.dofViewmodelEnd },
-			{ "hudElemLastAssignedSoundID", s.hudElemLastAssignedSoundID },
-			{ "objective", s.objective },
-			{ "weaponmodels", s.weaponmodels },
-			{ "deltaTime", s.deltaTime },
-			{ "killCamEntity", s.killCamEntity },
-			{ "hud", s.hud },
-		};
-	}
-
-	inline void from_json(const nlohmann::json& j, playerState_t& s)
-	{
-		j.at("commandTime").get_to(s.commandTime);
-		j.at("pm_type").get_to(s.pm_type);
-		j.at("bobCycle").get_to(s.bobCycle);
-		j.at("pm_flags").get_to(s.pm_flags);
-		j.at("weapFlags").get_to(s.weapFlags);
-		j.at("otherFlags").get_to(s.otherFlags);
-		j.at("pm_time").get_to(s.pm_time);
-		j.at("origin").get_to(s.origin);
-		j.at("velocity").get_to(s.velocity);
-		j.at("oldVelocity").get_to(s.oldVelocity);
-		j.at("weaponTime").get_to(s.weaponTime);
-		j.at("weaponDelay").get_to(s.weaponDelay);
-		j.at("grenadeTimeLeft").get_to(s.grenadeTimeLeft);
-		j.at("throwBackGrenadeOwner").get_to(s.throwBackGrenadeOwner);
-		j.at("throwBackGrenadeTimeLeft").get_to(s.throwBackGrenadeTimeLeft);
-		j.at("weaponRestrictKickTime").get_to(s.weaponRestrictKickTime);
-		j.at("foliageSoundTime").get_to(s.foliageSoundTime);
-		j.at("gravity").get_to(s.gravity);
-		j.at("leanf").get_to(s.leanf);
-		j.at("speed").get_to(s.speed);
-		j.at("delta_angles").get_to(s.delta_angles);
-		j.at("groundEntityNum").get_to(s.groundEntityNum);
-		j.at("vLadderVec").get_to(s.vLadderVec);
-		j.at("jumpTime").get_to(s.jumpTime);
-		j.at("jumpOriginZ").get_to(s.jumpOriginZ);
-		j.at("legsTimer").get_to(s.legsTimer);
-		j.at("legsAnim").get_to(s.legsAnim);
-		j.at("torsoTimer").get_to(s.torsoTimer);
-		j.at("torsoAnim").get_to(s.torsoAnim);
-		j.at("legsAnimDuration").get_to(s.legsAnimDuration);
-		j.at("torsoAnimDuration").get_to(s.torsoAnimDuration);
-		j.at("damageTimer").get_to(s.damageTimer);
-		j.at("damageDuration").get_to(s.damageDuration);
-		j.at("flinchYawAnim").get_to(s.flinchYawAnim);
-		j.at("movementDir").get_to(s.movementDir);
-		j.at("eFlags").get_to(s.eFlags);
-		j.at("eventSequence").get_to(s.eventSequence);
-		j.at("events").get_to(s.events);
-		j.at("eventParms").get_to(s.eventParms);
-		j.at("oldEventSequence").get_to(s.oldEventSequence);
-		j.at("ClientNum").get_to(s.ClientNum);
-		j.at("offHandIndex").get_to(s.offHandIndex);
-		j.at("offhandSecondary").get_to(s.offhandSecondary);
-		j.at("weapon").get_to(s.weapon);
-		j.at("weaponstate").get_to(s.weaponstate);
-		j.at("weaponShotCount").get_to(s.weaponShotCount);
-		j.at("fWeaponPosFrac").get_to(s.fWeaponPosFrac);
-		j.at("adsDelayTime").get_to(s.adsDelayTime);
-		j.at("spreadOverride").get_to(s.spreadOverride);
-		j.at("spreadOverrideState").get_to(s.spreadOverrideState);
-		j.at("viewmodelIndex").get_to(s.viewmodelIndex);
-		j.at("viewangles").get_to(s.viewangles);
-		j.at("viewHeightTarget").get_to(s.viewHeightTarget);
-		j.at("viewHeightCurrent").get_to(s.viewHeightCurrent);
-		j.at("viewHeightLerpTime").get_to(s.viewHeightLerpTime);
-		j.at("viewHeightLerpTarget").get_to(s.viewHeightLerpTarget);
-		j.at("viewHeightLerpDown").get_to(s.viewHeightLerpDown);
-		j.at("viewAngleClampBase").get_to(s.viewAngleClampBase);
-		j.at("viewAngleClampRange").get_to(s.viewAngleClampRange);
-		j.at("damageEvent").get_to(s.damageEvent);
-		j.at("damageYaw").get_to(s.damageYaw);
-		j.at("damagePitch").get_to(s.damagePitch);
-		j.at("damageCount").get_to(s.damageCount);
-		j.at("stats").get_to(s.stats);
-		j.at("ammo").get_to(s.ammo);
-		j.at("ammoclip").get_to(s.ammoclip);
-		j.at("weapons").get_to(s.weapons);
-		j.at("weaponold").get_to(s.weaponold);
-		j.at("weaponrechamber").get_to(s.weaponrechamber);
-		j.at("proneDirection").get_to(s.proneDirection);
-		j.at("proneDirectionPitch").get_to(s.proneDirectionPitch);
-		j.at("proneTorsoPitch").get_to(s.proneTorsoPitch);
-		j.at("viewlocked").get_to(s.viewlocked);
-		j.at("viewlocked_entNum").get_to(s.viewlocked_entNum);
-		j.at("cursorHint").get_to(s.cursorHint);
-		j.at("cursorHintString").get_to(s.cursorHintString);
-		j.at("cursorHintEntIndex").get_to(s.cursorHintEntIndex);
-		j.at("iCompassPlayerInfo").get_to(s.iCompassPlayerInfo);
-		j.at("radarEnabled").get_to(s.radarEnabled);
-		j.at("locationSelectionInfo").get_to(s.locationSelectionInfo);
-		j.at("sprintState").get_to(s.sprintState);
-		j.at("fTorsoPitch").get_to(s.fTorsoPitch);
-		j.at("fWaistPitch").get_to(s.fWaistPitch);
-		j.at("holdBreathScale").get_to(s.holdBreathScale);
-		j.at("holdBreathTimer").get_to(s.holdBreathTimer);
-		j.at("moveSpeedScaleMultiplier").get_to(s.moveSpeedScaleMultiplier);
-		j.at("mantleState").get_to(s.mantleState);
-		j.at("meleeChargeYaw").get_to(s.meleeChargeYaw);
-		j.at("meleeChargeDist").get_to(s.meleeChargeDist);
-		j.at("meleeChargeTime").get_to(s.meleeChargeTime);
-		j.at("perks").get_to(s.perks);
-		j.at("actionSlotType").get_to(s.actionSlotType);
-		j.at("actionSlotParam").get_to(s.actionSlotParam);
-		j.at("entityEventSequence").get_to(s.entityEventSequence);
-		j.at("weapAnim").get_to(s.weapAnim);
-		j.at("aimSpreadScale").get_to(s.aimSpreadScale);
-		j.at("shellshockIndex").get_to(s.shellshockIndex);
-		j.at("shellshockTime").get_to(s.shellshockTime);
-		j.at("shellshockDuration").get_to(s.shellshockDuration);
-		j.at("dofNearStart").get_to(s.dofNearStart);
-		j.at("dofNearEnd").get_to(s.dofNearEnd);
-		j.at("dofFarStart").get_to(s.dofFarStart);
-		j.at("dofFarEnd").get_to(s.dofFarEnd);
-		j.at("dofNearBlur").get_to(s.dofNearBlur);
-		j.at("dofFarBlur").get_to(s.dofFarBlur);
-		j.at("dofViewmodelStart").get_to(s.dofViewmodelStart);
-		j.at("dofViewmodelEnd").get_to(s.dofViewmodelEnd);
-		j.at("hudElemLastAssignedSoundID").get_to(s.hudElemLastAssignedSoundID);
-		j.at("objective").get_to(s.objective);
-		j.at("weaponmodels").get_to(s.weaponmodels);
-		j.at("deltaTime").get_to(s.deltaTime);
-		j.at("killCamEntity").get_to(s.killCamEntity);
-		j.at("hud").get_to(s.hud);
-	}
-
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(clientSnapshot_t, valid, snapFlags, serverTime, messageNum, deltaNum, ping,
-		areamask, cmdNum, ps, numEntities, parseEntitiesNum, numClients, parseClientsNum, serverCommandNum);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LerpEntityStatePhysicsJitter, innerRadius, minDisplacement, maxDisplacement);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LerpEntityStatePlayer, leanf, movementDir);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LerpEntityStateLoopFx, cullDist, period);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LerpEntityStateCustomExplode, startTime);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LerpEntityStateTurret, gunAngles);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LerpEntityStateAnonymous, buffer);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LerpEntityStateExplosion, innerRadius, magnitude);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LerpEntityStateBulletHit, start);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LerpEntityStatePrimaryLight, colorAndExp, intensity, radius, cosHalfFovOuter,
-		cosHalfFovInner);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LerpEntityStateMissile, launchTime);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LerpEntityStateSoundBlend, lerp);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LerpEntityStateExplosionJolt, innerRadius, impulse);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LerpEntityStateVehicle, bodyPitch, bodyRoll, steerYaw, materialTime, gunPitch,
-		gunYaw, team);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LerpEntityStateEarthquake, scale, radius, duration);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LerpEntityStateTypeUnion, turret, loopFx, primaryLight, player, vehicle, missile,
-		soundBlend, bulletHit, earthquake, customExplode, explosion, explosionJolt, physicsJitter, anonymous);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(trajectory_t, trType, trTime, trDuration, trBase, trDelta);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(LerpEntityState, eFlags, pos, apos, u);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(entityState_t, number, eType, lerp, time2, otherEntityNum, attackerEntityNum,
-		groundEntityNum, loopSound, surfType, index, ClientNum, iHeadIcon, iHeadIconTeam, solid, eventParm,
-		eventSequence, events, eventParms, weapon, weaponModel, legsAnim, torsoAnim, un1.helicopterStage, un2,
-		fTorsoPitch, fWaistPitch, partBits);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(clientState_t, clientIndex, team, modelindex, attachModelIndex, attachTagIndex,
-		netname, maxSprintTimeMultiplier, rank, prestige, perks, attachedVehEntNum, attachedVehSlotIndex);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(clientNames_t, netname, clantag);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(archivedEntityShared_t, svFlags, clientMask, absmin, absmax);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(archivedEntity_t, s, r);
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(archivedFrame_t, index, origin, velocity, movementDir, bobCycle, commandTime,
-		angles);
 }
