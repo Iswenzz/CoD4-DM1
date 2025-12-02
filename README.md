@@ -2,7 +2,6 @@
 
 [![Checks](https://img.shields.io/github/check-runs/Iswenzz/CoD4-DM1/master?logo=github)](https://github.com/Iswenzz/CoD4-DM1/actions)
 [![CodeFactor](https://img.shields.io/codefactor/grade/github/Iswenzz/CoD4-DM1?label=codefactor&logo=codefactor)](https://www.codefactor.io/repository/github/iswenzz/CoD4-DM1)
-[![CodeCov](https://img.shields.io/codecov/c/github/Iswenzz/CoD4-DM1?label=codecov&logo=codecov)](https://codecov.io/gh/Iswenzz/CoD4-DM1)
 [![License](https://img.shields.io/github/license/Iswenzz/CoD4-DM1?color=blue&logo=gitbook&logoColor=white)](https://github.com/Iswenzz/CoD4-DM1/blob/master/LICENSE)
 
 Reverse of CoD4 & CoD4X `.DM_1` demo files with features such as parsing snapshot informations, frames, entities, clients and server messages. This project comes with a CLI and a library.
@@ -37,3 +36,4 @@ This package is available for use via [vcpkg-registry](https://github.com/Iswenz
 Also feel free to post about any problems that may arise in the issues section of the repository.
 
 <a href="https://github.com/Caball009"><img src="https://avatars.githubusercontent.com/u/82909616?v=4" height=64 style="border-radius: 50%"></a>
+

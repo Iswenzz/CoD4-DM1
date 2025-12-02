@@ -47,7 +47,7 @@ namespace CoD4::DM1
 	{
 		if (DemoFile.is_open())
 		{
-			if (CurrentCompressedMsg.SrvMsgSeq == -1)
+			if (CurrentCompressedMsg.SrvMsgSeq == -1 || DemoFile.eof())
 			{
 				IsEOF = true;
 				return false;
@@ -326,7 +326,13 @@ namespace CoD4::DM1
 			else if (command == svc_ops_e::svc_baseline)
 			{
 				newnum = ReadEntityIndex(msg, GENTITYNUM_BITS);
-
+				if (static_cast<unsigned int>(newnum) >= 1024)
+				{
+					VerboseLog("Error parsing baseline entities");
+					msg.Overflowed = true;
+					return;
+				}
+				
 				entityState_t* es = &EntityBaselines[newnum];
 				NullEntityState = { 0 };
 
@@ -388,6 +394,12 @@ namespace CoD4::DM1
 			else if (command == svc_ops_e::svc_baseline)
 			{
 				newnum = ReadEntityIndex(msg, GENTITYNUM_BITS);
+				if (static_cast<unsigned int>(newnum) >= 1024)
+				{
+					VerboseLog("Error parsing baseline entities");
+					msg.Overflowed = true;
+					return;
+				}
 
 				entityState_t* es = &EntityBaselines[newnum];
 				NullEntityState = { 0 };
@@ -834,9 +846,10 @@ namespace CoD4::DM1
 			newnum = ReadEntityIndex(msg, GENTITYNUM_BITS);
 			if (newnum == 1023)
 				break;
-			if (msg.ReadCount > msg.CurSize)
+			if (msg.ReadCount > msg.CurSize || static_cast<unsigned int>(newnum) >= 1024)
 			{
 				VerboseLog("Error parsing entities");
+				msg.Overflowed = true;
 				return -1;
 			}
 
@@ -921,9 +934,10 @@ namespace CoD4::DM1
 		{
 			VerboseLog("clientnum: " << newnum << std::endl);
 			newnum = ReadEntityIndex(msg, 6);
-			if (msg.ReadCount > msg.CurSize)
+			if (msg.ReadCount > msg.CurSize || static_cast<unsigned int>(newnum) >= MAX_CLIENTS)
 			{
 				VerboseLog("Error parsing clients");
+				msg.Overflowed = true;
 				return;
 			}
 
@@ -1016,6 +1030,12 @@ namespace CoD4::DM1
 
 		bool readOriginAndVel = SendOriginAndVel = msg.ReadBit() > 0;
 		int lastChangedField = ReadLastChangedField(msg, PLAYER_STATE_FIELDS_COUNT);
+		if (static_cast<unsigned int>(lastChangedField) > PLAYER_STATE_FIELDS_COUNT)
+		{
+			VerboseLog("Error parsing playerstate");
+			msg.Overflowed = true;
+			return;
+		}
 
 		netField_t* stateFields = NetFields::PlayerStateFields;
 		for (int i = 0; i < lastChangedField; ++i)
@@ -1145,7 +1165,12 @@ namespace CoD4::DM1
 		for (i = 0; i < inuse; ++i)
 		{
 			lc = msg.ReadBits(6);
-			assert(lc <= sizeof(NetFields::HudElemFields) / sizeof(NetFields::HudElemFields[0]));
+			if (static_cast<unsigned int>(lc) >= HUD_ELEM_FIELDS_COUNT)
+			{
+				VerboseLog("Error parsing hud elements");
+				msg.Overflowed = true;
+				return;
+			}
 
 			for (y = 0; y <= lc; ++y)
 				ReadDeltaField(msg, time, &from[i], &to[i], &NetFields::HudElemFields[y], false, false);
