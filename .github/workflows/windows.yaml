@@ -16,11 +16,14 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v2
 
+            - name: CMake
+              uses: lukka/get-cmake@latest
+        
             - name: Vcpkg
               uses: lukka/run-vcpkg@v11
               with:
-                  vcpkgGitCommitId: bd136dad4da8059ba93f71412f52b2ec7c09d377
-
+                vcpkgGitCommitId: bd136dad4da8059ba93f71412f52b2ec7c09d377
+    
             - name: Build
               run: |
                   mkdir build && cd build
