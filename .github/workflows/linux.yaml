@@ -1,4 +1,4 @@
-name: Linux
+name: Windows
 
 on:
     push:
@@ -16,15 +16,18 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v2
 
+            - name: CMake
+              uses: lukka/get-cmake@latest
+        
             - name: Vcpkg
               uses: lukka/run-vcpkg@v11
               with:
-                  vcpkgGitCommitId: 4a600e9fea71bd7872080cbb716797e04d30e6d3
-
+                vcpkgGitCommitId: bd136dad4da8059ba93f71412f52b2ec7c09d377
+    
             - name: Build
               run: |
                   mkdir build && cd build
-                  cmake .. --preset linux -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTING=True
+                  cmake .. --preset windows -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTING=True
                   cmake --build . --config ${{env.BUILD_TYPE}}
 
             - name: Artifact
@@ -34,7 +37,7 @@ jobs:
                   path: build
 
     tests:
-        runs-on: ubuntu-latest
+        runs-on: windows-latest
         needs: [build]
         steps:
             - name: Checkout
@@ -48,4 +51,6 @@ jobs:
 
             - name: Tests
               run: |
-                  ctest -C ${{env.BUILD_TYPE}}
+                  cd build
+                  ctest -C Release
+
