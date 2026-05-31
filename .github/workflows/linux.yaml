@@ -27,7 +27,7 @@ jobs:
             - name: Build
               run: |
                   mkdir build && cd build
-                  cmake .. --preset windows -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTING=True
+                  cmake .. --preset linux -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTING=True
                   cmake --build . --config ${{env.BUILD_TYPE}}
 
             - name: Artifact
