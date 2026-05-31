@@ -1,9 +1,5 @@
 # CoD4 DM1
 
-[![Checks](https://img.shields.io/github/check-runs/Iswenzz/CoD4-DM1/master?logo=github)](https://github.com/Iswenzz/CoD4-DM1/actions)
-[![CodeFactor](https://img.shields.io/codefactor/grade/github/Iswenzz/CoD4-DM1?label=codefactor&logo=codefactor)](https://www.codefactor.io/repository/github/iswenzz/CoD4-DM1)
-[![License](https://img.shields.io/github/license/Iswenzz/CoD4-DM1?color=blue&logo=gitbook&logoColor=white)](https://github.com/Iswenzz/CoD4-DM1/blob/master/LICENSE)
-
 Reverse of CoD4 & CoD4X `.DM_1` demo files with features such as parsing snapshot informations, frames, entities, clients and server messages. This project comes with a CLI and a library.
 
 ## Features
